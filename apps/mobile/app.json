@@ -26,12 +26,12 @@
       [
         "expo-updates",
         {
-          "username": "YOUR_EXPO_USERNAME"
+          "username": "farrelputras"
         }
       ]
     ],
     "updates": {
-      "url": "https://u.expo.dev/YOUR_PROJECT_ID",
+      "url": "https://u.expo.dev/8bce9c4d-8ab5-4221-a061-d8c971ed8837",
       "runtimeVersion": {
         "policy": "appVersion"
       }
@@ -41,8 +41,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
-    }
+        "projectId": "8bce9c4d-8ab5-4221-a061-d8c971ed8837"
+      },
+      "router": {}
+    },
+    "owner": "farrelputras"
   }
 }
