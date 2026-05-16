@@ -1,0 +1,7 @@
+{
+  "name": "@lavender/shared",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Shared types and business logic (placeholder)",
+  "main": "index.js"
+}
