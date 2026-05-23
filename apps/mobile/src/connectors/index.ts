@@ -1,5 +1,18 @@
-import { DashboardSummary, RentalDueToday, ReturnStatus } from './types'
-import { users, vehicles, rentals } from './seed'
+import { DashboardSummary, RentalDueToday, ReturnStatus, UserSummary } from './types'
+import { users, vehicles, rentals, hutang } from './seed'
+
+export async function getUserSummaries(): Promise<UserSummary[]> {
+  return users
+    .map<UserSummary>((u) => ({
+      id: u.id,
+      name: u.name,
+      nickname: u.nickname,
+      isVerified: u.verifiedAt !== null,
+      activeRentalsCount: rentals.filter((r) => r.userId === u.id && r.status === 'active').length,
+      debtAmount: hutang.filter((h) => h.userId === u.id).reduce((sum, h) => sum + h.amount, 0),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'id'))
+}
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const activeRentals = rentals.filter((r) => r.status === 'active')

@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'expo-router'
 import { colors, textStyles, borderRadius, spacing } from '../../src/theme'
 import { getDashboardSummary, getRentalsDueToday } from '../../src/connectors'
 import { DashboardSummary, RentalDueToday } from '../../src/connectors/types'
@@ -26,6 +27,7 @@ function showToast(msg: string) {
 }
 
 export default function BerandaScreen() {
+  const router = useRouter()
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [rentalsDue, setRentalsDue] = useState<RentalDueToday[]>([])
   const [loading, setLoading] = useState(true)
@@ -85,9 +87,7 @@ export default function BerandaScreen() {
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnFilled]}
             activeOpacity={0.8}
-            onPress={() => {
-              // TODO: navigate to Sewa Baru flow when built
-            }}
+            onPress={() => router.push('/sewa-baru/pilih-user')}
           >
             <MaterialIcons name="add-circle" size={28} color={colors.onPrimary} />
             <Text style={[textStyles.headlineSm, { color: colors.onPrimary }]}>

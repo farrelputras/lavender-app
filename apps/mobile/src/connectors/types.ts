@@ -5,8 +5,26 @@ export type ReturnStatus = 'belumKembali' | 'terlambat'
 export interface User {
   id: string
   name: string
+  nickname: string | null
   phone: string
   verifiedAt: Date | null
+}
+
+export interface Hutang {
+  id: string
+  rentalId: string
+  userId: string
+  amount: number
+  createdAt: Date
+}
+
+export interface UserSummary {
+  id: string
+  name: string
+  nickname: string | null
+  isVerified: boolean
+  activeRentalsCount: number
+  debtAmount: number
 }
 
 export interface Vehicle {
