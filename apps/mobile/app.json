@@ -11,14 +11,14 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#8B7AB8"
+      "backgroundColor": "#62528d"
     },
     "android": {
       "package": "com.lavender.app",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#8B7AB8"
+        "backgroundColor": "#62528d"
       }
     },
     "plugins": [
@@ -28,7 +28,8 @@
         {
           "username": "farrelputras"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "updates": {
       "url": "https://u.expo.dev/8bce9c4d-8ab5-4221-a061-d8c971ed8837",
