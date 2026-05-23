@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LAVENDER - Tambah Pembayaran</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e1e3e4",
+                        "primary-fixed-dim": "#cfbcff",
+                        "surface-container": "#e6eff8",
+                        "primary": "#62528d",
+                        "on-primary-fixed": "#200f48",
+                        "tertiary-container": "#b7ad58",
+                        "primary-fixed": "#e9ddff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#655590",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "on-error": "#ffffff",
+                        "secondary": "#5c5f60",
+                        "inverse-surface": "#293138",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "surface": "#f6faff",
+                        "on-secondary-fixed": "#191c1d",
+                        "tertiary-fixed": "#f0e589",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "surface-variant": "#dbe4ed",
+                        "on-tertiary-container": "#464000",
+                        "primary-container": "#7c6ba8",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "background": "#f6faff",
+                        "secondary-container": "#e1e3e4",
+                        "surface-bright": "#f6faff",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "on-surface": "#141d23",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "on-surface-variant": "#49454f",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#cfbcff",
+                        "surface-container-highest": "#dbe4ed",
+                        "outline": "#7a7580",
+                        "on-secondary-container": "#626566",
+                        "on-secondary-fixed-variant": "#454748",
+                        "on-background": "#141d23",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#ecf5fe",
+                        "surface-container-high": "#e0e9f2",
+                        "tertiary": "#676011",
+                        "outline-variant": "#cac4d0",
+                        "inverse-on-surface": "#e9f2fb",
+                        "surface-dim": "#d2dbe4",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "xl": "32px",
+                        "base": "8px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Public Sans", "sans-serif"],
+                        "headline-md": ["Public Sans", "sans-serif"],
+                        "body-lg": ["Public Sans", "sans-serif"],
+                        "headline-sm": ["Public Sans", "sans-serif"],
+                        "label-lg": ["Public Sans", "sans-serif"],
+                        "headline-lg": ["Public Sans", "sans-serif"],
+                        "display-lg": ["Public Sans", "sans-serif"],
+                        "body-md": ["Public Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-hidden">
+<!-- Background Context (Dimmed Screen) -->
+<div class="relative w-full h-screen bg-surface overflow-hidden">
+<img alt="Latar belakang aplikasi yang diredupkan" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd4ThFwRjmHy4Ag7ZxxYHlPWE_Gvx2S-0rT2cY8ftm5WkDzjiHY6ZibYSnU9Ic2E55JAW-u9wonMbgYdi8rTZBqd32dogZaVutjldBc1U44N42lE_07c2AEdFBTNhTTTZ1MrOgsCgBZovfHuTz9kBEFBZoZ80T6IGRW0_-HJovNTGU_AvnNHF2bE5f6Z9RIFoWXa2PgSDzcDAJDHHyDg1rzZeELChblmqEf8rIO_2JSrLLFcoidCnV7krBL1L1rnuSzrV2DC7CF5U"/>
+<!-- Dark Overlay -->
+<div aria-hidden="true" class="absolute inset-0 bg-black/40 z-10"></div>
+<!-- Bottom Sheet Container -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container-lowest rounded-t-2xl z-20 flex flex-col max-h-[751px] shadow-[0px_-12px_32px_rgba(0,0,0,0.1)]">
+<!-- Drag Handle -->
+<div class="w-full flex justify-center pt-md pb-xs">
+<div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
+</div>
+<!-- Header -->
+<div class="flex justify-between items-center px-margin-mobile pb-md border-b border-surface-variant">
+<div class="w-8"></div> <!-- Spacer for centering -->
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Tambah Pembayaran</h2>
+<button aria-label="Tutup" class="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="close">close</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-margin-mobile py-lg space-y-lg">
+<!-- Section: Jumlah -->
+<div class="space-y-sm">
+<label class="font-label-lg text-label-lg text-on-surface flex items-center">
+                        Jumlah
+                        <span class="text-error ml-xs">*</span>
+</label>
+<div class="flex items-center bg-surface-container-low border border-outline-variant rounded-lg px-md h-16 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant mr-sm">Rp</span>
+<input class="flex-1 bg-transparent border-none p-0 font-headline-md text-headline-md text-on-surface focus:ring-0" inputmode="numeric" type="text" value="100.000"/>
+</div>
+</div>
+<!-- Section: Metode -->
+<div class="space-y-sm">
+<label class="font-label-lg text-label-lg text-on-surface flex items-center">
+                        Metode
+                        <span class="text-error ml-xs">*</span>
+</label>
+<div class="flex flex-wrap gap-sm">
+<!-- Selected Chip -->
+<button class="h-12 px-lg rounded-full bg-primary text-on-primary font-label-md text-label-md border border-primary transition-colors flex items-center justify-center">
+                            Cash
+                        </button>
+<!-- Unselected Chips -->
+<button class="h-12 px-lg rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md border border-primary hover:bg-surface-container-low transition-colors flex items-center justify-center">
+                            Transfer
+                        </button>
+<button class="h-12 px-lg rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md border border-primary hover:bg-surface-container-low transition-colors flex items-center justify-center">
+                            QRIS
+                        </button>
+<button class="h-12 px-lg rounded-full bg-surface-container-lowest text-primary font-label-md text-label-md border border-primary hover:bg-surface-container-low transition-colors flex items-center justify-center">
+                            Lainnya
+                        </button>
+</div>
+</div>
+<!-- Section: Tanggal -->
+<div class="space-y-sm">
+<label class="font-label-lg text-label-lg text-on-surface flex items-center">
+                        Tanggal
+                    </label>
+<div class="flex items-center bg-surface-container-lowest border border-outline-variant rounded-lg px-md h-14 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<input class="flex-1 bg-transparent border-none p-0 font-body-lg text-body-lg text-on-surface focus:ring-0" readonly="" type="text" value="16 Mei 2026"/>
+<span class="material-symbols-outlined text-on-surface-variant ml-sm" data-icon="calendar_month">calendar_month</span>
+</div>
+</div>
+<!-- Section: Catatan -->
+<div class="space-y-sm pb-xl"> <!-- Extra padding bottom for scroll clearance -->
+<label class="font-label-lg text-label-lg text-on-surface flex items-center">
+                        Catatan <span class="font-body-md text-body-md text-on-surface-variant font-normal ml-xs">(opsional)</span>
+</label>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-md focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+<textarea class="w-full bg-transparent border-none p-0 font-body-lg text-body-lg text-on-surface focus:ring-0 resize-none min-h-[80px]" placeholder="Catatan tambahan..."></textarea>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Action -->
+<div class="p-margin-mobile border-t border-surface-variant bg-surface-container-lowest pb-8"> <!-- extra padding for safe area -->
+<button class="w-full h-14 rounded-lg bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container active:scale-[0.98] transition-all">
+                    Simpan
+                </button>
+</div>
+</div>
+</div>
+</body></html>

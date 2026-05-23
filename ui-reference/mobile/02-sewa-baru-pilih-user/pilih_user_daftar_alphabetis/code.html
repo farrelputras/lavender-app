@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sewa Baru - Pilih User</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#7c6ba8",
+                        "surface": "#f6faff",
+                        "primary-fixed": "#e9ddff",
+                        "secondary-fixed": "#e1e3e4",
+                        "primary": "#62528d",
+                        "on-primary": "#ffffff",
+                        "outline": "#7a7580",
+                        "surface-variant": "#dbe4ed",
+                        "on-secondary-container": "#626566",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#293138",
+                        "outline-variant": "#cac4d0",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#191c1d",
+                        "surface-container": "#e6eff8",
+                        "on-surface-variant": "#49454f",
+                        "tertiary": "#676011",
+                        "surface-container-high": "#e0e9f2",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#b7ad58",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "primary-fixed-dim": "#cfbcff",
+                        "inverse-primary": "#cfbcff",
+                        "on-background": "#141d23",
+                        "inverse-on-surface": "#e9f2fb",
+                        "secondary-container": "#e1e3e4",
+                        "on-surface": "#141d23",
+                        "on-secondary-fixed-variant": "#454748",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#f0e589",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "on-primary-container": "#fffbff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d2dbe4",
+                        "surface-container-low": "#ecf5fe",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "surface-tint": "#655590",
+                        "surface-container-highest": "#dbe4ed",
+                        "on-tertiary-container": "#464000",
+                        "on-tertiary": "#ffffff",
+                        "secondary": "#5c5f60",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "on-secondary": "#ffffff",
+                        "background": "#f6faff",
+                        "surface-bright": "#f6faff",
+                        "on-primary-fixed": "#200f48"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "xs": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Public Sans"],
+                        "label-lg": ["Public Sans"],
+                        "label-md": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "headline-sm": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "display-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased font-body-md min-h-screen pb-margin-desktop md:bg-surface-container-low">
+<!-- Mobile Wrapper -->
+<div class="md:max-w-md md:mx-auto md:bg-surface md:min-h-screen md:shadow-lg md:relative overflow-hidden">
+<!-- Top App Bar -->
+<header class="bg-surface sticky top-0 z-50 shadow-sm md:shadow-none">
+<div class="flex items-center justify-between px-margin-mobile h-16 w-full">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors active:scale-95 duration-150 ease-in-out text-primary">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1 px-4 text-center">
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Sewa Baru</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Langkah 1 dari 3 · Pilih User</p>
+</div>
+<div class="w-10 h-10"></div> <!-- Placeholder for balance -->
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-variant h-1">
+<div class="bg-primary h-1" style="width: 33.33%;"></div>
+</div>
+</header>
+<!-- Search Bar (Sticky below app bar) -->
+<div class="sticky top-[68px] z-40 bg-surface px-margin-mobile py-sm border-b border-surface-variant/50">
+<div class="flex items-center gap-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" data-icon="search">search</span>
+<input class="w-full h-12 pl-10 pr-4 bg-surface-container rounded-lg border-none focus:ring-2 focus:ring-primary font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60" placeholder="Cari nama atau panggilan..." type="text" value="">
+</div>
+</div>
+</div>
+<main class="px-margin-mobile pt-lg pb-xl relative">
+<!-- A-Z Quick Scroll Index -->
+<div class="fixed right-0 md:absolute md:right-0 top-[200px] bottom-0 z-50 flex flex-col justify-center items-center w-6 text-[10px] font-semibold text-primary/70 pr-2 pb-20 select-none">
+<span class="py-[2px] cursor-pointer hover:text-primary">A</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">B</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">C</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">D</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">E</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">F</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">G</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">H</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">I</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">J</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">K</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">L</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">M</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">N</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">O</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">P</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">Q</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">R</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">S</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">T</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">U</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">V</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">W</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">X</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">Y</span>
+<span class="py-[2px] cursor-pointer hover:text-primary">Z</span>
+</div>
+<!-- Phonebook List -->
+<div class="flex flex-col pr-4">
+<!-- Group A -->
+<div class="mb-lg">
+<div class="sticky top-[133px] z-30 bg-surface/95 backdrop-blur-sm py-xs mb-sm">
+<h2 class="font-label-lg text-on-surface-variant font-bold px-1">A</h2>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Card 1 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">AP</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Andito Pratama (Dito)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center gap-1 bg-[#E6F4EA] text-[#137333] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+                                Terverifikasi
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Card 2 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">AS</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Andini Sari (Andin)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center gap-1 bg-[#E6F4EA] text-[#137333] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+                                Terverifikasi
+                            </span>
+<span class="inline-flex items-center bg-[#FEF7E0] text-[#B06000] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+                                Sedang Sewa (1)
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Card 3 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left border-l-4 border-l-error">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">AW</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Andre Wijaya (Andre)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+                                Belum Diverifikasi
+                            </span>
+<span class="inline-flex items-center bg-error-container text-on-error-container px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+                                Hutang Rp 250.000
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Card 4 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">AR</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Arif Rahman (Arif)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center gap-1 bg-[#E6F4EA] text-[#137333] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+                                Terverifikasi
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Group B -->
+<div class="mb-lg">
+<div class="sticky top-[133px] z-30 bg-surface/95 backdrop-blur-sm py-xs mb-sm">
+<h2 class="font-label-lg text-on-surface-variant font-bold px-1">B</h2>
+</div>
+<div class="flex flex-col gap-sm">
+<!-- Card 1 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">BS</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Budi Santoso (Budi)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center gap-1 bg-[#E6F4EA] text-[#137333] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+<span class="material-symbols-outlined text-[14px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+                                Terverifikasi
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Card 2 -->
+<button class="w-full bg-surface-container-lowest rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-surface-variant/30 p-md flex items-start gap-md hover:bg-surface-container-low transition-colors active:scale-[0.98] text-left">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="font-label-lg text-label-lg text-on-primary-fixed-variant">BC</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-xs truncate">Bella Clarissa (Bella)</h3>
+<div class="flex flex-wrap gap-xs">
+<span class="inline-flex items-center bg-surface-variant text-on-surface-variant px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+                                Belum Diverifikasi
+                            </span>
+<span class="inline-flex items-center bg-[#FEF7E0] text-[#B06000] px-2 py-1 rounded-full font-label-md text-[12px] font-semibold leading-none">
+                                Sedang Sewa (1)
+                            </span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Action -->
+<div class="mt-lg flex justify-center">
+<button class="flex items-center gap-2 text-primary hover:bg-primary-fixed/50 px-4 py-3 rounded-full transition-colors font-label-lg text-label-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    Tidak ketemu? Daftarkan User Baru
+                </button>
+</div>
+</main>
+</div>
+</body></html>

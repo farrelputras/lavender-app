@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Proses Pengembalian</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#dbe4ed",
+                        "outline-variant": "#cac4d0",
+                        "on-secondary-fixed": "#191c1d",
+                        "surface-container": "#e6eff8",
+                        "on-background": "#141d23",
+                        "on-error-container": "#93000a",
+                        "background": "#f6faff",
+                        "surface-container-high": "#e0e9f2",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "inverse-on-surface": "#e9f2fb",
+                        "surface-dim": "#d2dbe4",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#e1e3e4",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#f0e589",
+                        "primary-container": "#7c6ba8",
+                        "on-primary-container": "#fffbff",
+                        "primary-fixed": "#e9ddff",
+                        "inverse-primary": "#cfbcff",
+                        "surface-container-highest": "#dbe4ed",
+                        "secondary": "#5c5f60",
+                        "tertiary-container": "#b7ad58",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed": "#e1e3e4",
+                        "surface-tint": "#655590",
+                        "surface-container-low": "#ecf5fe",
+                        "primary-fixed-dim": "#cfbcff",
+                        "on-secondary-container": "#626566",
+                        "on-error": "#ffffff",
+                        "outline": "#7a7580",
+                        "inverse-surface": "#293138",
+                        "on-tertiary-container": "#464000",
+                        "on-primary-fixed": "#200f48",
+                        "surface-bright": "#f6faff",
+                        "surface": "#f6faff",
+                        "primary": "#62528d",
+                        "on-surface-variant": "#49454f",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "on-surface": "#141d23",
+                        "on-secondary-fixed-variant": "#454748",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "tertiary": "#676011",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "amber": {
+                            500: "#f59e0b",
+                            700: "#b45309"
+                        }
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "base": "8px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "headline-sm": ["Public Sans"],
+                        "label-md": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "display-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-[100px] md:pb-0">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-surface border-b border-outline-variant flex items-center justify-between px-margin-mobile py-sm h-16 shadow-[0_4px_12px_rgba(0,0,0,0.05)] md:shadow-none">
+<div class="flex items-center gap-md">
+<button aria-label="Back" class="text-primary hover:bg-surface-container-high transition-colors p-sm rounded-full active:scale-95 duration-100 flex items-center justify-center h-12 w-12">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-sm text-headline-sm text-primary font-bold">Proses Pengembalian</h1>
+<p class="font-label-md text-label-md text-secondary">Andito Pratama (Dito) · Honda Vario 160 · N 1234 ABC</p>
+</div>
+</div>
+<button aria-label="More options" class="text-primary hover:bg-surface-container-high transition-colors p-sm rounded-full active:scale-95 duration-100 flex items-center justify-center h-12 w-12">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<main class="max-w-3xl mx-auto p-margin-mobile md:p-lg space-y-lg">
+<!-- Section 1: Waktu Kembali -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md pb-sm border-b border-outline-variant">Waktu Kembali</h2>
+<div class="space-y-sm">
+<label class="block font-label-md text-label-md text-on-surface-variant" for="waktu-kembali">Tanggal &amp; Jam</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline rounded-lg px-md py-sm font-body-md text-on-surface h-12 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none appearance-none" id="waktu-kembali" type="datetime-local" value="2026-05-16T15:00"/>
+</div>
+<p class="font-label-md text-label-md text-[#b45309] flex items-center gap-xs mt-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule">schedule</span>
+                    Terlambat 3 jam dari estimasi
+                </p>
+</div>
+</section>
+<!-- Section 2: Kondisi Kembali -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md pb-sm border-b border-outline-variant">Kondisi Kembali</h2>
+<!-- Bensin -->
+<div class="mb-lg">
+<div class="flex justify-between items-end mb-sm">
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant">Bensin Kembali (kotak)</label>
+<p class="font-body-md text-body-md text-secondary text-sm">Saat keluar: 4 kotak</p>
+</div>
+<div class="flex items-center gap-md">
+<button aria-label="Kurangi bensin" class="w-10 h-10 rounded-full border border-outline text-primary flex items-center justify-center hover:bg-surface-container active:scale-95">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface w-20 text-center">3 kotak</span>
+<button aria-label="Tambah bensin" class="w-10 h-10 rounded-full border border-outline text-primary flex items-center justify-center hover:bg-surface-container active:scale-95">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<!-- Fuel Gauge Bar -->
+<div class="flex gap-[2px] h-4 w-full bg-surface-container rounded-sm overflow-hidden mb-sm">
+<div class="flex-1 bg-primary"></div>
+<div class="flex-1 bg-primary"></div>
+<div class="flex-1 bg-primary"></div>
+<div class="flex-1 bg-surface-variant"></div>
+<div class="flex-1 bg-surface-variant"></div>
+<div class="flex-1 bg-surface-variant"></div>
+<div class="flex-1 bg-surface-variant"></div>
+<div class="flex-1 bg-surface-variant"></div>
+</div>
+<!-- Harga Bensin / Kotak Input -->
+<div class="mt-md">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="harga-bensin">Harga bensin / kotak</label>
+<input class="w-full bg-surface border border-outline rounded-lg px-md py-sm font-body-md text-on-surface h-12 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none" id="harga-bensin" inputmode="numeric" type="text" value="Rp 5.000"/>
+<p class="font-body-md text-body-md text-secondary text-xs mt-xs">Dipakai untuk menghitung saran penyesuaian tarif. Bisa diubah kalau harga bensin naik.</p>
+</div>
+</div>
+<!-- KM -->
+<div class="mb-lg">
+<label class="block font-label-md text-label-md text-on-surface-variant" for="km-kembali">KM Kembali (opsional)</label>
+<div class="relative mt-sm">
+<input class="w-full bg-surface border border-outline rounded-lg pl-md pr-[50px] py-sm font-body-md text-on-surface h-12 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none" id="km-kembali" placeholder="25360" type="number"/>
+<span class="absolute right-md top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant">km</span>
+</div>
+<div class="flex justify-between items-center mt-sm">
+<p class="font-body-md text-body-md text-secondary text-sm">Saat keluar: 25.340 km</p>
+<p class="font-body-md text-body-md text-secondary text-sm italic">Boleh dikosongkan.</p>
+</div>
+</div>
+<!-- Foto -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface-variant mb-sm">Foto Kondisi Kembali</label>
+<div class="flex gap-md overflow-x-auto pb-sm">
+<div class="w-24 h-24 rounded-lg bg-surface-container-high border border-outline-variant flex-shrink-0 relative overflow-hidden group">
+<img alt="Motorcycle condition" class="w-full h-full object-cover" data-alt="A close-up shot of a modern scooter's front wheel and fender, parked on a paved surface. The lighting is bright and clear, highlighting the clean lines of the vehicle against a neutral background. The aesthetic is practical and documentary, focused on showcasing the physical condition of the scooter in a well-lit, functional setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr-IC_KRPXuBKYw-c9wa9QWmz-rETZj8KzCwEV22Bf8e7m1qBSBv3Iq8VVBvE1Wo5m_fKp-Kgi_yc_ITbGorbvL5A6agjWEcj9-eBFVgBd7ct2xELbpDxYF5bH3LX1SqmI7XJrP7NWwgJnjP91OY_Vtmy9H5xoV7gbsj49ShhXKZ_i5J6LfE6G8vwkqqehUNqu1R9atlgpPZU-saPlrO_cKMilu4F8jBg8QTjAnx14OV2aNU53MzUnyT9V2H9hJr8zqCf2h8KwaCQ"/>
+<button class="absolute top-1 right-1 w-6 h-6 bg-inverse-surface/70 text-inverse-on-surface rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</button>
+</div>
+<div class="w-24 h-24 rounded-lg bg-surface-container-high border border-outline-variant flex-shrink-0 relative overflow-hidden group">
+<img alt="Motorcycle dashboard" class="w-full h-full object-cover" data-alt="A detailed view of a modern scooter's digital dashboard, displaying mileage and fuel levels. The screen is illuminated against the darker plastic casing. The lighting is balanced, ensuring the numbers are clearly visible. The mood is functional and straightforward, capturing technical details in a crisp, hyper-legible manner appropriate for operational documentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6hmPEfrqOrnXjWXbEZ4MjJdDKKjfIdzZqByGLUL9YX0pqJlt_j5VsUhSucWe5s8gD5Hp_hBMcueNXimoFwVJbwVIeaEupKuLXEXGAldjsgWd-r7IH1l_tslb4wCSgUURUYPZV1mQt7NTi_JN5m6ZSuLhBfFRtwOyhkHtAR3kKJeKLidScLqAx9cp7TdnciHqJvu_5Vd9f9nPUxw9Vd70zhOAl0oirboN3Bf1aP4vdzvWrg-BLnxLB1Z9fxy5SMCPYsMIqDBBYeuI"/>
+<button class="absolute top-1 right-1 w-6 h-6 bg-inverse-surface/70 text-inverse-on-surface rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[14px]" data-icon="close">close</span>
+</button>
+</div>
+<button class="w-24 h-24 rounded-lg border-2 border-dashed border-outline-variant text-primary flex flex-col items-center justify-center flex-shrink-0 hover:bg-surface-container hover:border-primary transition-colors h-[96px]">
+<span class="material-symbols-outlined mb-xs" data-icon="add_a_photo">add_a_photo</span>
+<span class="font-label-md text-label-md text-[12px]">Tambah Foto</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Rincian Biaya -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md pb-sm border-b border-outline-variant">Rincian Biaya</h2>
+<div class="space-y-md mb-md">
+<div class="flex justify-between items-center py-xs">
+<span class="font-body-md text-body-md text-on-surface-variant">Subtotal Sewa</span>
+<div class="relative w-32">
+<input class="w-full bg-surface border border-outline rounded text-right px-sm py-1 font-body-md text-on-surface h-10 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none" inputmode="numeric" type="text" value="200.000"/>
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant">Rp</span>
+</div>
+</div><div class="flex justify-between items-center py-md border-t border-outline-variant/30">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-[#FFF8E1] flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[#FFA000]" data-icon="local_gas_station">local_gas_station</span>
+</div>
+<div class="flex flex-col">
+<span class="font-medium text-on-surface">Bensin kurang 1 kotak</span>
+<span class="text-sm text-secondary font-normal">saran +Rp 5.000</span>
+</div>
+</div>
+<button class="h-11 px-lg bg-tertiary-container text-on-tertiary-container font-label-lg rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-sm">
+        Terapkan
+    </button>
+</div>
+</div>
+<button class="text-primary font-label-lg text-label-lg flex items-center gap-xs hover:bg-surface-container py-2 px-3 rounded-lg transition-colors mb-md -ml-3 h-12">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Tambah Biaya
+            </button>
+<div class="flex justify-end items-center pt-md border-t border-outline-variant">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold mr-md">Total Tagihan</span>
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">Rp 200.000</span>
+</div>
+</section>
+<!-- Section 4: Pembayaran -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md pb-sm border-b border-outline-variant">Pembayaran</h2>
+<div class="bg-surface-container rounded-lg p-sm flex items-center justify-between mb-md border border-outline-variant/50">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" data-icon="payments">payments</span>
+<span class="font-body-md text-body-md text-on-surface">Rp 100.000 · Cash · 16 Mei 2026</span>
+</div>
+<button class="text-secondary hover:text-error transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+<button class="w-full border border-outline text-primary font-label-lg text-label-lg flex items-center justify-center gap-xs hover:bg-surface-container py-3 rounded-lg transition-colors h-12 mb-md">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Tambah Pembayaran
+            </button>
+<div class="flex justify-between items-center p-sm bg-[#fef3c7] rounded-lg border border-[#f59e0b]/30">
+<span class="font-headline-sm text-headline-sm text-[#b45309] font-bold">Sisa</span>
+<span class="font-headline-sm text-headline-sm text-[#b45309] font-bold">Rp 160.000</span>
+</div>
+</section>
+<!-- Section 5: Status Jaminan -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-[#f59e0b]/50">
+<div class="flex items-center gap-sm mb-md pb-sm border-b border-outline-variant">
+<span class="material-symbols-outlined text-[#b45309]" data-icon="warning">warning</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Status Jaminan</h2>
+</div>
+<div class="bg-[#fef3c7] p-sm rounded-lg border border-[#f59e0b]/30 mb-sm">
+<p class="font-label-lg text-label-lg text-[#b45309]">Jaminan ditahan — akan dibuat Hutang Rp 160.000</p>
+</div>
+<div class="flex items-start gap-md mb-sm">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="badge">badge</span>
+<div>
+<span class="block font-body-md text-body-md text-on-surface">KTP, KTM</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-secondary text-sm italic">Hutang otomatis dibuat saat pengembalian disimpan.</p>
+</section>
+<!-- Section 6: Catatan -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-md border border-outline-variant/30 mb-[120px] md:mb-lg">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-md pb-sm border-b border-outline-variant">Catatan</h2>
+<textarea class="w-full bg-surface border border-outline rounded-lg p-md font-body-md text-on-surface h-32 focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none resize-none" placeholder="Tambahkan catatan opsional..."></textarea>
+</section>
+</main>
+<!-- Sticky Bottom Button -->
+<div class="fixed bottom-0 left-0 w-full bg-surface-container-lowest border-t border-outline-variant p-margin-mobile shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-40 md:relative md:bg-transparent md:border-none md:shadow-none md:p-0 md:max-w-3xl md:mx-auto md:pb-xl">
+<button class="w-full bg-primary text-on-primary font-label-lg text-label-lg h-14 rounded-xl flex items-center justify-center hover:bg-[#4d3d76] transition-colors active:scale-95 shadow-lg">
+            Selesaikan &amp; Buat Hutang
+        </button>
+</div>
+</body></html>

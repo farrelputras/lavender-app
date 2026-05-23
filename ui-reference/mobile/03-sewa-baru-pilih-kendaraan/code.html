@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>LAVENDER - Pilih Kendaraan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e9ddff",
+                        "on-surface-variant": "#49454f",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#7c6ba8",
+                        "background": "#f6faff",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#141d23",
+                        "surface-container-high": "#e0e9f2",
+                        "surface": "#f6faff",
+                        "outline-variant": "#cac4d0",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#cfbcff",
+                        "tertiary-container": "#b7ad58",
+                        "surface-dim": "#d2dbe4",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "surface-container": "#e6eff8",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#ecf5fe",
+                        "surface-variant": "#dbe4ed",
+                        "tertiary-fixed": "#f0e589",
+                        "secondary": "#5c5f60",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "on-surface": "#141d23",
+                        "on-primary-fixed": "#200f48",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "primary-fixed-dim": "#cfbcff",
+                        "outline": "#7a7580",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#191c1d",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#e1e3e4",
+                        "surface-tint": "#655590",
+                        "on-secondary-container": "#626566",
+                        "on-primary-container": "#fffbff",
+                        "inverse-surface": "#293138",
+                        "surface-bright": "#f6faff",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "primary": "#62528d",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dbe4ed",
+                        "on-tertiary-container": "#464000",
+                        "tertiary": "#676011",
+                        "secondary-fixed": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#454748",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "inverse-on-surface": "#e9f2fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "xs": "4px",
+                        "margin-desktop": "40px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "label-lg": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "headline-sm": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-20 md:pb-0 selection:bg-primary selection:text-on-primary">
+<!-- Top App Bar -->
+<header class="bg-surface sticky top-0 z-40 border-b border-surface-variant">
+<div class="flex items-center px-margin-mobile h-16 w-full relative">
+<button aria-label="Kembali" class="p-2 -ml-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-all text-on-surface">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="flex-1 text-center pr-10">
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Sewa Baru</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Langkah 2 dari 3 · Pilih Kendaraan</p>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="h-1 bg-surface-container-high w-full">
+<div class="h-full bg-primary" style="width: 66%;"></div>
+</div>
+</header>
+<main class="max-w-3xl mx-auto md:mt-lg px-margin-mobile md:px-0">
+<!-- Selected User Summary -->
+<div class="mt-md bg-primary-fixed rounded-xl p-md flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-sm text-headline-sm">
+                    D
+                </div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Untuk:</p>
+<p class="font-body-md text-body-md font-medium text-on-primary-fixed">Andito Pratama (Dito)</p>
+</div>
+</div>
+<button class="font-label-lg text-label-lg text-primary hover:text-on-primary-fixed-variant transition-colors">Ubah</button>
+</div>
+<!-- Search & Filters -->
+<div class="mt-lg flex flex-col gap-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-12 pl-12 pr-4 rounded-xl border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant transition-all" placeholder="Cari plat nomor..." type="text">
+</div>
+<div class="flex items-center gap-sm overflow-x-auto pb-2 -mx-margin-mobile px-margin-mobile md:mx-0 md:px-0 scrollbar-hide">
+<button class="h-10 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md whitespace-nowrap shrink-0">Semua</button>
+<button class="h-10 px-4 rounded-full border border-outline text-on-surface font-label-md text-label-md whitespace-nowrap shrink-0 hover:bg-surface-container-low transition-colors">Motor</button>
+<button class="h-10 px-4 rounded-full border border-outline text-on-surface font-label-md text-label-md whitespace-nowrap shrink-0 hover:bg-surface-container-low transition-colors">Mobil</button>
+<div class="w-[1px] h-6 bg-outline-variant shrink-0 mx-xs"></div>
+<button class="h-10 px-4 rounded-full border border-outline text-on-surface font-label-md text-label-md whitespace-nowrap shrink-0 flex items-center gap-xs hover:bg-surface-container-low transition-colors">
+                    Tampilkan Semua
+                    <span class="material-symbols-outlined text-[18px]">toggle_off</span>
+</button>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-xs">8 kendaraan tersedia</p>
+</div>
+<!-- Vehicle Grid -->
+<div class="mt-md grid grid-cols-2 md:grid-cols-3 gap-md pb-lg">
+<!-- Card 1 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="Red Honda Beat" class="w-full h-full object-cover" data-alt="A bright red Honda Beat scooter parked in a clean, modern parking lot. The setting is bright and sunny, highlighting the scooter's glossy finish. The overall aesthetic is clean and professional, matching a high-end vehicle rental catalog. The lighting is soft and even, avoiding harsh shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQOCzOUQGu5ZSAgeWvg9VRcGIyF6YwLT5N0wTMuXfG90muyUgj8Z9prUJnP8deGe8LwvpoODtyyaP-55nlS4oL3AgxiRVBB4s0qur2oIFXXnDjHVd7Li7O1DZSCXFykDuTIvM_KGUalyxzQmy-0_wlCSzpKgzPjPYll03RANC4nmPj_I07eB7plgaILExgtjkWXs4EZCXQQC1M0LVOYs49HLEoE1M6GTMIkGWsZlxGrvO4jxra6ZwZatSgq-JeobzLLgrR0GYrPYk">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 1234 AB</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Honda Beat 2022</p>
+</div>
+</button>
+<!-- Card 2 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="Black Honda Vario" class="w-full h-full object-cover" data-alt="A sleek black Honda Vario scooter photographed from a slight angle. The scooter is positioned against a neutral, light-colored wall to make it stand out. The lighting is studio-quality, emphasizing the matte black texture of the bodywork. The visual style is crisp and corporate, suitable for an app catalog." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAE6ZsopZOolgB7mhPl4kW9l8Wveenfgx9fxSeD0u-DuQo-ryDMzH6JJCRUab-rjYi9SySYin-sWbTN5GTJelm0Nuzq3QJtEuFcCyZCSMaU0xuNP3aXf-CImNfpDYScuXazzamzhjDgo7OI_Yts895ARrVv-kW_psckw8JFsr4wVrc_4Kbq-1PZV-U0Umc6Zhd2YlCMweibb4wYaeyJKyMp6VcLo8Mt8vONXNxPeQ3Fm5trSpPfBt4DQxgn5SzoooDsfEVr6qQIo8Y">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 5678 XY</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Honda Vario 125</p>
+</div>
+</button>
+<!-- Card 3 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="White Yamaha NMAX" class="w-full h-full object-cover" data-alt="A pristine white Yamaha NMAX scooter parked on a smooth paved surface. The background is slightly blurred to keep the focus entirely on the vehicle. The lighting is natural but bright, giving the white paint a luminous quality. The image feels clean, modern, and trustworthy, aligning with a professional brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAChLf8eIpOHaqQeNtK6Pd1tPYqgEn3QP686I8bzEW2H7r7xf-33lzcqt_7YZLg9IOyOS4t-JBW0qKnfKOOf14xEd2MtKHKKcZuC0N_fVjHt7AENqYXb0DgVnaDGT8g1DrAReViCy99vlDLG9oDIDFbUpqW2M4fiDebOYJyOImVQiTQMjPWkVw8PE14F_Q4WXkLGyDVGPfLmrqWSQ4B5xcn8KYwpIzi2R5qW31OMCaASUrlsfzADmLfMdVT-dvTt4Yz-AoPVsat6Y8">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 9876 CD</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Yamaha NMAX 155</p>
+</div>
+</button>
+<!-- Card 4 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="Blue Honda Scoopy" class="w-full h-full object-cover" data-alt="A stylish blue Honda Scoopy scooter with a retro design, positioned cleanly against a pale background. The lighting highlights the curved lines and chrome accents of the scooter. The mood is approachable and friendly, yet maintaining a high-quality, professional photography standard. The colors are vibrant but accurate." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVGL_GBnF7Kbva0i2xmeRV2Pt7sbIRfWz8pHOcgA7kq7mg8u8z3LYIK8Joa88eYVpG_AXOzshb097Je1Azuy7xA5dKFB9As2vg7XjxYLgL-M9Nmm2PPlIXa4e08aWgNqjwgTE_6_fVfRIOQ3fKsaqS8ayY4kEf9-scAEwmflOfchPtaB_ko2_cbhUEOfU6bthvnEJWlBPtyHeFrqsAPBJpWFajEhy0g_Su2aDtlWwQa9CYHG__O4de8V4IW23pi_zJrBErRgoPTWE">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 4321 EF</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Honda Scoopy</p>
+</div>
+</button>
+<!-- Card 5 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="Silver Toyota Avanza" class="w-full h-full object-cover" data-alt="A silver Toyota Avanza MPV parked outdoors on a bright day. The car is clean and shiny, reflecting the clear sky. The composition is a classic three-quarter front view, typical for automotive sales. The overall look is practical, reliable, and perfectly suited for a functional vehicle rental interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHy4nUPMH_bENch-vStKsetw9xRg7vcTB9ZZ0BRyuhfrmxByGH-Aiz_GAQUQ853_2LMiMhvNBjJ8C-eROc-q98ngx4mOFcBAWJYQMl_NLN0WZqTWg39KpSjFpmWXUN7MEHgmtmHbTeJhKJhqWu9zzL8LpjPaq0CG4m9ud3RRh1ERLod9fedtjTqHk9rjO4X2vpra_oJ54DqmqJq-h0r44g_WAjmTL1rWFdhTYBqFmzj-aRlK3r8emWXQqnxaEDtxUNCzho-ug6d2w">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 1111 GH</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Toyota Avanza</p>
+</div>
+</button>
+<!-- Card 6 -->
+<button class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col text-left hover:shadow-[0px_12px_32px_rgba(0,0,0,0.1)] transition-all group active:scale-95">
+<div class="h-32 w-full bg-surface-container-low relative">
+<img alt="Black Honda PCX" class="w-full h-full object-cover" data-alt="A premium black Honda PCX maxi-scooter shown from a side profile. The setting is minimal, with a soft gray background that emphasizes the scooter's robust and modern design. The lighting is sophisticated, creating subtle highlights along the black body panels. The aesthetic is highly professional and neat." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6t75LWt86bHOjY6Z3zDJ_-sa7sjReRU_khZda7s8MkOUyUYSRdCWW4nn6PDFmIn6fbdYcj2vrY4MXX9GwOsE2NgSIx9h31935j5e5djprxhUVJyaYCwgBqLJ7rPgfknELeVB2RRvQZ1Jtc-MnXAvgUDjzurOe1nNbe1Y6kNprAGCYj4x_Aempp9TDEa9Z_RhVOido3-cD7AdPMH1KXYFjNGCv7EKHPqD3AmlGWk4wmA4UfGzHkKQi7jG-t0td_j0ClEU38vk-k-w">
+</div>
+<div class="p-4 flex flex-col gap-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">N 2222 IJ</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Honda PCX 160</p>
+</div>
+</button>
+</div>
+</main>
+</body></html>

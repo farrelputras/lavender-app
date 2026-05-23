@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Detail Penyewaan - Lavender</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#49454f",
+                        "secondary": "#5c5f60",
+                        "primary": "#62528d",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#293138",
+                        "on-secondary-container": "#626566",
+                        "on-primary-fixed": "#200f48",
+                        "primary-container": "#7c6ba8",
+                        "inverse-primary": "#cfbcff",
+                        "tertiary": "#676011",
+                        "outline-variant": "#cac4d0",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#f0e589",
+                        "tertiary-container": "#b7ad58",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "on-secondary-fixed-variant": "#454748",
+                        "surface-dim": "#d2dbe4",
+                        "on-primary-container": "#fffbff",
+                        "surface-variant": "#dbe4ed",
+                        "background": "#f6faff",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-high": "#e0e9f2",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "on-secondary-fixed": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "outline": "#7a7580",
+                        "inverse-on-surface": "#e9f2fb",
+                        "surface-tint": "#655590",
+                        "secondary-container": "#e1e3e4",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#e9ddff",
+                        "surface": "#f6faff",
+                        "on-background": "#141d23",
+                        "surface-container-highest": "#dbe4ed",
+                        "surface-container": "#e6eff8",
+                        "on-tertiary-container": "#464000",
+                        "surface-container-low": "#ecf5fe",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#141d23",
+                        "surface-bright": "#f6faff",
+                        "secondary-fixed": "#e1e3e4",
+                        "primary-fixed-dim": "#cfbcff",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "margin-mobile": "16px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Public Sans"],
+                        "headline-sm": ["Public Sans"],
+                        "headline-md": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "label-md": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "headline-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full h-16 px-margin-mobile bg-surface dark:bg-inverse-surface border-b border-outline-variant shadow-sm docked full-width top-0 z-50 sticky">
+<button aria-label="Kembali" class="text-on-surface-variant flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-on-surface uppercase tracking-wider text-center flex-1">Detail Penyewaan</h1>
+<div class="px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md">Selesai</div>
+</header>
+<main class="p-margin-mobile flex flex-col gap-lg max-w-md mx-auto w-full">
+<!-- Section 1: User & Vehicle -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<div class="flex flex-col gap-xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wide">Penyewa</span>
+<span class="font-headline-md text-on-surface">Andito Pratama (Dito)</span>
+<div class="flex items-center gap-xs mt-1">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-size: 18px;">call</span>
+<span class="font-body-md text-on-surface-variant">0812-3456-7890</span>
+</div>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<div class="flex justify-between items-center">
+<div class="flex flex-col gap-xs">
+<span class="font-label-md text-on-surface-variant uppercase tracking-wide">Kendaraan</span>
+<span class="font-headline-sm text-on-surface">Honda Vario 160</span>
+</div>
+<div class="bg-surface-variant px-3 py-1 rounded-md font-mono text-sm text-on-surface-variant font-bold border border-outline-variant">
+                    N 1234 ABC
+                </div>
+</div>
+</section>
+<!-- Section 2: Waktu Sewa -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md">
+<h2 class="font-headline-sm text-on-surface border-b border-outline-variant pb-2">Waktu Sewa</h2>
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface-variant">Mulai</span>
+<span class="font-label-md text-on-surface text-right">Sabtu, 16 Mei 2026<br/><span class="text-on-surface-variant font-normal">14:32</span></span>
+</div>
+<div class="flex justify-between items-start">
+<span class="font-body-md text-on-surface-variant">Kembali</span>
+<span class="font-label-md text-on-surface text-right">Minggu, 17 Mei 2026<br/><span class="text-on-surface-variant font-normal">05:32</span></span>
+</div>
+</div>
+<div class="bg-[#fff8e1] text-[#f57f17] p-3 rounded-lg font-label-md flex items-center gap-2 border border-[#ffe082]">
+<span class="material-symbols-outlined" style="font-size: 20px;">warning</span>
+                 Terlambat 3 jam
+            </div>
+<div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant">
+<span class="font-body-md text-on-surface-variant block mb-1">Paket Sewa</span>
+<span class="font-label-md text-on-surface block">1 Hari 12 Jam (36 jam)</span>
+</div>
+</section>
+<!-- Section 3: Jaminan -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md">
+<h2 class="font-headline-sm text-on-surface border-b border-outline-variant pb-2">Jaminan</h2>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">badge</span>
+<span class="font-label-md text-on-surface">KTP, KTM</span>
+</div>
+<div class="bg-[#e8f5e9] text-[#2e7d32] p-3 rounded-lg font-label-md flex items-center gap-2 border border-[#c8e6c9]">
+<span class="material-symbols-outlined" style="font-size: 20px;">check_circle</span>
+                 Sudah dikembalikan
+            </div>
+</section>
+<!-- Section 4: Kondisi Kendaraan (Reorganized) -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-lg">
+<h2 class="font-headline-sm text-on-surface border-b border-outline-variant pb-2">Kondisi Kendaraan</h2>
+<!-- Handover Section -->
+<div class="flex flex-col gap-md">
+<span class="font-label-md text-on-surface-variant font-bold uppercase tracking-wider">Keluar</span>
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface-variant">Bensin Keluar 3 kotak</span>
+<div class="flex gap-0.5">
+<div class="w-2.5 h-4 bg-[#8B7AB8] rounded-sm"></div>
+<div class="w-2.5 h-4 bg-[#8B7AB8] rounded-sm"></div>
+<div class="w-2.5 h-4 bg-[#8B7AB8] rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface-variant">KM Keluar</span>
+<span class="font-label-md text-on-surface">25.340 km</span>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-1 mt-1">
+<div class="w-24 h-24 rounded-lg bg-surface-variant flex-shrink-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA3Lfa-Vh_dVzlU5yZgqTDqG2f-Ay8_z5dGj77NcSNiGEiEUySuj5D5CZT60ZRkPJodKz0q43AcRk1ZdBsDnHd1d2fej5ZfzHheMhyIPsst3abGSrTVX06DWJqe9oD-uUMHauA80vBM_Y9hPtB58d_iFPvy3U6x__DUcdsRx-7tfi5GLITTjI6NZOdjjYjJG2seEk1pvZgHPFMTa2pDQvOcT6t_WRxBHhoTDFOqgM-fG_GVbS_5OH8JmLcBFUXUwT80UZTVT59IyxA');"></div>
+<div class="w-24 h-24 rounded-lg bg-surface-variant flex-shrink-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0Hy7YYQzH8LpiCesE3NREm-joFQM5KVZ_Gt9CHpVGC64ptnBWOO6g60rv4uk_5wVSvn6p-lICuHy8SjKDFU27WI-FUaRMJOuFrnRonLYHyT3Vhev_smVeUs0fFY4ScV5LEotsvnVOt-qGvIkb8zpqnhu7lEyZCvbB7bU3mY-hlUbEXmB_C45fI96xoP-Ap1KkOYrRsgEusr_tcOAXK1cBh6KVcax2i1NlHdrHKVZEKuM2E3SxiI4xbjY8q1urOjwfKqsSZiORjdw');"></div>
+</div>
+</div>
+</div>
+<hr class="border-outline-variant/50"/>
+<!-- Return Section -->
+<div class="flex flex-col gap-md">
+<span class="font-label-md text-on-surface-variant font-bold uppercase tracking-wider">Kembali</span>
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface-variant">Bensin Kembali 1 kotak</span>
+<div class="flex gap-0.5">
+<div class="w-2.5 h-4 bg-[#8B7AB8] rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+<div class="w-2.5 h-4 bg-outline-variant rounded-sm"></div>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-on-surface-variant">KM Kembali</span>
+<span class="font-label-md text-on-surface">25.560 km</span>
+</div>
+<div class="flex gap-2 overflow-x-auto pb-1 mt-1">
+<div class="w-24 h-24 rounded-lg bg-surface-variant flex-shrink-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAOZXzVQ2WfBpKf2CLvlerZZkHBy6Pyl0dUCrFS9zrqZVIfCXNnB_Sz-hHB4ofosGu0UYNZ0BhzNb6I07nBumQ5O0-eeoHkYBUS7UmwQJj8_x4GX9F_fqAbFUBqfXwNd6Lzu0qcElWqLxkXiTMC9WtV_bOgeVH6KkB2RFzEoB3uNc88IMr7DRAuFGQhBKD3aOjEGgTwFD7OnEYEWW7X8cBYXkC-D3vCr4DgpzSbdIHf_17oyWN2Z2gnZlxVO8tQpcb0t-5GIyBEVhY');"></div>
+<div class="w-24 h-24 rounded-lg bg-surface-variant flex-shrink-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrdIJ78Pu_FNUj61qd9VmAmk1dghhMxlfqeB17T-OqRogMA9DVdNTxWxMK58WvS9P0fzFTZvyyLyzbvZcpt4OE0FGkdBtF3WEhCytoUhIVsuxCReAcOdAOoqiX0gYYkWasx4cx_Ll5anUfQFCzrJ1ieiEiiB4vieNKXmdJq85TdrSony5hmFgWTFCCtbbT5IomxtoNBcXn2xghcnnslgjVgvz79cvq-eaoPywGUnhB8Y--MpjuvnIaHp5N-QPR6x6WMeLsMOxIl30');"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Rincian Biaya -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md">
+<h2 class="font-headline-sm text-on-surface border-b border-outline-variant pb-2">Rincian Biaya</h2>
+<div class="flex flex-col gap-sm">
+<div class="flex justify-between">
+<span class="font-body-md text-on-surface-variant">Subtotal Sewa</span>
+<span class="font-body-md text-on-surface">Rp 200.000</span>
+</div>
+<div class="flex justify-between">
+<span class="font-body-md text-on-surface-variant">Denda Telat</span>
+<span class="font-body-md text-on-surface">Rp 50.000</span>
+</div>
+<div class="flex justify-between">
+<span class="font-body-md text-on-surface-variant">Bensin Kurang</span>
+<span class="font-body-md text-on-surface">Rp 20.000</span>
+</div>
+<div class="flex justify-between">
+<span class="font-body-md text-on-surface-variant">Diskon</span>
+<span class="font-body-md text-error">- Rp 10.000</span>
+</div>
+</div>
+<hr class="border-outline-variant"/>
+<div class="flex justify-between items-center bg-surface-container p-3 rounded-lg">
+<span class="font-label-lg text-on-surface">Total</span>
+<span class="font-headline-lg text-primary">Rp 260.000</span>
+</div>
+</section>
+<!-- Section 6: Pembayaran -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<h2 class="font-headline-sm text-on-surface">Pembayaran</h2>
+<div class="bg-[#e8f5e9] text-[#2e7d32] px-3 py-1 rounded-full font-label-md border border-[#c8e6c9]">Lunas</div>
+</div>
+<div class="flex flex-col gap-sm">
+<div class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant bg-surface-bright">
+<span class="material-symbols-outlined text-on-surface-variant">payments</span>
+<div class="flex flex-col">
+<span class="font-label-md text-on-surface">Rp 100.000</span>
+<span class="font-body-md text-on-surface-variant text-sm">Cash · 16 Mei</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant bg-surface-bright">
+<span class="material-symbols-outlined text-on-surface-variant">account_balance</span>
+<div class="flex flex-col">
+<span class="font-label-md text-on-surface">Rp 160.000</span>
+<span class="font-body-md text-on-surface-variant text-sm">Transfer · 17 Mei</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 7: Catatan -->
+<section class="bg-surface-container-lowest rounded-xl p-lg shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant flex flex-col gap-md mb-xl">
+<h2 class="font-headline-sm text-on-surface border-b border-outline-variant pb-2">Catatan</h2>
+<div class="bg-surface-variant p-md rounded-lg border border-outline-variant min-h-[100px]">
+<p class="font-body-md text-on-surface">Motor dikembalikan dalam kondisi bensin setengah, body lecet halus di kiri.</p>
+</div>
+</section>
+</main>
+</body></html>
