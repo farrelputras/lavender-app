@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router'
 import { colors, textStyles, spacing } from '../../src/theme'
 import { getUserSummaries } from '../../src/connectors'
 import { UserSummary } from '../../src/connectors/types'
-import { formatRupiah } from '../../src/lib/format'
+import { formatRupiah, initialsFromName } from '../../src/lib/format'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -28,12 +28,6 @@ function showToast(msg: string) {
   } else {
     Alert.alert('', msg)
   }
-}
-
-function initialsFromName(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return parts[0][0].toUpperCase()
 }
 
 function groupByFirstLetter(
@@ -52,14 +46,14 @@ function groupByFirstLetter(
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function UserCard({ summary }: { summary: UserSummary }) {
+  const router = useRouter()
   return (
     <TouchableOpacity
       style={[styles.userCard, summary.debtAmount > 0 && styles.userCardDebt]}
       activeOpacity={0.8}
-      onPress={() => {
-        // TODO: router.push('/sewa-baru/pilih-kendaraan') when Step 2 lands
-        showToast('Langkah 2 belum tersedia di demo')
-      }}
+      onPress={() =>
+        router.push({ pathname: '/sewa-baru/pilih-kendaraan', params: { userId: summary.id } })
+      }
     >
       <View style={styles.userCardRow}>
         <View style={styles.userAvatar}>

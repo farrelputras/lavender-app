@@ -2,6 +2,8 @@ export type RentalStatus = 'active' | 'completed' | 'cancelled'
 
 export type ReturnStatus = 'belumKembali' | 'terlambat'
 
+export type VehicleCategory = 'motor' | 'mobil'
+
 export interface User {
   id: string
   name: string
@@ -31,8 +33,18 @@ export interface Vehicle {
   id: string
   name: string
   plate: string
+  category: VehicleCategory
   rate6h: number
   rate12h: number
+  rate24h: number
+  available: boolean
+}
+
+export interface VehicleSummary {
+  id: string
+  name: string
+  plate: string
+  category: VehicleCategory
   rate24h: number
   available: boolean
 }

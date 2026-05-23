@@ -40,6 +40,9 @@ export const colors = {
   inverseSurface: '#293138',
   inverseOnSurface: '#e9f2fb',
   inversePrimary: '#cfbcff',
+  primaryFixed: '#e9ddff',
+  onPrimaryFixed: '#200f48',
+  onPrimaryFixedVariant: '#4d3d76',
 } as const;
 
 // 4, 8, 12, 16, 20, 24, 32, 48
