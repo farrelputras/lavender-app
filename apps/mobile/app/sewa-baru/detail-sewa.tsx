@@ -357,10 +357,6 @@ export default function DetailSewaScreen() {
       : userSummary.name
     : '...'
 
-  const vehicleDisplayName = vehicle
-    ? `${vehicle.name} · ${vehicle.plate}`
-    : '...'
-
   const isMotor = vehicle?.category === 'motor'
 
   const mulaiLabel = `${formatHeaderDate(mulai)} · ${formatTime(mulai)}`
@@ -453,9 +449,18 @@ export default function DetailSewaScreen() {
                   color={colors.primary}
                 />
               </View>
-              <Text style={[textStyles.bodyMd, styles.contextName]} numberOfLines={1}>
-                {vehicleDisplayName}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[textStyles.bodyMd, { color: colors.onSurface, fontWeight: '500' }]} numberOfLines={1}>
+                  {vehicle?.name ?? '...'}
+                </Text>
+                {vehicle && (
+                  <View style={styles.plateChip}>
+                    <Text style={[textStyles.labelMd, { color: colors.onSurface, letterSpacing: 1, fontFamily: 'PublicSans_600SemiBold' }]}>
+                      {vehicle.plate}
+                    </Text>
+                  </View>
+                )}
+              </View>
               <TouchableOpacity
                 onPress={() => router.back()}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -1001,6 +1006,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.outlineVariant,
     opacity: 0.5,
     marginVertical: spacing.sm,
+  },
+  plateChip: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.surfaceVariant,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    borderRadius: 6,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    marginTop: 2,
   },
 
   // Checkbox

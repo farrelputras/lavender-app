@@ -45,3 +45,24 @@ export function initialsFromName(name: string): string {
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
   return parts[0][0].toUpperCase()
 }
+
+export function formatPhoneId(phone: string): string {
+  let digits: string
+  if (phone.startsWith('+62')) {
+    digits = '0' + phone.slice(3)
+  } else if (phone.startsWith('0')) {
+    digits = phone
+  } else {
+    return phone
+  }
+  if (digits.length <= 4) return digits
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`
+  return `${digits.slice(0, 4)}-${digits.slice(4, 8)}-${digits.slice(8)}`
+}
+
+export function toWaNumber(phone: string): string {
+  const digits = phone.replace(/[^0-9]/g, '')
+  if (digits.startsWith('62')) return digits
+  if (digits.startsWith('0')) return '62' + digits.slice(1)
+  return digits
+}

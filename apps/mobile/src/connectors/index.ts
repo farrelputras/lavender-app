@@ -6,6 +6,7 @@ function toUserSummary(u: typeof users[number]): UserSummary {
     id: u.id,
     name: u.name,
     nickname: u.nickname,
+    phone: u.phone,
     isVerified: u.verifiedAt !== null,
     activeRentalsCount: rentals.filter((r) => r.userId === u.id && r.status === 'active').length,
     debtAmount: hutang.filter((h) => h.userId === u.id).reduce((sum, h) => sum + h.amount, 0),
@@ -91,6 +92,15 @@ export async function getRentalsDueToday(): Promise<RentalDueToday[]> {
 
 export async function getRental(id: string): Promise<Rental | null> {
   return rentals.find((r) => r.id === id) ?? null
+}
+
+export async function addPayment(rentalId: string, input: Omit<Payment, 'id'>): Promise<Rental> {
+  const rental = rentals.find((r) => r.id === rentalId)
+  if (!rental) throw new Error(`Rental ${rentalId} not found`)
+  const id = `pay-${rentalId}-${rental.payments.length}`
+  rental.payments.push({ ...input, id })
+  rental.totalPaid = rental.payments.reduce((s, p) => s + p.amount, 0)
+  return { ...rental }
 }
 
 export async function createRental(input: CreateRentalInput): Promise<Rental> {

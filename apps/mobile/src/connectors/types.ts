@@ -53,6 +53,7 @@ export interface UserSummary {
   id: string
   name: string
   nickname: string | null
+  phone: string
   isVerified: boolean
   activeRentalsCount: number
   debtAmount: number

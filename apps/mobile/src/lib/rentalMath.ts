@@ -1,4 +1,4 @@
-import { Payment, Vehicle } from '../connectors/types'
+import { Payment, Rental, Vehicle } from '../connectors/types'
 
 /**
  * Compose the default tarif from a vehicle's rates and the selected duration.
@@ -59,4 +59,21 @@ export function isPaketValid(hari: number, jam: 0 | 6 | 12): boolean {
 
 export function computeTotalBill(tarif: number, addOnAmount: number, discount: number): number {
   return Math.max(0, tarif + addOnAmount - discount)
+}
+
+export function formatPaket(hari: number, jam: 0 | 6 | 12): string {
+  const totalJam = hari * 24 + jam
+  const parts: string[] = []
+  if (hari > 0) parts.push(`${hari} Hari`)
+  if (jam > 0) parts.push(`${jam} Jam`)
+  if (parts.length === 0) parts.push('0 Jam')
+  return `${parts.join(' ')} (${totalJam} jam)`
+}
+
+export function isOverdue(rental: Pick<Rental, 'dueAt' | 'status'>, now?: Date): boolean {
+  return rental.status === 'active' && rental.dueAt.getTime() < (now ?? new Date()).getTime()
+}
+
+export function hoursLate(dueAt: Date, now?: Date): number {
+  return Math.max(0, Math.ceil(((now ?? new Date()).getTime() - dueAt.getTime()) / 3_600_000))
 }

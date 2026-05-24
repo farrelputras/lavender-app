@@ -129,9 +129,7 @@ export default function BerandaScreen() {
             <TouchableOpacity
               key={item.rentalId}
               activeOpacity={0.8}
-              onPress={() => {
-                // TODO: navigate to rental detail when built
-              }}
+              onPress={() => router.push({ pathname: '/penyewaan/[id]', params: { id: item.rentalId } } as never)}
               style={[
                 styles.rentalCard,
                 item.status === 'terlambat' && styles.rentalCardOverdue,
