@@ -146,7 +146,10 @@ export default function PilihKendaraanScreen() {
     : `${availableCount} kendaraan tersedia`
 
   const handleSelectVehicle = (vehicle: VehicleSummary) => {
-    showToast('Langkah 3 belum tersedia di demo')
+    router.push({
+      pathname: '/sewa-baru/detail-sewa',
+      params: { userId, vehicleId: vehicle.id },
+    })
   }
 
   const displayName = userSummary
@@ -195,12 +198,9 @@ export default function PilihKendaraanScreen() {
             {userSummary ? initialsFromName(userSummary.name) : '?'}
           </Text>
         </View>
-        <View style={styles.userStripText}>
-          <Text style={[textStyles.labelMd, { color: colors.onPrimaryFixedVariant }]}>Untuk:</Text>
-          <Text style={[textStyles.bodyMd, { color: colors.onPrimaryFixed, fontWeight: '500' }]} numberOfLines={1}>
-            {displayName}
-          </Text>
-        </View>
+        <Text style={[textStyles.bodyMd, styles.userStripText]} numberOfLines={1}>
+          {displayName}
+        </Text>
         <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
           <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
         </TouchableOpacity>
@@ -320,22 +320,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: spacing.base,
     marginTop: spacing.base,
-    backgroundColor: colors.primaryFixed,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
     padding: spacing.base,
     gap: spacing.md,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
   },
   userAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
   },
   userStripText: {
     flex: 1,
+    color: colors.onSurface,
+    fontWeight: '500',
   },
 
   // Search

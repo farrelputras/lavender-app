@@ -177,6 +177,10 @@ export const vehicles: Vehicle[] = [
 
 // ===== RENTALS =====
 
+const emptyKondisi = { bensinKotak: 4, km: null, photos: [] }
+const defaultJaminan = { items: ['ktp' as const] }
+const emptyAddOn = { description: '', amount: 0 }
+
 export const rentals: Rental[] = [
   // ===== 3 DUE TODAY (anchored to now) =====
 
@@ -184,39 +188,69 @@ export const rentals: Rental[] = [
   {
     id: 'rental-001',
     userId: 'user-001',
-    vehicleId: 'veh-002', // Honda Vario
-    startAt: new Date(now.getTime() - 4 * 60 * 60 * 1000), // Started 4 hours ago
+    vehicleId: 'veh-002',
+    startAt: new Date(now.getTime() - 4 * 60 * 60 * 1000),
     dueAt: dueIn2h,
     returnedAt: null,
     status: 'active',
+    paketHari: 0,
+    paketJam: 6,
+    tarif: 65000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 65000,
     totalPaid: 65000,
+    payments: [{ id: 'pay-001-1', amount: 65000, method: 'cash', paidAt: new Date(now.getTime() - 4 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 2: Due in 5 hours (belumKembali)
   {
     id: 'rental-002',
     userId: 'user-002',
-    vehicleId: 'veh-004', // Yamaha NMAX
-    startAt: new Date(now.getTime() - 7 * 60 * 60 * 1000), // Started 7 hours ago
+    vehicleId: 'veh-004',
+    startAt: new Date(now.getTime() - 7 * 60 * 60 * 1000),
     dueAt: dueIn5h,
     returnedAt: null,
     status: 'active',
+    paketHari: 0,
+    paketJam: 12,
+    tarif: 75000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 75000,
-    totalPaid: 40000, // Partial payment, will create debt on return
+    totalPaid: 40000,
+    payments: [{ id: 'pay-002-1', amount: 40000, method: 'cash', paidAt: new Date(now.getTime() - 7 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 3: Overdue by 3 hours (terlambat)
   {
     id: 'rental-003',
     userId: 'user-003',
-    vehicleId: 'veh-011', // Vespa S
-    startAt: new Date(now.getTime() - 27 * 60 * 60 * 1000), // Started 27 hours ago
+    vehicleId: 'veh-011',
+    startAt: new Date(now.getTime() - 27 * 60 * 60 * 1000),
     dueAt: overdueBy3h,
     returnedAt: null,
     status: 'active',
+    paketHari: 1,
+    paketJam: 0,
+    tarif: 105000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 105000,
     totalPaid: 105000,
+    payments: [{ id: 'pay-003-1', amount: 105000, method: 'cash', paidAt: new Date(now.getTime() - 27 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // ===== 7 HISTORICAL/FUTURE RENTALS =====
@@ -230,8 +264,18 @@ export const rentals: Rental[] = [
     dueAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
     returnedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
     status: 'completed',
+    paketHari: 1,
+    paketJam: 0,
+    tarif: 85000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 85000,
     totalPaid: 85000,
+    payments: [{ id: 'pay-004-1', amount: 85000, method: 'cash', paidAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: emptyKondisi,
+    notes: '',
   },
 
   // Rental 5: Completed 1 day ago (partial payment → hutang-001 seeded below)
@@ -243,8 +287,18 @@ export const rentals: Rental[] = [
     dueAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
     returnedAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
     status: 'completed',
+    paketHari: 1,
+    paketJam: 0,
+    tarif: 300000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 300000,
     totalPaid: 50000,
+    payments: [{ id: 'pay-005-1', amount: 50000, method: 'cash', paidAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: emptyKondisi,
+    notes: '',
   },
 
   // Rental 6: Due tomorrow
@@ -252,12 +306,22 @@ export const rentals: Rental[] = [
     id: 'rental-006',
     userId: 'user-006',
     vehicleId: 'veh-006',
-    startAt: new Date(now.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
-    dueAt: new Date(now.getTime() + 12 * 60 * 60 * 1000), // 12 hours from now
+    startAt: new Date(now.getTime() - 12 * 60 * 60 * 1000),
+    dueAt: new Date(now.getTime() + 12 * 60 * 60 * 1000),
     returnedAt: null,
     status: 'active',
+    paketHari: 1,
+    paketJam: 0,
+    tarif: 52000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 52000,
     totalPaid: 52000,
+    payments: [{ id: 'pay-006-1', amount: 52000, method: 'cash', paidAt: new Date(now.getTime() - 12 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 7: Due in 3 days
@@ -265,12 +329,22 @@ export const rentals: Rental[] = [
     id: 'rental-007',
     userId: 'user-007',
     vehicleId: 'veh-007',
-    startAt: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6 hours ago
-    dueAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+    startAt: new Date(now.getTime() - 6 * 60 * 60 * 1000),
+    dueAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
     returnedAt: null,
     status: 'active',
+    paketHari: 3,
+    paketJam: 6,
+    tarif: 85000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 85000,
     totalPaid: 85000,
+    payments: [{ id: 'pay-007-1', amount: 85000, method: 'cash', paidAt: new Date(now.getTime() - 6 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 8: Due in 1 day
@@ -278,12 +352,22 @@ export const rentals: Rental[] = [
     id: 'rental-008',
     userId: 'user-008',
     vehicleId: 'veh-008',
-    startAt: new Date(now.getTime() - 18 * 60 * 60 * 1000), // 18 hours ago
-    dueAt: new Date(now.getTime() + 6 * 60 * 60 * 1000), // 6 hours from now (but not "today" in the 2h-5h window)
+    startAt: new Date(now.getTime() - 18 * 60 * 60 * 1000),
+    dueAt: new Date(now.getTime() + 6 * 60 * 60 * 1000),
     returnedAt: null,
     status: 'active',
+    paketHari: 1,
+    paketJam: 0,
+    tarif: 95000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 95000,
     totalPaid: 95000,
+    payments: [{ id: 'pay-008-1', amount: 95000, method: 'cash', paidAt: new Date(now.getTime() - 18 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 9: Due in 2 days
@@ -291,12 +375,22 @@ export const rentals: Rental[] = [
     id: 'rental-009',
     userId: 'user-009',
     vehicleId: 'veh-009',
-    startAt: new Date(now.getTime() - 12 * 60 * 60 * 1000), // 12 hours ago
-    dueAt: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+    startAt: new Date(now.getTime() - 12 * 60 * 60 * 1000),
+    dueAt: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
     returnedAt: null,
     status: 'active',
+    paketHari: 2,
+    paketJam: 12,
+    tarif: 78000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 78000,
-    totalPaid: 40000, // Partial payment
+    totalPaid: 40000,
+    payments: [{ id: 'pay-009-1', amount: 40000, method: 'cash', paidAt: new Date(now.getTime() - 12 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 
   // Rental 10: Due in 4 days
@@ -304,12 +398,22 @@ export const rentals: Rental[] = [
     id: 'rental-010',
     userId: 'user-010',
     vehicleId: 'veh-010',
-    startAt: new Date(now.getTime() - 8 * 60 * 60 * 1000), // 8 hours ago
-    dueAt: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000), // 4 days from now
+    startAt: new Date(now.getTime() - 8 * 60 * 60 * 1000),
+    dueAt: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),
     returnedAt: null,
     status: 'active',
+    paketHari: 4,
+    paketJam: 0,
+    tarif: 62000,
+    addOn: emptyAddOn,
+    discount: 0,
     totalBill: 62000,
     totalPaid: 62000,
+    payments: [{ id: 'pay-010-1', amount: 62000, method: 'cash', paidAt: new Date(now.getTime() - 8 * 60 * 60 * 1000) }],
+    jaminan: defaultJaminan,
+    kondisiKeluar: emptyKondisi,
+    kondisiKembali: null,
+    notes: '',
   },
 ]
 

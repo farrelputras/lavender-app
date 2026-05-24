@@ -1,4 +1,4 @@
-import { DashboardSummary, RentalDueToday, ReturnStatus, UserSummary, VehicleSummary } from './types'
+import { DashboardSummary, RentalDueToday, ReturnStatus, UserSummary, VehicleSummary, Vehicle, Rental, CreateRentalInput, Payment } from './types'
 import { users, vehicles, rentals, hutang } from './seed'
 
 function toUserSummary(u: typeof users[number]): UserSummary {
@@ -37,6 +37,10 @@ export async function getVehicleSummaries(): Promise<VehicleSummary[]> {
       if (a.available !== b.available) return a.available ? -1 : 1
       return a.plate.localeCompare(b.plate, 'id')
     })
+}
+
+export async function getVehicle(id: string): Promise<Vehicle | null> {
+  return vehicles.find((v) => v.id === id) ?? null
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
@@ -83,4 +87,50 @@ export async function getRentalsDueToday(): Promise<RentalDueToday[]> {
       }
     })
     .sort((a, b) => a.dueAt.getTime() - b.dueAt.getTime())
+}
+
+export async function getRental(id: string): Promise<Rental | null> {
+  return rentals.find((r) => r.id === id) ?? null
+}
+
+export async function createRental(input: CreateRentalInput): Promise<Rental> {
+  const ts = Date.now()
+
+  const payments: Payment[] = input.payments.map((p, i) => ({
+    ...p,
+    id: `pay-${ts}-${i}`,
+  }))
+
+  const totalPaid = payments.reduce((s, p) => s + p.amount, 0)
+  const totalBill = Math.max(0, input.tarif + input.addOn.amount - input.discount)
+
+  const rental: Rental = {
+    id: `rental-${ts}`,
+    userId: input.userId,
+    vehicleId: input.vehicleId,
+    startAt: input.startAt,
+    dueAt: input.dueAt,
+    returnedAt: null,
+    status: 'active',
+    paketHari: input.paketHari,
+    paketJam: input.paketJam,
+    tarif: input.tarif,
+    addOn: input.addOn,
+    discount: input.discount,
+    totalBill,
+    totalPaid,
+    payments,
+    jaminan: input.jaminan,
+    kondisiKeluar: input.kondisiKeluar,
+    kondisiKembali: null,
+    notes: input.notes ?? '',
+  }
+
+  rentals.push(rental)
+
+  // Mark vehicle as unavailable
+  const vehicle = vehicles.find((v) => v.id === input.vehicleId)
+  if (vehicle) vehicle.available = false
+
+  return rental
 }

@@ -4,6 +4,10 @@ export type ReturnStatus = 'belumKembali' | 'terlambat'
 
 export type VehicleCategory = 'motor' | 'mobil'
 
+export type PaymentMethod = 'cash' | 'transfer' | 'qris' | 'lainnya'
+
+export type JaminanItem = 'ktp' | 'ktm' | 'lainnya'
+
 export interface User {
   id: string
   name: string
@@ -18,6 +22,31 @@ export interface Hutang {
   userId: string
   amount: number
   createdAt: Date
+}
+
+export interface Payment {
+  id: string
+  amount: number
+  method: PaymentMethod
+  methodDescription?: string
+  paidAt: Date
+  notes?: string
+}
+
+export interface RentalAddOn {
+  description: string
+  amount: number
+}
+
+export interface KondisiSnapshot {
+  bensinKotak: number
+  km: number | null
+  photos: { id: string; uri: string | null }[]
+}
+
+export interface Jaminan {
+  items: JaminanItem[]
+  lainnyaDescription?: string
 }
 
 export interface UserSummary {
@@ -57,8 +86,37 @@ export interface Rental {
   dueAt: Date
   returnedAt: Date | null
   status: RentalStatus
+  // Financials
+  tarif: number
+  addOn: RentalAddOn
+  discount: number
   totalBill: number
   totalPaid: number
+  payments: Payment[]
+  // Handover
+  jaminan: Jaminan
+  kondisiKeluar: KondisiSnapshot
+  kondisiKembali: KondisiSnapshot | null
+  // Meta
+  notes: string
+  paketHari: number
+  paketJam: 0 | 6 | 12
+}
+
+export interface CreateRentalInput {
+  userId: string
+  vehicleId: string
+  startAt: Date
+  dueAt: Date
+  paketHari: number
+  paketJam: 0 | 6 | 12
+  tarif: number
+  addOn: RentalAddOn
+  discount: number
+  jaminan: Jaminan
+  kondisiKeluar: KondisiSnapshot
+  payments: Omit<Payment, 'id'>[]
+  notes?: string
 }
 
 export interface DashboardSummary {

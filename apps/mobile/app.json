@@ -29,7 +29,8 @@
           "username": "farrelputras"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-community/datetimepicker"
     ],
     "updates": {
       "url": "https://u.expo.dev/8bce9c4d-8ab5-4221-a061-d8c971ed8837",
