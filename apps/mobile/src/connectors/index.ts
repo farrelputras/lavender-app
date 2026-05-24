@@ -1,5 +1,16 @@
-import { DashboardSummary, RentalDueToday, ReturnStatus, UserSummary, VehicleSummary, Vehicle, Rental, CreateRentalInput, Payment } from './types'
+import { DashboardSummary, RentalDueToday, ReturnStatus, UserSummary, VehicleSummary, Vehicle, Rental, CreateRentalInput, Payment, KondisiSnapshot, Hutang } from './types'
 import { users, vehicles, rentals, hutang } from './seed'
+import { computeReturnTotal } from '../lib/rentalMath'
+
+export interface CloseRentalInput {
+  returnedAt: Date
+  kondisiKembali: KondisiSnapshot
+  subtotalSewa: number
+  extraFees: { description: string; amount: number }[]
+  discount: number
+  notes?: string
+  newPayments: Omit<Payment, 'id'>[]
+}
 
 function toUserSummary(u: typeof users[number]): UserSummary {
   return {
@@ -100,6 +111,44 @@ export async function addPayment(rentalId: string, input: Omit<Payment, 'id'>): 
   const id = `pay-${rentalId}-${rental.payments.length}`
   rental.payments.push({ ...input, id })
   rental.totalPaid = rental.payments.reduce((s, p) => s + p.amount, 0)
+  return { ...rental }
+}
+
+export async function closeRental(rentalId: string, input: CloseRentalInput): Promise<Rental> {
+  const rental = rentals.find((r) => r.id === rentalId)
+  if (!rental) throw new Error(`Rental ${rentalId} not found`)
+  if (rental.status !== 'active') throw new Error(`Rental ${rentalId} is not active`)
+
+  const ts = Date.now()
+
+  const newPays: Payment[] = input.newPayments.map((p, i) => ({
+    ...p,
+    id: `pay-${ts}-close-${i}`,
+  }))
+  rental.payments.push(...newPays)
+  rental.totalPaid = rental.payments.reduce((s, p) => s + p.amount, 0)
+
+  rental.totalBill = computeReturnTotal(input.subtotalSewa, input.extraFees, input.discount)
+  rental.returnedAt = input.returnedAt
+  rental.kondisiKembali = input.kondisiKembali
+  rental.status = 'completed'
+  if (input.notes !== undefined) rental.notes = input.notes
+
+  const vehicle = vehicles.find((v) => v.id === rental.vehicleId)
+  if (vehicle) vehicle.available = true
+
+  const sisa = Math.max(0, rental.totalBill - rental.totalPaid)
+  if (sisa > 0) {
+    const h: Hutang = {
+      id: `hutang-${ts}`,
+      rentalId: rental.id,
+      userId: rental.userId,
+      amount: sisa,
+      createdAt: new Date(),
+    }
+    hutang.push(h)
+  }
+
   return { ...rental }
 }
 

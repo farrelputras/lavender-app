@@ -66,7 +66,7 @@ function BensinGauge({ value }: { value: number }) {
 
 export default function DetailPenyewaanScreen() {
   const router = useRouter()
-  const { id, just_created } = useLocalSearchParams<{ id: string; just_created?: string }>()
+  const { id, just_created, just_closed } = useLocalSearchParams<{ id: string; just_created?: string; just_closed?: string }>()
 
   const [rental, setRental] = useState<Rental | null>(null)
   const [user, setUser] = useState<UserSummary | null>(null)
@@ -83,9 +83,8 @@ export default function DetailPenyewaanScreen() {
       setUser(u)
       setVehicle(v)
       setLoading(false)
-      if (just_created === '1') {
-        showToast('Penyewaan tersimpan')
-      }
+      if (just_created === '1') showToast('Penyewaan tersimpan')
+      if (just_closed === '1') showToast('Pengembalian tersimpan')
     }
     load()
   }, [id])
@@ -406,7 +405,7 @@ export default function DetailPenyewaanScreen() {
         {/* ── 7. Catatan ───────────────────────────────── */}
         <View>
           <View style={styles.sectionHeader}>
-            <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan</Text>
+            <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
             <TouchableOpacity onPress={() => showToast('Akan segera tersedia')}>
               <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
             </TouchableOpacity>
@@ -427,7 +426,7 @@ export default function DetailPenyewaanScreen() {
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.btnProses}
-          onPress={() => showToast('Akan segera tersedia')}
+          onPress={() => router.push({ pathname: '/penyewaan/pengembalian/[id]', params: { id: rental.id } } as never)}
           activeOpacity={0.8}
         >
           <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Proses Pengembalian</Text>

@@ -77,3 +77,23 @@ export function isOverdue(rental: Pick<Rental, 'dueAt' | 'status'>, now?: Date):
 export function hoursLate(dueAt: Date, now?: Date): number {
   return Math.max(0, Math.ceil(((now ?? new Date()).getTime() - dueAt.getTime()) / 3_600_000))
 }
+
+export function computeFuelAdjustment(
+  bensinKeluar: number,
+  bensinKembali: number,
+  hargaPerKotak: number,
+): { selisih: number; deltaRupiah: number; direction: 'add' | 'subtract' | 'none' } {
+  const selisih = bensinKembali - bensinKeluar
+  const deltaRupiah = Math.abs(selisih) * hargaPerKotak
+  const direction = selisih > 0 ? 'subtract' : selisih < 0 ? 'add' : 'none'
+  return { selisih, deltaRupiah, direction }
+}
+
+export function computeReturnTotal(
+  subtotalSewa: number,
+  extraFees: { amount: number }[],
+  discount: number,
+): number {
+  const extras = extraFees.reduce((s, f) => s + (f.amount || 0), 0)
+  return Math.max(0, subtotalSewa + extras - discount)
+}

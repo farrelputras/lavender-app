@@ -871,7 +871,7 @@ export default function DetailSewaScreen() {
 
           {/* ── Catatan ──────────────────────────────────────── */}
           <View>
-            <SectionLabel>Catatan</SectionLabel>
+            <SectionLabel>Catatan Rental</SectionLabel>
             <TextInput
               style={[textStyles.bodyMd, styles.catatanInput]}
               placeholder="Catatan tambahan jika ada"
