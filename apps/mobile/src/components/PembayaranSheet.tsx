@@ -7,15 +7,14 @@ import {
   TouchableWithoutFeedback,
   TextInput,
   ScrollView,
-  KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from 'react-native'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Payment, PaymentMethod } from '../connectors/types'
 import { colors, textStyles, spacing } from '../theme'
-import { formatRupiah } from '../lib/format'
 
 type Props = {
   visible: boolean
@@ -31,6 +30,8 @@ const METHODS: { key: PaymentMethod; label: string }[] = [
   { key: 'lainnya', label: 'Lainnya' },
 ]
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+
 function todayMidnight(): Date {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
@@ -38,16 +39,36 @@ function todayMidnight(): Date {
 }
 
 export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmount }: Props) {
-  const [rawAmount, setRawAmount] = useState(defaultAmount ? String(defaultAmount) : '')
+  const [rawDigits, setRawDigits] = useState(defaultAmount ? String(defaultAmount) : '')
   const [method, setMethod] = useState<PaymentMethod>('cash')
   const [methodDesc, setMethodDesc] = useState('')
   const [paidAt, setPaidAt] = useState<Date>(todayMidnight)
   const [notes, setNotes] = useState('')
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [amountError, setAmountError] = useState(false)
+  const [kbOffset, setKbOffset] = useState(0)
+
+  useEffect(() => {
+    if (!visible) return
+    const showSub = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKbOffset(e.endCoordinates.height)
+    })
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKbOffset(0)
+    })
+    return () => {
+      showSub.remove()
+      hideSub.remove()
+      setKbOffset(0)
+    }
+  }, [visible])
+
+  const displayValue = rawDigits
+    ? new Intl.NumberFormat('id-ID').format(parseInt(rawDigits, 10) || 0)
+    : ''
 
   function reset() {
-    setRawAmount(defaultAmount ? String(defaultAmount) : '')
+    setRawDigits(defaultAmount ? String(defaultAmount) : '')
     setMethod('cash')
     setMethodDesc('')
     setPaidAt(todayMidnight())
@@ -62,7 +83,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
   }
 
   function handleSubmit() {
-    const amount = parseInt(rawAmount.replace(/\D/g, ''), 10)
+    const amount = parseInt(rawDigits, 10)
     if (!amount || amount <= 0) {
       setAmountError(true)
       return
@@ -78,12 +99,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
     onClose()
   }
 
-  const parsedAmount = parseInt(rawAmount.replace(/\D/g, ''), 10)
-  const amountDisplay = rawAmount.replace(/\D/g, '') ? formatRupiah(parsedAmount || 0) : ''
-
-  const DAYS = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
-  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-  const dateLabel = `${DAYS[paidAt.getDay()]}, ${paidAt.getDate()} ${MONTHS[paidAt.getMonth()]} ${paidAt.getFullYear()}`
+  const dateLabel = `${paidAt.getDate()} ${MONTHS[paidAt.getMonth()]} ${paidAt.getFullYear()}`
 
   return (
     <Modal
@@ -97,9 +113,8 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
         <View style={styles.backdrop} />
       </TouchableWithoutFeedback>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.sheetWrapper}
+      <View
+        style={[styles.sheetWrapper, { paddingBottom: kbOffset }]}
         pointerEvents="box-none"
       >
         <View style={styles.sheet}>
@@ -108,9 +123,10 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
 
           {/* Header */}
           <View style={styles.header}>
+            <View style={{ width: 32 }} />
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Tambah Pembayaran</Text>
-            <TouchableOpacity onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <MaterialIcons name="close" size={24} color={colors.onSurfaceVariant} />
+            <TouchableOpacity style={styles.closeBtn} onPress={handleClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
             </TouchableOpacity>
           </View>
 
@@ -121,27 +137,24 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
           >
             {/* Jumlah */}
             <View style={styles.field}>
-              <Text style={[textStyles.labelMd, styles.fieldLabel]}>Jumlah *</Text>
+              <Text style={styles.fieldLabel}>
+                Jumlah <Text style={{ color: colors.error }}>*</Text>
+              </Text>
               <View style={[styles.rupiahInput, amountError && styles.inputError]}>
-                <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                <Text style={[textStyles.headlineSm, { color: colors.onSurfaceVariant, marginRight: 8 }]}>Rp</Text>
                 <TextInput
-                  style={[textStyles.bodyMd, styles.rupiahField]}
+                  style={[textStyles.headlineMd, styles.rupiahField]}
                   keyboardType="numeric"
                   placeholder="0"
                   placeholderTextColor={colors.onSurfaceVariant}
-                  value={rawAmount.replace(/\D/g, '')}
+                  value={displayValue}
                   onChangeText={(t) => {
                     setAmountError(false)
-                    setRawAmount(t)
+                    setRawDigits(t.replace(/\D/g, ''))
                   }}
                   returnKeyType="done"
                 />
               </View>
-              {amountDisplay ? (
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}>
-                  {amountDisplay}
-                </Text>
-              ) : null}
               {amountError && (
                 <Text style={[textStyles.labelMd, { color: colors.error, marginTop: 4 }]}>
                   Jumlah harus lebih dari 0
@@ -151,7 +164,9 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
 
             {/* Metode */}
             <View style={styles.field}>
-              <Text style={[textStyles.labelMd, styles.fieldLabel]}>Metode *</Text>
+              <Text style={styles.fieldLabel}>
+                Metode <Text style={{ color: colors.error }}>*</Text>
+              </Text>
               <View style={styles.methodRow}>
                 {METHODS.map((m) => (
                   <TouchableOpacity
@@ -162,7 +177,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
                   >
                     <Text style={[
                       textStyles.labelMd,
-                      { color: method === m.key ? colors.onPrimary : colors.onSurface },
+                      { color: method === m.key ? colors.onPrimary : colors.primary },
                     ]}>
                       {m.label}
                     </Text>
@@ -182,14 +197,14 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
 
             {/* Tanggal */}
             <View style={styles.field}>
-              <Text style={[textStyles.labelMd, styles.fieldLabel]}>Tanggal</Text>
+              <Text style={styles.fieldLabel}>Tanggal</Text>
               <TouchableOpacity
                 style={styles.dateRow}
                 onPress={() => setShowDatePicker(true)}
                 activeOpacity={0.8}
               >
-                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{dateLabel}</Text>
-                <MaterialIcons name="calendar-today" size={20} color={colors.primary} />
+                <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{dateLabel}</Text>
+                <MaterialIcons name="calendar-month" size={20} color={colors.onSurfaceVariant} />
               </TouchableOpacity>
               {showDatePicker && (
                 <DateTimePicker
@@ -209,11 +224,14 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
             </View>
 
             {/* Catatan */}
-            <View style={styles.field}>
-              <Text style={[textStyles.labelMd, styles.fieldLabel]}>Catatan (opsional)</Text>
+            <View style={[styles.field, { paddingBottom: 32 }]}>
+              <Text style={styles.fieldLabel}>
+                Catatan{' '}
+                <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>(opsional)</Text>
+              </Text>
               <TextInput
-                style={[textStyles.bodyMd, styles.textInput, { minHeight: 72, textAlignVertical: 'top' }]}
-                placeholder="Contoh: DP, cicilan pertama..."
+                style={[textStyles.bodyMd, styles.textInput, { minHeight: 80, textAlignVertical: 'top' }]}
+                placeholder="Catatan tambahan..."
                 placeholderTextColor={colors.onSurfaceVariant}
                 value={notes}
                 onChangeText={setNotes}
@@ -223,18 +241,14 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
             </View>
           </ScrollView>
 
-          {/* Actions */}
+          {/* Action */}
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.btnBatal} onPress={handleClose} activeOpacity={0.8}>
-              <Text style={[textStyles.labelLg, { color: colors.onSurfaceVariant }]}>Batal</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.btnTambah} onPress={handleSubmit} activeOpacity={0.8}>
-              <MaterialIcons name="check" size={20} color={colors.onPrimary} style={{ marginRight: 6 }} />
-              <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Tambah</Text>
+            <TouchableOpacity style={styles.btnSimpan} onPress={handleSubmit} activeOpacity={0.8}>
+              <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Simpan</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   )
 }
@@ -250,50 +264,58 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 32 : 16,
     maxHeight: '90%',
   },
   handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
+    width: 48,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: colors.outlineVariant,
     alignSelf: 'center',
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 16,
+    marginBottom: 4,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
+    borderBottomColor: colors.surfaceVariant,
+  },
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   body: {
-    padding: spacing.base,
-    gap: spacing.xl,
-    paddingBottom: spacing.sm,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+    gap: 24,
   },
   field: {
     gap: spacing.xs,
   },
   fieldLabel: {
-    color: colors.onSurfaceVariant,
+    ...textStyles.labelLg,
+    color: colors.onSurface,
   },
   rupiahInput: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    height: 52,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 64,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceContainerLow,
   },
   inputError: {
     borderColor: colors.error,
@@ -309,62 +331,51 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   methodChip: {
-    height: 40,
-    paddingHorizontal: spacing.base,
+    height: 48,
+    paddingHorizontal: 24,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.outline,
+    borderColor: colors.primary,
+    backgroundColor: colors.surfaceContainerLowest,
     justifyContent: 'center',
     alignItems: 'center',
   },
   methodChipActive: {
     backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   textInput: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 16,
     paddingVertical: spacing.sm,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceContainerLowest,
     color: colors.onSurface,
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    height: 52,
-    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 56,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceContainerLowest,
   },
   actions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.base,
-    paddingTop: spacing.md,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 32,
     borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    borderTopColor: colors.surfaceVariant,
+    backgroundColor: colors.surfaceContainerLowest,
   },
-  btnBatal: {
-    flex: 1,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  btnTambah: {
-    flex: 2,
-    height: 52,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
+  btnSimpan: {
+    height: 56,
+    borderRadius: 8,
     backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
