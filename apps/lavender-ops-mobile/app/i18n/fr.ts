@@ -1,4 +1,3 @@
-import demoFr from "./demo-fr"
 import { Translations } from "./en"
 
 const fr: Translations = {
@@ -125,7 +124,6 @@ const fr: Translations = {
     },
   },
 
-  ...demoFr,
 }
 
 export default fr

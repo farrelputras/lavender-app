@@ -1,4 +1,3 @@
-import demoEs from "./demo-es"
 import { Translations } from "./en"
 
 const es: Translations = {
@@ -125,7 +124,6 @@ const es: Translations = {
     },
   },
 
-  ...demoEs,
 }
 
 export default es

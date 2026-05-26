@@ -1,5 +1,3 @@
-import demoEn from "./demo-en"
-
 const en = {
   common: {
     ok: "OK!",
@@ -122,7 +120,6 @@ const en = {
     },
   },
 
-  ...demoEn,
 }
 
 export default en
