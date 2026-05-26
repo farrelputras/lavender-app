@@ -10,3 +10,6 @@ export type { FieldCardProps } from "./FieldCard"
 
 export { FuelGauge } from "./FuelGauge"
 export type { FuelGaugeProps } from "./FuelGauge"
+
+export { Stepper } from "./Stepper"
+export type { StepperProps } from "./Stepper"
