@@ -16,3 +16,6 @@ export type { StepperProps } from "./Stepper"
 
 export { RupiahInput } from "./RupiahInput"
 export type { RupiahInputProps } from "./RupiahInput"
+
+export { PhotoRow } from "./PhotoRow"
+export type { PhotoItem, PhotoRowProps } from "./PhotoRow"
