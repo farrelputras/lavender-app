@@ -66,3 +66,9 @@ export function toWaNumber(phone: string): string {
   if (digits.startsWith("0")) return "62" + digits.slice(1)
   return digits
 }
+
+export function parseRupiahInput(raw: string): number {
+  const cleaned = raw.replace(/[^\d-]/g, "")
+  const n = parseInt(cleaned, 10)
+  return isNaN(n) ? 0 : n
+}
