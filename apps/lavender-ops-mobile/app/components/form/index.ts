@@ -19,3 +19,6 @@ export type { RupiahInputProps } from "./RupiahInput"
 
 export { PhotoRow } from "./PhotoRow"
 export type { PhotoItem, PhotoRowProps } from "./PhotoRow"
+
+export { BottomActionBar } from "./BottomActionBar"
+export type { BottomActionBarProps } from "./BottomActionBar"
