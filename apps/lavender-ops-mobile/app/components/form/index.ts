@@ -7,3 +7,6 @@ export type { SectionLabelProps } from "./SectionLabel"
 
 export { FieldCard } from "./FieldCard"
 export type { FieldCardProps } from "./FieldCard"
+
+export { FuelGauge } from "./FuelGauge"
+export type { FuelGaugeProps } from "./FuelGauge"
