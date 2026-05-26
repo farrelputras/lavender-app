@@ -13,3 +13,6 @@ export type { FuelGaugeProps } from "./FuelGauge"
 
 export { Stepper } from "./Stepper"
 export type { StepperProps } from "./Stepper"
+
+export { RupiahInput } from "./RupiahInput"
+export type { RupiahInputProps } from "./RupiahInput"
