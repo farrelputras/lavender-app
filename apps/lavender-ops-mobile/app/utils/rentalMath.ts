@@ -1,4 +1,4 @@
-import { Payment, Rental, Vehicle } from '../services/rentals/types'
+import { Payment, Rental, Vehicle } from "../services/rentals/types"
 
 /**
  * Compose the default tarif from a vehicle's rates and the selected duration.
@@ -25,10 +25,7 @@ export function addDuration(start: Date, hari: number, jam: number): Date {
  * Given a start and an end date, infer the closest (hari, jam) pair.
  * Snap jam to the nearest of 0 / 6 / 12 based on total hours mod 24.
  */
-export function durationToPaket(
-  start: Date,
-  end: Date,
-): { hari: number; jam: 0 | 6 | 12 } {
+export function durationToPaket(start: Date, end: Date): { hari: number; jam: 0 | 6 | 12 } {
   const totalHours = Math.max(0, Math.round((end.getTime() - start.getTime()) / (60 * 60 * 1000)))
   const hari = Math.floor(totalHours / 24)
   const remainingHours = totalHours % 24
@@ -66,12 +63,12 @@ export function formatPaket(hari: number, jam: 0 | 6 | 12): string {
   const parts: string[] = []
   if (hari > 0) parts.push(`${hari} Hari`)
   if (jam > 0) parts.push(`${jam} Jam`)
-  if (parts.length === 0) parts.push('0 Jam')
-  return `${parts.join(' ')} (${totalJam} jam)`
+  if (parts.length === 0) parts.push("0 Jam")
+  return `${parts.join(" ")} (${totalJam} jam)`
 }
 
-export function isOverdue(rental: Pick<Rental, 'dueAt' | 'status'>, now?: Date): boolean {
-  return rental.status === 'active' && rental.dueAt.getTime() < (now ?? new Date()).getTime()
+export function isOverdue(rental: Pick<Rental, "dueAt" | "status">, now?: Date): boolean {
+  return rental.status === "active" && rental.dueAt.getTime() < (now ?? new Date()).getTime()
 }
 
 export function hoursLate(dueAt: Date, now?: Date): number {
@@ -82,10 +79,10 @@ export function computeFuelAdjustment(
   bensinKeluar: number,
   bensinKembali: number,
   hargaPerKotak: number,
-): { selisih: number; deltaRupiah: number; direction: 'add' | 'subtract' | 'none' } {
+): { selisih: number; deltaRupiah: number; direction: "add" | "subtract" | "none" } {
   const selisih = bensinKembali - bensinKeluar
   const deltaRupiah = Math.abs(selisih) * hargaPerKotak
-  const direction = selisih > 0 ? 'subtract' : selisih < 0 ? 'add' : 'none'
+  const direction = selisih > 0 ? "subtract" : selisih < 0 ? "add" : "none"
   return { selisih, deltaRupiah, direction }
 }
 

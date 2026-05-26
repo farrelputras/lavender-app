@@ -21,25 +21,23 @@ export interface CloseRentalInput {
   extraFees: { description: string; amount: number }[]
   discount: number
   notes?: string
-  newPayments: Omit<Payment, 'id'>[]
+  newPayments: Omit<Payment, "id">[]
 }
 
-function toUserSummary(u: typeof users[number]): UserSummary {
+function toUserSummary(u: (typeof users)[number]): UserSummary {
   return {
     id: u.id,
     name: u.name,
     nickname: u.nickname,
     phone: u.phone,
     isVerified: u.verifiedAt !== null,
-    activeRentalsCount: rentals.filter((r) => r.userId === u.id && r.status === 'active').length,
+    activeRentalsCount: rentals.filter((r) => r.userId === u.id && r.status === "active").length,
     debtAmount: hutang.filter((h) => h.userId === u.id).reduce((sum, h) => sum + h.amount, 0),
   }
 }
 
 export async function getUserSummaries(): Promise<UserSummary[]> {
-  return users
-    .map(toUserSummary)
-    .sort((a, b) => a.name.localeCompare(b.name, 'id'))
+  return users.map(toUserSummary).sort((a, b) => a.name.localeCompare(b.name, "id"))
 }
 
 export async function getUserSummary(id: string): Promise<UserSummary | null> {
@@ -59,7 +57,7 @@ export async function getVehicleSummaries(): Promise<VehicleSummary[]> {
     }))
     .sort((a, b) => {
       if (a.available !== b.available) return a.available ? -1 : 1
-      return a.plate.localeCompare(b.plate, 'id')
+      return a.plate.localeCompare(b.plate, "id")
     })
 }
 
@@ -68,7 +66,7 @@ export async function getVehicle(id: string): Promise<Vehicle | null> {
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
-  const activeRentals = rentals.filter((r) => r.status === 'active')
+  const activeRentals = rentals.filter((r) => r.status === "active")
   const activeDebtRentals = activeRentals.filter((r) => r.totalPaid < r.totalBill)
 
   return {
@@ -90,7 +88,7 @@ export async function getRentalsDueToday(): Promise<RentalDueToday[]> {
 
   return rentals
     .filter((r) => {
-      if (r.status !== 'active') return false
+      if (r.status !== "active") return false
       return (
         r.dueAt.getFullYear() === todayYear &&
         r.dueAt.getMonth() === todayMonth &&
@@ -100,12 +98,12 @@ export async function getRentalsDueToday(): Promise<RentalDueToday[]> {
     .map((r) => {
       const user = users.find((u) => u.id === r.userId)
       const vehicle = vehicles.find((v) => v.id === r.vehicleId)
-      const status: ReturnStatus = r.dueAt < now ? 'terlambat' : 'belumKembali'
+      const status: ReturnStatus = r.dueAt < now ? "terlambat" : "belumKembali"
       return {
         rentalId: r.id,
-        customerName: user?.name ?? '',
-        vehicleName: vehicle?.name ?? '',
-        vehiclePlate: vehicle?.plate ?? '',
+        customerName: user?.name ?? "",
+        vehicleName: vehicle?.name ?? "",
+        vehiclePlate: vehicle?.plate ?? "",
         dueAt: r.dueAt,
         status,
       }
@@ -117,7 +115,7 @@ export async function getRental(id: string): Promise<Rental | null> {
   return rentals.find((r) => r.id === id) ?? null
 }
 
-export async function addPayment(rentalId: string, input: Omit<Payment, 'id'>): Promise<Rental> {
+export async function addPayment(rentalId: string, input: Omit<Payment, "id">): Promise<Rental> {
   const rental = rentals.find((r) => r.id === rentalId)
   if (!rental) throw new Error(`Rental ${rentalId} not found`)
   const id = `pay-${rentalId}-${rental.payments.length}`
@@ -129,7 +127,7 @@ export async function addPayment(rentalId: string, input: Omit<Payment, 'id'>): 
 export async function closeRental(rentalId: string, input: CloseRentalInput): Promise<Rental> {
   const rental = rentals.find((r) => r.id === rentalId)
   if (!rental) throw new Error(`Rental ${rentalId} not found`)
-  if (rental.status !== 'active') throw new Error(`Rental ${rentalId} is not active`)
+  if (rental.status !== "active") throw new Error(`Rental ${rentalId} is not active`)
 
   const ts = Date.now()
 
@@ -143,7 +141,7 @@ export async function closeRental(rentalId: string, input: CloseRentalInput): Pr
   rental.totalBill = computeReturnTotal(input.subtotalSewa, input.extraFees, input.discount)
   rental.returnedAt = input.returnedAt
   rental.kondisiKembali = input.kondisiKembali
-  rental.status = 'completed'
+  rental.status = "completed"
   if (input.notes !== undefined) rental.notes = input.notes
 
   const vehicle = vehicles.find((v) => v.id === rental.vehicleId)
@@ -182,7 +180,7 @@ export async function createRental(input: CreateRentalInput): Promise<Rental> {
     startAt: input.startAt,
     dueAt: input.dueAt,
     returnedAt: null,
-    status: 'active',
+    status: "active",
     paketHari: input.paketHari,
     paketJam: input.paketJam,
     tarif: input.tarif,
@@ -194,7 +192,7 @@ export async function createRental(input: CreateRentalInput): Promise<Rental> {
     jaminan: input.jaminan,
     kondisiKeluar: input.kondisiKeluar,
     kondisiKembali: null,
-    notes: input.notes ?? '',
+    notes: input.notes ?? "",
   }
 
   rentals.push(rental)

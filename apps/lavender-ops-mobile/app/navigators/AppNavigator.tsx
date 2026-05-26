@@ -8,9 +8,9 @@ import { PenyewaanDetailScreen } from "@/screens/PenyewaanDetailScreen"
 import { useAppTheme } from "@/theme/context"
 
 import { MainNavigator } from "./MainNavigator"
-import { SewaBaruNavigator } from "./SewaBaruNavigator"
 import type { AppStackParamList, NavigationProps } from "./navigationTypes"
 import { navigationRef, useBackButtonHandler } from "./navigationUtilities"
+import { SewaBaruNavigator } from "./SewaBaruNavigator"
 
 const exitRoutes = Config.exitRoutes
 

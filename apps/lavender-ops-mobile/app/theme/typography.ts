@@ -15,15 +15,15 @@ export const customFontsToLoad = {
 
 const fonts = {
   publicSans: {
-    regular:  "publicSansRegular",
-    normal:   "publicSansRegular",  // alias for Ignite components that use `weight="normal"`
-    medium:   "publicSansMedium",
+    regular: "publicSansRegular",
+    normal: "publicSansRegular", // alias for Ignite components that use `weight="normal"`
+    medium: "publicSansMedium",
     semibold: "publicSansSemiBold",
-    bold:     "publicSansBold",
+    bold: "publicSansBold",
   },
   helveticaNeue: {
-    thin:   "HelveticaNeue-Thin",
-    light:  "HelveticaNeue-Light",
+    thin: "HelveticaNeue-Thin",
+    light: "HelveticaNeue-Light",
     normal: "Helvetica Neue",
     medium: "HelveticaNeue-Medium",
   },
@@ -31,8 +31,8 @@ const fonts = {
     normal: "Courier",
   },
   sansSerif: {
-    thin:   "sans-serif-thin",
-    light:  "sans-serif-light",
+    thin: "sans-serif-thin",
+    light: "sans-serif-light",
     normal: "sans-serif",
     medium: "sans-serif-medium",
   },
@@ -43,26 +43,26 @@ const fonts = {
 
 export const typography = {
   fonts,
-  primary:   fonts.publicSans,
+  primary: fonts.publicSans,
   secondary: Platform.select({ ios: fonts.helveticaNeue, android: fonts.sansSerif }),
-  code:      Platform.select({ ios: fonts.courier, android: fonts.monospace }),
+  code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
 
   // M3 type-scale presets — sized up for a 50yo primary user
   textStyles: {
-    displayLg:   { fontFamily: "publicSansBold",     fontSize: 40, lineHeight: 48 },
-    headlineLg:  { fontFamily: "publicSansSemiBold",  fontSize: 32, lineHeight: 40 },
-    headlineMd:  { fontFamily: "publicSansSemiBold",  fontSize: 24, lineHeight: 32 },
-    headlineSm:  { fontFamily: "publicSansSemiBold",  fontSize: 20, lineHeight: 28 },
-    bodyLg:      { fontFamily: "publicSansRegular",   fontSize: 18, lineHeight: 28 },
-    bodyMd:      { fontFamily: "publicSansRegular",   fontSize: 16, lineHeight: 24 },
-    labelLg:     { fontFamily: "publicSansSemiBold",  fontSize: 16, lineHeight: 20 },
-    labelMd:     { fontFamily: "publicSansMedium",    fontSize: 14, lineHeight: 18 },
+    displayLg: { fontFamily: "publicSansBold", fontSize: 40, lineHeight: 48 },
+    headlineLg: { fontFamily: "publicSansSemiBold", fontSize: 32, lineHeight: 40 },
+    headlineMd: { fontFamily: "publicSansSemiBold", fontSize: 24, lineHeight: 32 },
+    headlineSm: { fontFamily: "publicSansSemiBold", fontSize: 20, lineHeight: 28 },
+    bodyLg: { fontFamily: "publicSansRegular", fontSize: 18, lineHeight: 28 },
+    bodyMd: { fontFamily: "publicSansRegular", fontSize: 16, lineHeight: 24 },
+    labelLg: { fontFamily: "publicSansSemiBold", fontSize: 16, lineHeight: 20 },
+    labelMd: { fontFamily: "publicSansMedium", fontSize: 14, lineHeight: 18 },
   },
 
   borderRadius: {
     default: 12,
-    card:    16,
-    button:  8,
+    card: 16,
+    button: 8,
   },
 
   tapTargetMin: 48,

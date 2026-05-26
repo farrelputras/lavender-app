@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native'
-import { colors, typography, spacing } from '@/theme/tokens'
+import { View, Text, StyleSheet } from "react-native"
+
+import { colors, typography, spacing } from "@/theme/tokens"
 
 export function HutangScreen() {
   return (
@@ -11,14 +12,14 @@ export function HutangScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    alignItems: "center",
     backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
+    justifyContent: "center",
   },
   text: {
-    fontSize: typography.heading,
     color: colors.text,
+    fontSize: typography.heading,
     marginTop: spacing.base,
   },
 })

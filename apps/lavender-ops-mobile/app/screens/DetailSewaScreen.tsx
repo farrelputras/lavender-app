@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react"
 import {
   View,
   Text,
@@ -10,33 +11,45 @@ import {
   ActivityIndicator,
   Alert,
   ToastAndroid,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useState, useEffect, useRef } from 'react'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+} from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import DateTimePicker from "@react-native-community/datetimepicker"
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { SafeAreaView } from "react-native-safe-area-context"
 
-import { colors, textStyles, spacing } from '@/theme/tokens'
-import { getUserSummary, getVehicle, createRental } from '@/services/rentals'
-import type { UserSummary, Vehicle, Payment, JaminanItem, KondisiSnapshot } from '@/services/rentals/types'
-import { formatRupiah, formatHeaderDate, formatTime, initialsFromName } from '@/utils/format'
-import { composeTarif, addDuration, durationToPaket, sumPayments, isPaketValid, computeTotalBill } from '@/utils/rentalMath'
-import PembayaranSheet from '@/components/PembayaranSheet'
-import type { SewaBaruScreenProps, AppStackParamList } from '@/navigators/navigationTypes'
+import PembayaranSheet from "@/components/PembayaranSheet"
+import type { SewaBaruScreenProps, AppStackParamList } from "@/navigators/navigationTypes"
+import { getUserSummary, getVehicle, createRental } from "@/services/rentals"
+import type {
+  UserSummary,
+  Vehicle,
+  Payment,
+  JaminanItem,
+  KondisiSnapshot,
+} from "@/services/rentals/types"
+import { colors, textStyles, spacing } from "@/theme/tokens"
+import { formatRupiah, formatHeaderDate, formatTime, initialsFromName } from "@/utils/format"
+import {
+  composeTarif,
+  addDuration,
+  durationToPaket,
+  sumPayments,
+  isPaketValid,
+  computeTotalBill,
+} from "@/utils/rentalMath"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
 function parseRupiahInput(raw: string): number {
-  const n = parseInt(raw.replace(/\D/g, ''), 10)
+  const n = parseInt(raw.replace(/\D/g, ""), 10)
   return isNaN(n) ? 0 : n
 }
 
@@ -115,7 +128,7 @@ function Stepper({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'DetailSewa'>) {
+export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"DetailSewa">) {
   const { userId, vehicleId } = route.params
 
   // ─── Data loading
@@ -125,13 +138,13 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
 
   useEffect(() => {
     if (!userId || !vehicleId) {
-      showToast('Data tidak lengkap')
+      showToast("Data tidak lengkap")
       navigation.goBack()
       return
     }
     Promise.all([getUserSummary(userId), getVehicle(vehicleId)]).then(([u, v]) => {
       if (!u || !v) {
-        showToast('Data tidak ditemukan')
+        showToast("Data tidak ditemukan")
         navigation.goBack()
         return
       }
@@ -142,13 +155,13 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   }, [userId, vehicleId])
 
   // ─── Jaminan
-  const [jaminanItems, setJaminanItems] = useState<Set<JaminanItem>>(new Set(['ktp', 'ktm']))
-  const [jaminanLainnya, setJaminanLainnya] = useState('')
+  const [jaminanItems, setJaminanItems] = useState<Set<JaminanItem>>(new Set(["ktp", "ktm"]))
+  const [jaminanLainnya, setJaminanLainnya] = useState("")
   const [jaminanError, setJaminanError] = useState(false)
 
   // ─── Kondisi Keluar
   const [bensin, setBensin] = useState(4)
-  const [km, setKm] = useState('')
+  const [km, setKm] = useState("")
   const [photos, setPhotos] = useState<{ id: string; uri: string | null }[]>([])
 
   // ─── Paket Sewa
@@ -160,33 +173,33 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   const [mulai, setMulai] = useState<Date>(new Date())
   const [estimasi, setEstimasi] = useState<Date>(() => addDuration(new Date(), 1, 0))
   const [estimasiManual, setEstimasiManual] = useState(false)
-  const [pickerTarget, setPickerTarget] = useState<'mulai' | 'estimasi' | null>(null)
-  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
+  const [pickerTarget, setPickerTarget] = useState<"mulai" | "estimasi" | null>(null)
+  const [pickerMode, setPickerMode] = useState<"date" | "time">("date")
   const [pickerTempDate, setPickerTempDate] = useState<Date>(new Date())
 
   // ─── Tarif & Total
   const defaultTarif = vehicle ? composeTarif(vehicle, hari, jam) : 0
-  const [tarifRaw, setTarifRaw] = useState('')
+  const [tarifRaw, setTarifRaw] = useState("")
   const tarifValue = tarifRaw ? parseRupiahInput(tarifRaw) : defaultTarif
 
-  const [addOnDesc, setAddOnDesc] = useState('')
-  const [addOnAmountRaw, setAddOnAmountRaw] = useState('')
+  const [addOnDesc, setAddOnDesc] = useState("")
+  const [addOnAmountRaw, setAddOnAmountRaw] = useState("")
   const addOnAmount = parseRupiahInput(addOnAmountRaw)
 
-  const [discountRaw, setDiscountRaw] = useState('')
+  const [discountRaw, setDiscountRaw] = useState("")
   const discount = parseRupiahInput(discountRaw)
 
   const totalBill = computeTotalBill(tarifValue, addOnAmount, discount)
 
   // ─── Payments
-  const [payments, setPayments] = useState<Omit<Payment, 'id'>[]>([])
+  const [payments, setPayments] = useState<Omit<Payment, "id">[]>([])
   const [showPaySheet, setShowPaySheet] = useState(false)
 
   const paid = sumPayments(payments as Payment[])
   const remaining = Math.max(0, totalBill - paid)
 
   // ─── Catatan
-  const [notes, setNotes] = useState('')
+  const [notes, setNotes] = useState("")
 
   // ─── Saving
   const [saving, setSaving] = useState(false)
@@ -219,22 +232,22 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   }
 
   // ─── Datetime picker flow (two-step: date then time on Android)
-  function openPicker(target: 'mulai' | 'estimasi') {
-    const base = target === 'mulai' ? mulai : estimasi
+  function openPicker(target: "mulai" | "estimasi") {
+    const base = target === "mulai" ? mulai : estimasi
     setPickerTarget(target)
-    setPickerMode('date')
+    setPickerMode("date")
     setPickerTempDate(base)
   }
 
   function handlePickerChange(_event: unknown, date?: Date) {
     if (!date) {
-      if (Platform.OS === 'android') setPickerTarget(null)
+      if (Platform.OS === "android") setPickerTarget(null)
       return
     }
-    if (pickerMode === 'date') {
+    if (pickerMode === "date") {
       setPickerTempDate(date)
-      if (Platform.OS === 'android') {
-        setPickerMode('time')
+      if (Platform.OS === "android") {
+        setPickerMode("time")
       }
     } else {
       const merged = new Date(pickerTempDate)
@@ -245,8 +258,8 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   }
 
   function handleIOSPickerDone() {
-    if (pickerMode === 'date') {
-      setPickerMode('time')
+    if (pickerMode === "date") {
+      setPickerMode("time")
     } else {
       applyPickerResult(pickerTempDate)
       setPickerTarget(null)
@@ -254,12 +267,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   }
 
   function applyPickerResult(date: Date) {
-    if (pickerTarget === 'mulai') {
+    if (pickerTarget === "mulai") {
       setMulai(date)
       if (!estimasiManual) {
         setEstimasi(addDuration(date, hari, jam))
       }
-    } else if (pickerTarget === 'estimasi') {
+    } else if (pickerTarget === "estimasi") {
       setEstimasi(date)
       setEstimasiManual(true)
       const { hari: h, jam: j } = durationToPaket(mulai, date)
@@ -292,17 +305,17 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   function validate(): string | null {
     if (jaminanItems.size === 0) {
       setJaminanError(true)
-      return 'Pilih minimal satu jaminan'
+      return "Pilih minimal satu jaminan"
     }
     if (!isPaketValid(hari, jam)) {
       setPaketError(true)
-      return 'Durasi minimal 0 Hari 6 Jam'
+      return "Durasi minimal 0 Hari 6 Jam"
     }
     if (estimasi <= mulai) {
-      return 'Estimasi kembali harus setelah waktu mulai'
+      return "Estimasi kembali harus setelah waktu mulai"
     }
     if (tarifValue <= 0) {
-      return 'Tarif harus lebih dari 0'
+      return "Tarif harus lebih dari 0"
     }
     return null
   }
@@ -329,22 +342,22 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
         discount,
         jaminan: {
           items: Array.from(jaminanItems),
-          lainnyaDescription: jaminanItems.has('lainnya') ? jaminanLainnya : undefined,
+          lainnyaDescription: jaminanItems.has("lainnya") ? jaminanLainnya : undefined,
         },
         kondisiKeluar: {
           bensinKotak: bensin,
-          km: km.trim() ? parseInt(km.replace(/\D/g, ''), 10) : null,
+          km: km.trim() ? parseInt(km.replace(/\D/g, ""), 10) : null,
           photos,
         } as KondisiSnapshot,
         payments,
         notes,
       })
-      showToast('Penyewaan berhasil disimpan')
+      showToast("Penyewaan berhasil disimpan")
       navigation.getParent<NativeStackNavigationProp<AppStackParamList>>()?.reset({
         index: 1,
         routes: [
-          { name: 'MainTabs' },
-          { name: 'PenyewaanDetail', params: { rentalId: rental.id, justCreated: true } },
+          { name: "MainTabs" },
+          { name: "PenyewaanDetail", params: { rentalId: rental.id, justCreated: true } },
         ],
       })
     } finally {
@@ -357,24 +370,40 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
     ? userSummary.nickname
       ? `${userSummary.name} (${userSummary.nickname})`
       : userSummary.name
-    : '...'
+    : "..."
 
-  const isMotor = vehicle?.category === 'motor'
+  const isMotor = vehicle?.category === "motor"
 
   const mulaiLabel = `${formatHeaderDate(mulai)} · ${formatTime(mulai)}`
   const estimasiLabel = `${formatHeaderDate(estimasi)} · ${formatTime(estimasi)}`
 
   const tarifHint = formatRupiah(defaultTarif)
-  const tarifChanged = tarifRaw !== '' && tarifValue !== defaultTarif
+  const tarifChanged = tarifRaw !== "" && tarifValue !== defaultTarif
 
-  const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const MONTHS_SHORT = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ]
 
   function formatPayDate(d: Date) {
     return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
   }
 
   const methodLabel: Record<string, string> = {
-    cash: 'Cash', transfer: 'Transfer', qris: 'QRIS', lainnya: 'Lainnya',
+    cash: "Cash",
+    transfer: "Transfer",
+    qris: "QRIS",
+    lainnya: "Lainnya",
   }
 
   if (loading) {
@@ -386,7 +415,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {/* AppBar */}
       <View style={styles.appBar}>
         <TouchableOpacity
@@ -402,17 +431,17 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
             Langkah 3 dari 3 · Detail Sewa
           </Text>
         </View>
-        <Text style={[textStyles.labelMd, { color: colors.primary, fontWeight: '600' }]}>3/3</Text>
+        <Text style={[textStyles.labelMd, { color: colors.primary, fontWeight: "600" }]}>3/3</Text>
       </View>
 
       {/* Progress bar — 3/3 full */}
       <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '100%' }]} />
+        <View style={[styles.progressFill, { width: "100%" }]} />
       </View>
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
         <ScrollView
@@ -427,14 +456,14 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
             <View style={styles.contextRow}>
               <View style={styles.contextAvatar}>
                 <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
-                  {userSummary ? initialsFromName(userSummary.name) : '?'}
+                  {userSummary ? initialsFromName(userSummary.name) : "?"}
                 </Text>
               </View>
               <Text style={[textStyles.bodyMd, styles.contextName]} numberOfLines={1}>
                 {userDisplayName}
               </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('PilihUser')}
+                onPress={() => navigation.navigate("PilihUser")}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
@@ -445,18 +474,30 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
             <View style={styles.contextRow}>
               <View style={styles.contextVehicleIcon}>
                 <MaterialIcons
-                  name={isMotor ? 'two-wheeler' : 'directions-car'}
+                  name={isMotor ? "two-wheeler" : "directions-car"}
                   size={24}
                   color={colors.primary}
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[textStyles.bodyMd, { color: colors.onSurface, fontWeight: '500' }]} numberOfLines={1}>
-                  {vehicle?.name ?? '...'}
+                <Text
+                  style={[textStyles.bodyMd, { color: colors.onSurface, fontWeight: "500" }]}
+                  numberOfLines={1}
+                >
+                  {vehicle?.name ?? "..."}
                 </Text>
                 {vehicle && (
                   <View style={styles.plateChip}>
-                    <Text style={[textStyles.labelMd, { color: colors.onSurface, letterSpacing: 1, fontFamily: 'publicSansSemiBold' }]}>
+                    <Text
+                      style={[
+                        textStyles.labelMd,
+                        {
+                          color: colors.onSurface,
+                          letterSpacing: 1,
+                          fontFamily: "publicSansSemiBold",
+                        },
+                      ]}
+                    >
                       {vehicle.plate}
                     </Text>
                   </View>
@@ -475,7 +516,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
           <View>
             <SectionLabel>Jaminan</SectionLabel>
             <FieldCard style={jaminanError ? styles.cardError : undefined}>
-              {(['ktp', 'ktm', 'lainnya'] as JaminanItem[]).map((item) => (
+              {(["ktp", "ktm", "lainnya"] as JaminanItem[]).map((item) => (
                 <TouchableOpacity
                   key={item}
                   style={styles.checkboxRow}
@@ -488,11 +529,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                     )}
                   </View>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                    {item === 'ktp' ? 'KTP' : item === 'ktm' ? 'KTM' : 'Lainnya'}
+                    {item === "ktp" ? "KTP" : item === "ktm" ? "KTM" : "Lainnya"}
                   </Text>
                 </TouchableOpacity>
               ))}
-              {jaminanItems.has('lainnya') && (
+              {jaminanItems.has("lainnya") && (
                 <TextInput
                   style={[textStyles.bodyMd, styles.inlineInput, { marginTop: spacing.sm }]}
                   placeholder="Sebutkan jaminan lainnya..."
@@ -508,7 +549,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                 size={14}
                 color={jaminanError ? colors.error : colors.onSurfaceVariant}
               />
-              <Text style={[textStyles.labelMd, { color: jaminanError ? colors.error : colors.onSurfaceVariant }]}>
+              <Text
+                style={[
+                  textStyles.labelMd,
+                  { color: jaminanError ? colors.error : colors.onSurfaceVariant },
+                ]}
+              >
                 Minimal pilih satu jaminan
               </Text>
             </View>
@@ -522,7 +568,9 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
               <View style={styles.kondisiSection}>
                 <View style={styles.kondisiLabelRow}>
                   <MaterialIcons name="local-gas-station" size={20} color={colors.primary} />
-                  <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>Bensin (kotak)</Text>
+                  <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>
+                    Bensin (kotak)
+                  </Text>
                 </View>
                 <Stepper
                   value={bensin}
@@ -546,7 +594,9 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
               <View style={styles.kondisiSection}>
                 <View style={styles.kondisiLabelRow}>
                   <MaterialIcons name="speed" size={20} color={colors.primary} />
-                  <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>KM (opsional)</Text>
+                  <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>
+                    KM (opsional)
+                  </Text>
                 </View>
                 <View style={styles.kmInputRow}>
                   <TextInput
@@ -572,7 +622,9 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
               >
                 <TouchableOpacity style={styles.photoAdd} onPress={addPhoto} activeOpacity={0.8}>
                   <MaterialIcons name="add-a-photo" size={28} color={colors.primary} />
-                  <Text style={[textStyles.labelMd, { color: colors.primary, marginTop: 4 }]}>Tambah Foto</Text>
+                  <Text style={[textStyles.labelMd, { color: colors.primary, marginTop: 4 }]}>
+                    Tambah Foto
+                  </Text>
                 </TouchableOpacity>
                 {photos.map((p) => (
                   <View key={p.id} style={styles.photoThumb}>
@@ -598,7 +650,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
             <View style={styles.paketRow}>
               {/* Hari card */}
               <FieldCard style={styles.paketCard}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   Hari
                 </Text>
                 <Stepper
@@ -612,7 +669,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
 
               {/* Jam card */}
               <FieldCard style={styles.paketCard}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   Jam
                 </Text>
                 <View style={styles.jamSegmented}>
@@ -623,10 +685,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                       onPress={() => handleJamChange(j)}
                       activeOpacity={0.8}
                     >
-                      <Text style={[
-                        textStyles.labelMd,
-                        { color: jam === j ? colors.onPrimary : colors.onSurfaceVariant },
-                      ]}>
+                      <Text
+                        style={[
+                          textStyles.labelMd,
+                          { color: jam === j ? colors.onPrimary : colors.onSurfaceVariant },
+                        ]}
+                      >
                         {j}
                       </Text>
                     </TouchableOpacity>
@@ -640,7 +704,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                 size={14}
                 color={paketError ? colors.error : colors.onSurfaceVariant}
               />
-              <Text style={[textStyles.labelMd, { color: paketError ? colors.error : colors.onSurfaceVariant }]}>
+              <Text
+                style={[
+                  textStyles.labelMd,
+                  { color: paketError ? colors.error : colors.onSurfaceVariant },
+                ]}
+              >
                 Minimal 0 Hari 6 Jam
               </Text>
             </View>
@@ -649,14 +718,19 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
           {/* ── Waktu Sewa ───────────────────────────────────── */}
           <View>
             <SectionLabel>Waktu Sewa</SectionLabel>
-            <FieldCard style={{ padding: 0, overflow: 'hidden' }}>
+            <FieldCard style={{ padding: 0, overflow: "hidden" }}>
               <TouchableOpacity
                 style={styles.waktuRow}
-                onPress={() => openPicker('mulai')}
+                onPress={() => openPicker("mulai")}
                 activeOpacity={0.8}
               >
                 <View>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: 2 }]}>
+                  <Text
+                    style={[
+                      textStyles.labelMd,
+                      { color: colors.onSurfaceVariant, marginBottom: 2 },
+                    ]}
+                  >
                     Mulai
                   </Text>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{mulaiLabel}</Text>
@@ -666,14 +740,21 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
               <View style={styles.waktuDivider} />
               <TouchableOpacity
                 style={styles.waktuRow}
-                onPress={() => openPicker('estimasi')}
+                onPress={() => openPicker("estimasi")}
                 activeOpacity={0.8}
               >
                 <View>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: 2 }]}>
+                  <Text
+                    style={[
+                      textStyles.labelMd,
+                      { color: colors.onSurfaceVariant, marginBottom: 2 },
+                    ]}
+                  >
                     Estimasi Kembali
                   </Text>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{estimasiLabel}</Text>
+                  <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                    {estimasiLabel}
+                  </Text>
                 </View>
                 <MaterialIcons name="edit-calendar" size={22} color={colors.primary} />
               </TouchableOpacity>
@@ -688,10 +769,15 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
             {/* DateTimePicker */}
             {pickerTarget !== null && (
               <>
-                {Platform.OS === 'ios' ? (
+                {Platform.OS === "ios" ? (
                   <View style={styles.iosPickerContainer}>
-                    <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: 4 }]}>
-                      {pickerMode === 'date' ? 'Pilih Tanggal' : 'Pilih Waktu'}
+                    <Text
+                      style={[
+                        textStyles.labelMd,
+                        { color: colors.onSurfaceVariant, marginBottom: 4 },
+                      ]}
+                    >
+                      {pickerMode === "date" ? "Pilih Tanggal" : "Pilih Waktu"}
                     </Text>
                     <DateTimePicker
                       value={pickerTempDate}
@@ -703,13 +789,19 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                     />
                     <TouchableOpacity style={styles.iosPickerDone} onPress={handleIOSPickerDone}>
                       <Text style={[textStyles.labelLg, { color: colors.primary }]}>
-                        {pickerMode === 'date' ? 'Pilih Waktu →' : 'Selesai'}
+                        {pickerMode === "date" ? "Pilih Waktu →" : "Selesai"}
                       </Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
                   <DateTimePicker
-                    value={pickerMode === 'date' ? (pickerTarget === 'mulai' ? mulai : estimasi) : pickerTempDate}
+                    value={
+                      pickerMode === "date"
+                        ? pickerTarget === "mulai"
+                          ? mulai
+                          : estimasi
+                        : pickerTempDate
+                    }
                     mode={pickerMode}
                     display="default"
                     onChange={handlePickerChange}
@@ -722,7 +814,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
           {/* ── Tarif & Total ────────────────────────────────── */}
           <View>
             <FieldCard>
-              <Text style={[textStyles.headlineSm, { color: colors.onSurface, marginBottom: spacing.md }]}>
+              <Text
+                style={[
+                  textStyles.headlineSm,
+                  { color: colors.onSurface, marginBottom: spacing.md },
+                ]}
+              >
                 Tarif &amp; Total
               </Text>
 
@@ -741,7 +838,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                     returnKeyType="done"
                   />
                 </View>
-                <Text style={[textStyles.labelMd, { color: tarifChanged ? colors.primary : colors.onSurfaceVariant }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: tarifChanged ? colors.primary : colors.onSurfaceVariant },
+                  ]}
+                >
                   Tarif default: {tarifHint}
                 </Text>
               </View>
@@ -800,10 +902,15 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
           {/* ── Pembayaran ───────────────────────────────────── */}
           <View>
             <SectionLabel>Pembayaran</SectionLabel>
-            <FieldCard style={{ padding: 0, overflow: 'hidden' }}>
+            <FieldCard style={{ padding: 0, overflow: "hidden" }}>
               {payments.length === 0 ? (
                 <View style={styles.emptyPayment}>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, fontStyle: 'italic' }]}>
+                  <Text
+                    style={[
+                      textStyles.bodyMd,
+                      { color: colors.onSurfaceVariant, fontStyle: "italic" },
+                    ]}
+                  >
                     Belum ada pembayaran
                   </Text>
                 </View>
@@ -813,11 +920,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                     key={idx}
                     style={styles.paymentRow}
                     onLongPress={() => {
-                      Alert.alert('Hapus Pembayaran?', formatRupiah(p.amount), [
-                        { text: 'Batal', style: 'cancel' },
+                      Alert.alert("Hapus Pembayaran?", formatRupiah(p.amount), [
+                        { text: "Batal", style: "cancel" },
                         {
-                          text: 'Hapus',
-                          style: 'destructive',
+                          text: "Hapus",
+                          style: "destructive",
                           onPress: () => setPayments((prev) => prev.filter((_, i) => i !== idx)),
                         },
                       ])
@@ -849,21 +956,37 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="add" size={20} color={colors.primary} />
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Tambah Pembayaran</Text>
+                <Text style={[textStyles.labelLg, { color: colors.primary }]}>
+                  Tambah Pembayaran
+                </Text>
               </TouchableOpacity>
             </FieldCard>
 
             {/* Summary */}
             <View style={styles.paySummary}>
               <View style={styles.paySummaryRow}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Sudah dibayar:</Text>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>{formatRupiah(paid)}</Text>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  Sudah dibayar:
+                </Text>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  {formatRupiah(paid)}
+                </Text>
               </View>
               <View style={styles.paySummaryRow}>
-                <Text style={[textStyles.labelLg, { color: remaining > 0 ? colors.error : colors.onSuccessContainer }]}>
+                <Text
+                  style={[
+                    textStyles.labelLg,
+                    { color: remaining > 0 ? colors.error : colors.onSuccessContainer },
+                  ]}
+                >
                   Sisa:
                 </Text>
-                <Text style={[textStyles.labelLg, { color: remaining > 0 ? colors.error : colors.onSuccessContainer }]}>
+                <Text
+                  style={[
+                    textStyles.labelLg,
+                    { color: remaining > 0 ? colors.error : colors.onSuccessContainer },
+                  ]}
+                >
                   {formatRupiah(remaining)}
                 </Text>
               </View>
@@ -928,7 +1051,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<'Det
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const CARD_SHADOW = {
-  shadowColor: '#000',
+  shadowColor: "#000",
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.05,
   shadowRadius: 12,
@@ -936,37 +1059,42 @@ const CARD_SHADOW = {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  safeArea: { backgroundColor: colors.background, flex: 1 },
+  loadingContainer: {
+    alignItems: "center",
+    backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
+  },
 
   // AppBar
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
-  backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+  backBtn: { alignItems: "center", height: 40, justifyContent: "center", width: 40 },
   titleBlock: { flex: 1 },
 
   // Progress
-  progressTrack: { height: 4, backgroundColor: colors.surfaceVariant },
-  progressFill: { height: 4, backgroundColor: colors.primary },
+  progressTrack: { backgroundColor: colors.surfaceVariant, height: 4 },
+  progressFill: { backgroundColor: colors.primary, height: 4 },
 
   // Scroll
   scrollContent: {
-    padding: spacing.base,
     gap: spacing.xl,
+    padding: spacing.base,
   },
 
   // Card
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
-    padding: spacing.base,
-    borderWidth: 1,
     borderColor: colors.outlineVariant,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: spacing.base,
     ...CARD_SHADOW,
   },
   cardError: {
@@ -975,113 +1103,118 @@ const styles = StyleSheet.create({
 
   // Context bar
   contextRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.md,
   },
   contextAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    alignItems: "center",
     backgroundColor: colors.primaryContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 22,
     flexShrink: 0,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
   contextVehicleIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 12,
     flexShrink: 0,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
   contextName: {
-    flex: 1,
     color: colors.onSurface,
-    fontWeight: '500',
+    flex: 1,
+    fontWeight: "500",
   },
   contextDivider: {
-    height: 1,
     backgroundColor: colors.outlineVariant,
-    opacity: 0.5,
+    height: 1,
     marginVertical: spacing.sm,
+    opacity: 0.5,
   },
   plateChip: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     backgroundColor: colors.surfaceVariant,
-    borderWidth: 1,
     borderColor: colors.outlineVariant,
     borderRadius: 6,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    borderWidth: 1,
     marginTop: 2,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
 
   // Checkbox
   checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.sm,
     paddingVertical: spacing.sm,
   },
   checkbox: {
-    width: 22,
-    height: 22,
+    alignItems: "center",
+    borderColor: colors.outline,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: colors.outline,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 22,
+    justifyContent: "center",
+    width: 22,
   },
   checkboxChecked: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   inlineInput: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
     color: colors.onSurface,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
 
   // Caption
   caption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: 4,
     marginTop: spacing.xs,
   },
 
   // Kondisi Keluar
   kondisiSection: { gap: spacing.sm },
-  kondisiLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  kondisiDivider: { height: 1, backgroundColor: colors.outlineVariant, marginVertical: spacing.md, opacity: 0.5 },
+  kondisiLabelRow: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
+  kondisiDivider: {
+    backgroundColor: colors.outlineVariant,
+    height: 1,
+    marginVertical: spacing.md,
+    opacity: 0.5,
+  },
   bensinHint: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.xs,
     marginTop: spacing.xs,
   },
 
   kmInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    height: 52,
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
+    paddingHorizontal: spacing.md,
   },
   kmInput: {
-    flex: 1,
     color: colors.onSurface,
+    flex: 1,
     padding: 0,
   },
 
@@ -1091,81 +1224,81 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   photoAdd: {
-    width: 120,
-    height: 120,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: colors.primary,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: colors.primary,
+    borderRadius: 14,
+    borderStyle: "dashed",
+    borderWidth: 2,
+    height: 120,
+    justifyContent: "center",
+    width: 120,
   },
   photoThumb: {
-    width: 120,
-    height: 120,
-    borderRadius: 14,
-    overflow: 'hidden',
-    borderWidth: 1,
     borderColor: colors.outlineVariant,
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 120,
+    overflow: "hidden",
+    width: 120,
   },
   photoPlaceholder: {
-    flex: 1,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
+    justifyContent: "center",
   },
   photoClose: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 22,
-    height: 22,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.85)",
     borderRadius: 11,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 22,
+    justifyContent: "center",
+    position: "absolute",
+    right: 6,
+    top: 6,
+    width: 22,
   },
 
   // Stepper
   stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: spacing.xs,
   },
   stepperBtn: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 8,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
 
   // Fuel gauge
-  fuelGaugeRow: { flexDirection: 'row', gap: 2, height: 8, marginTop: spacing.xs },
-  fuelSegment: { flex: 1, borderRadius: 0 },
-  fuelSegmentFirst: { borderTopLeftRadius: 4, borderBottomLeftRadius: 4 },
-  fuelSegmentLast: { borderTopRightRadius: 4, borderBottomRightRadius: 4 },
+  fuelGaugeRow: { flexDirection: "row", gap: 2, height: 8, marginTop: spacing.xs },
+  fuelSegment: { borderRadius: 0, flex: 1 },
+  fuelSegmentFirst: { borderBottomLeftRadius: 4, borderTopLeftRadius: 4 },
+  fuelSegmentLast: { borderBottomRightRadius: 4, borderTopRightRadius: 4 },
 
   // Paket Sewa
-  paketRow: { flexDirection: 'row', gap: spacing.sm },
+  paketRow: { flexDirection: "row", gap: spacing.sm },
   paketCard: { flex: 1 },
   jamSegmented: {
-    flexDirection: 'row',
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 10,
-    padding: 3,
+    flexDirection: "row",
     gap: 2,
+    padding: 3,
   },
   jamOption: {
+    alignItems: "center",
+    borderRadius: 8,
     flex: 1,
     height: 46,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
+    justifyContent: "center",
   },
   jamOptionActive: {
     backgroundColor: colors.primary,
@@ -1173,150 +1306,150 @@ const styles = StyleSheet.create({
 
   // Waktu Sewa
   waktuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: spacing.base,
   },
-  waktuDivider: { height: 1, backgroundColor: colors.outlineVariant },
+  waktuDivider: { backgroundColor: colors.outlineVariant, height: 1 },
   iosPickerContainer: {
-    marginTop: spacing.sm,
-    padding: spacing.sm,
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
+    marginTop: spacing.sm,
+    padding: spacing.sm,
   },
   iosPickerDone: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     paddingVertical: spacing.sm,
   },
 
   // Tarif & Total form
   formField: { gap: spacing.xs },
   rupiahInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    height: 52,
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
     marginTop: spacing.xs,
+    paddingHorizontal: spacing.md,
   },
   rupiahField: {
-    flex: 1,
     color: colors.onSurface,
+    flex: 1,
     padding: 0,
   },
   textInput: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    height: 52,
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
     color: colors.onSurface,
+    height: 52,
     marginTop: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   totalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
+    alignItems: "center",
     borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: spacing.md,
     paddingTop: spacing.md,
   },
 
   // Pembayaran
   emptyPayment: {
+    alignItems: "center",
     padding: spacing.base,
-    alignItems: 'center',
   },
   paymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
     gap: spacing.md,
     padding: spacing.base,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
   },
   paymentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
   methodBadge: {
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 999,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: colors.surfaceContainer,
   },
   addPaymentBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.xs,
+    justifyContent: "center",
     padding: spacing.base,
   },
   paySummary: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
-    padding: spacing.base,
     gap: spacing.xs,
     marginTop: spacing.sm,
+    padding: spacing.base,
   },
   paySummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   // Catatan
   catatanInput: {
-    padding: spacing.base,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surfaceContainerLowest,
     color: colors.onSurface,
     minHeight: 96,
+    padding: spacing.base,
     ...CARD_SHADOW,
   },
 
   // Bottom bar
   bottomBar: {
-    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
+    flexDirection: "row",
     gap: spacing.sm,
     padding: spacing.base,
-    paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.base,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
   },
   btnBatal: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.base,
-    height: 52,
+    alignItems: "center",
+    borderColor: colors.outlineVariant,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-  },
-  btnSimpan: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
     gap: spacing.xs,
     height: 52,
-    borderRadius: 12,
+    paddingHorizontal: spacing.base,
+  },
+  btnSimpan: {
+    alignItems: "center",
     backgroundColor: colors.primary,
+    borderRadius: 12,
+    flex: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
+    height: 52,
+    justifyContent: "center",
   },
 })

@@ -120,7 +120,6 @@ const ko: Translations = {
       content: "즐겨찾기가 없습니다. 에피소드에 있는 하트를 눌러서 즐겨찾기에 추가하세요.",
     },
   },
-
 }
 
 export default ko

@@ -1,12 +1,12 @@
-export type RentalStatus = 'active' | 'completed' | 'cancelled'
+export type RentalStatus = "active" | "completed" | "cancelled"
 
-export type ReturnStatus = 'belumKembali' | 'terlambat'
+export type ReturnStatus = "belumKembali" | "terlambat"
 
-export type VehicleCategory = 'motor' | 'mobil'
+export type VehicleCategory = "motor" | "mobil"
 
-export type PaymentMethod = 'cash' | 'transfer' | 'qris' | 'lainnya'
+export type PaymentMethod = "cash" | "transfer" | "qris" | "lainnya"
 
-export type JaminanItem = 'ktp' | 'ktm' | 'lainnya'
+export type JaminanItem = "ktp" | "ktm" | "lainnya"
 
 export interface User {
   id: string
@@ -116,7 +116,7 @@ export interface CreateRentalInput {
   discount: number
   jaminan: Jaminan
   kondisiKeluar: KondisiSnapshot
-  payments: Omit<Payment, 'id'>[]
+  payments: Omit<Payment, "id">[]
   notes?: string
 }
 

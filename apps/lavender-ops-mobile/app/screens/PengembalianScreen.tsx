@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import {
   View,
   Text,
@@ -10,53 +11,52 @@ import {
   ToastAndroid,
   ActivityIndicator,
   KeyboardAvoidingView,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useState, useEffect } from 'react'
-import DateTimePicker from '@react-native-community/datetimepicker'
+} from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import DateTimePicker from "@react-native-community/datetimepicker"
+import { SafeAreaView } from "react-native-safe-area-context"
 
-import { colors, textStyles, spacing } from '@/theme/tokens'
-import { getRental, getUserSummary, getVehicle, closeRental } from '@/services/rentals'
-import type { CloseRentalInput } from '@/services/rentals'
-import type { Rental, UserSummary, Vehicle, Payment } from '@/services/rentals/types'
-import { formatRupiah, formatHeaderDate, formatTime } from '@/utils/format'
+import PembayaranSheet from "@/components/PembayaranSheet"
+import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { getRental, getUserSummary, getVehicle, closeRental } from "@/services/rentals"
+import type { CloseRentalInput } from "@/services/rentals"
+import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
+import { colors, textStyles, spacing } from "@/theme/tokens"
+import { formatRupiah, formatHeaderDate, formatTime } from "@/utils/format"
 import {
   sumPayments,
   hoursLate,
   computeFuelAdjustment,
   computeReturnTotal,
-} from '@/utils/rentalMath'
-import PembayaranSheet from '@/components/PembayaranSheet'
-import type { AppStackScreenProps } from '@/navigators/navigationTypes'
+} from "@/utils/rentalMath"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
 function parseRupiahInput(raw: string): number {
-  const cleaned = raw.replace(/[^\d-]/g, '')
+  const cleaned = raw.replace(/[^\d-]/g, "")
   const n = parseInt(cleaned, 10)
   return isNaN(n) ? 0 : n
 }
 
 function displayRupiah(digits: string): string {
-  if (!digits) return ''
+  if (!digits) return ""
   const n = parseRupiahInput(digits)
-  if (n === 0 && digits === '') return ''
-  const sign = n < 0 ? '−' : ''
-  return sign + new Intl.NumberFormat('id-ID').format(Math.abs(n))
+  if (n === 0 && digits === "") return ""
+  const sign = n < 0 ? "−" : ""
+  return sign + new Intl.NumberFormat("id-ID").format(Math.abs(n))
 }
 
 type ExtraFee = { id: string; description: string; rawAmount: string }
 
-const JAMINAN_LABELS: Record<string, string> = { ktp: 'KTP', ktm: 'KTM', lainnya: 'Lainnya' }
+const JAMINAN_LABELS: Record<string, string> = { ktp: "KTP", ktm: "KTM", lainnya: "Lainnya" }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -119,7 +119,12 @@ function Stepper({
           color={value <= min ? colors.outlineVariant : colors.primary}
         />
       </TouchableOpacity>
-      <Text style={[textStyles.headlineSm, { color: colors.onSurface, minWidth: 72, textAlign: 'center' }]}>
+      <Text
+        style={[
+          textStyles.headlineSm,
+          { color: colors.onSurface, minWidth: 72, textAlign: "center" },
+        ]}
+      >
         {label}
       </Text>
       <TouchableOpacity
@@ -140,7 +145,7 @@ function Stepper({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'Pengembalian'>) {
+export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"Pengembalian">) {
   const { rentalId } = route.params
 
   const [rental, setRental] = useState<Rental | null>(null)
@@ -151,26 +156,26 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
   // ── Waktu Kembali ─────────────────────────────────────────────────────────
   const [returnedAt, setReturnedAt] = useState<Date>(() => new Date())
   const [pickerActive, setPickerActive] = useState(false)
-  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
+  const [pickerMode, setPickerMode] = useState<"date" | "time">("date")
   const [pickerTempDate, setPickerTempDate] = useState<Date>(() => new Date())
 
   // ── Kondisi Kembali ───────────────────────────────────────────────────────
   const [bensinKembali, setBensinKembali] = useState(4)
-  const [rawHarga, setRawHarga] = useState('5000')
-  const [kmKembali, setKmKembali] = useState('')
+  const [rawHarga, setRawHarga] = useState("5000")
+  const [kmKembali, setKmKembali] = useState("")
 
   // ── Rincian Biaya ─────────────────────────────────────────────────────────
-  const [rawSubtotal, setRawSubtotal] = useState('')
+  const [rawSubtotal, setRawSubtotal] = useState("")
   const [extraFees, setExtraFees] = useState<ExtraFee[]>([])
   const [showDiscount, setShowDiscount] = useState(false)
-  const [rawDiscount, setRawDiscount] = useState('')
+  const [rawDiscount, setRawDiscount] = useState("")
 
   // ── Pembayaran ────────────────────────────────────────────────────────────
-  const [pendingPayments, setPendingPayments] = useState<Omit<Payment, 'id'>[]>([])
+  const [pendingPayments, setPendingPayments] = useState<Omit<Payment, "id">[]>([])
   const [showPaySheet, setShowPaySheet] = useState(false)
 
   // ── Catatan ───────────────────────────────────────────────────────────────
-  const [notes, setNotes] = useState('')
+  const [notes, setNotes] = useState("")
 
   // ── Saving ────────────────────────────────────────────────────────────────
   const [saving, setSaving] = useState(false)
@@ -178,7 +183,10 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
   useEffect(() => {
     async function load() {
       const r = await getRental(rentalId)
-      if (!r) { setLoading(false); return }
+      if (!r) {
+        setLoading(false)
+        return
+      }
       const [u, v] = await Promise.all([getUserSummary(r.userId), getVehicle(r.vehicleId)])
       setRental(r)
       setUser(u)
@@ -215,7 +223,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
   // ── DateTime picker handlers ───────────────────────────────────────────────
   function openPicker() {
     setPickerTempDate(returnedAt)
-    setPickerMode('date')
+    setPickerMode("date")
     setPickerActive(true)
   }
 
@@ -224,11 +232,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
       setPickerActive(false)
       return
     }
-    if (pickerMode === 'date') {
+    if (pickerMode === "date") {
       const combined = new Date(pickerTempDate)
       combined.setFullYear(selected.getFullYear(), selected.getMonth(), selected.getDate())
       setPickerTempDate(combined)
-      if (Platform.OS === 'android') setPickerMode('time')
+      if (Platform.OS === "android") setPickerMode("time")
     } else {
       const combined = new Date(pickerTempDate)
       combined.setHours(selected.getHours(), selected.getMinutes(), 0, 0)
@@ -238,8 +246,8 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
   }
 
   function handleIosPickerDone() {
-    if (pickerMode === 'date') {
-      setPickerMode('time')
+    if (pickerMode === "date") {
+      setPickerMode("time")
     } else {
       setReturnedAt(new Date(pickerTempDate))
       setPickerActive(false)
@@ -248,21 +256,18 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
   // ── Extra fees ────────────────────────────────────────────────────────────
   function addExtraFee() {
-    setExtraFees((prev) => [
-      ...prev,
-      { id: String(Date.now()), description: '', rawAmount: '' },
-    ])
+    setExtraFees((prev) => [...prev, { id: String(Date.now()), description: "", rawAmount: "" }])
   }
 
   function removeExtraFee(feeId: string) {
     setExtraFees((prev) => prev.filter((f) => f.id !== feeId))
   }
 
-  function updateExtraFee(feeId: string, field: 'description' | 'rawAmount', value: string) {
+  function updateExtraFee(feeId: string, field: "description" | "rawAmount", value: string) {
     setExtraFees((prev) =>
       prev.map((f) =>
         f.id === feeId
-          ? { ...f, [field]: field === 'rawAmount' ? value.replace(/\D/g, '') : value }
+          ? { ...f, [field]: field === "rawAmount" ? value.replace(/\D/g, "") : value }
           : f,
       ),
     )
@@ -270,11 +275,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
   // ── Fuel suggestion Terapkan ──────────────────────────────────────────────
   function applyFuelSuggestion() {
-    if (!fuelAdj || fuelAdj.direction === 'none') return
-    const signed = fuelAdj.direction === 'add' ? fuelAdj.deltaRupiah : -fuelAdj.deltaRupiah
+    if (!fuelAdj || fuelAdj.direction === "none") return
+    const signed = fuelAdj.direction === "add" ? fuelAdj.deltaRupiah : -fuelAdj.deltaRupiah
     setExtraFees((prev) => [
       ...prev,
-      { id: String(Date.now()), description: 'Bensin', rawAmount: String(signed) },
+      { id: String(Date.now()), description: "Bensin", rawAmount: String(signed) },
     ])
   }
 
@@ -298,9 +303,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
         newPayments: pendingPayments,
       }
       await closeRental(rental.id, input)
-      navigation.replace('PenyewaanDetail', { rentalId: rental.id, justClosed: true })
+      navigation.replace("PenyewaanDetail", { rentalId: rental.id, justClosed: true })
     } catch {
-      showToast('Gagal menyimpan pengembalian')
+      showToast("Gagal menyimpan pengembalian")
       setSaving(false)
     }
   }
@@ -308,7 +313,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
   // ── Render guards ─────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
@@ -318,7 +323,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
   if (!rental || !user || !vehicle) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         <View style={styles.centered}>
           <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
             Data penyewaan tidak ditemukan.
@@ -332,22 +337,29 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
   // ── JSX ───────────────────────────────────────────────────────────────────
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={0}
       >
         {/* ── AppBar ─────────────────────────────────────────────────── */}
         <View style={styles.appBar}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
             <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
           <View style={styles.appBarTitle}>
             <Text style={[textStyles.labelLg, { color: colors.onSurface }]} numberOfLines={1}>
               Proses Pengembalian
             </Text>
-            <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
+            <Text
+              style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}
+              numberOfLines={1}
+            >
               {subtitle}
             </Text>
           </View>
@@ -364,9 +376,16 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
             <FieldCard>
               {/* Mulai (read-only) */}
               <View style={styles.timeRow}>
-                <MaterialIcons name="schedule" size={20} color={colors.onSurfaceVariant} style={{ marginTop: 2 }} />
+                <MaterialIcons
+                  name="schedule"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                  style={{ marginTop: 2 }}
+                />
                 <View style={{ flex: 1 }}>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Mulai</Text>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                    Mulai
+                  </Text>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
                     {formatHeaderDate(rental.startAt)} · {formatTime(rental.startAt)}
                   </Text>
@@ -377,9 +396,16 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
               {/* Kembali (editable) */}
               <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
-                <MaterialIcons name="event" size={20} color={colors.primary} style={{ marginTop: 2 }} />
+                <MaterialIcons
+                  name="event"
+                  size={20}
+                  color={colors.primary}
+                  style={{ marginTop: 2 }}
+                />
                 <View style={{ flex: 1 }}>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kembali</Text>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                    Kembali
+                  </Text>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
                     {formatHeaderDate(returnedAt)} · {formatTime(returnedAt)}
                   </Text>
@@ -397,21 +423,28 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
               )}
 
               {/* iOS: inline picker with Done button */}
-              {pickerActive && Platform.OS === 'ios' && (
+              {pickerActive && Platform.OS === "ios" && (
                 <View style={styles.iosPickerContainer}>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: 4 }]}>
-                    {pickerMode === 'date' ? 'Pilih Tanggal' : 'Pilih Jam'}
+                  <Text
+                    style={[
+                      textStyles.labelMd,
+                      { color: colors.onSurfaceVariant, marginBottom: 4 },
+                    ]}
+                  >
+                    {pickerMode === "date" ? "Pilih Tanggal" : "Pilih Jam"}
                   </Text>
                   <DateTimePicker
                     value={pickerTempDate}
                     mode={pickerMode}
                     display="spinner"
-                    onChange={(_e, d) => { if (d) setPickerTempDate(d) }}
+                    onChange={(_e, d) => {
+                      if (d) setPickerTempDate(d)
+                    }}
                     locale="id-ID"
                   />
                   <TouchableOpacity style={styles.iosPickerDone} onPress={handleIosPickerDone}>
                     <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
-                      {pickerMode === 'date' ? 'Pilih Jam →' : 'Selesai'}
+                      {pickerMode === "date" ? "Pilih Jam →" : "Selesai"}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -419,7 +452,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
             </FieldCard>
 
             {/* Android: picker outside the card */}
-            {pickerActive && Platform.OS === 'android' && (
+            {pickerActive && Platform.OS === "android" && (
               <DateTimePicker
                 value={pickerTempDate}
                 mode={pickerMode}
@@ -435,7 +468,12 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
             <FieldCard>
               {/* Bensin stepper */}
               <View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   Bensin Kembali
                 </Text>
                 <Stepper
@@ -445,7 +483,12 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                   label={`${bensinKembali} kotak`}
                 />
                 <FuelGauge value={bensinKembali} />
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginTop: spacing.xs },
+                  ]}
+                >
                   Saat keluar: {rental.kondisiKeluar.bensinKotak} kotak
                 </Text>
               </View>
@@ -454,7 +497,12 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
               {/* Harga bensin per kotak */}
               <View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   Harga bensin / kotak
                 </Text>
                 <View style={styles.inputRow}>
@@ -462,14 +510,19 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                   <TextInput
                     style={[textStyles.bodyMd, styles.inlineInput]}
                     value={displayRupiah(rawHarga)}
-                    onChangeText={(t) => setRawHarga(t.replace(/\D/g, ''))}
+                    onChangeText={(t) => setRawHarga(t.replace(/\D/g, ""))}
                     keyboardType="numeric"
                     returnKeyType="done"
                     placeholder="5.000"
                     placeholderTextColor={colors.outlineVariant}
                   />
                 </View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginTop: spacing.xs },
+                  ]}
+                >
                   Dipakai untuk menghitung saran penyesuaian tarif.
                 </Text>
               </View>
@@ -478,29 +531,37 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
               {/* KM */}
               <View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   KM Kembali (opsional)
                 </Text>
                 <View style={styles.inputRow}>
                   <TextInput
                     style={[textStyles.bodyMd, styles.inlineInput]}
                     value={kmKembali}
-                    onChangeText={(t) => setKmKembali(t.replace(/\D/g, ''))}
+                    onChangeText={(t) => setKmKembali(t.replace(/\D/g, ""))}
                     keyboardType="numeric"
                     returnKeyType="done"
                     placeholder={
-                      rental.kondisiKeluar.km != null
-                        ? String(rental.kondisiKeluar.km + 1)
-                        : '—'
+                      rental.kondisiKeluar.km != null ? String(rental.kondisiKeluar.km + 1) : "—"
                     }
                     placeholderTextColor={colors.outlineVariant}
                   />
                   <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>km</Text>
                 </View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginTop: spacing.xs },
+                  ]}
+                >
                   {rental.kondisiKeluar.km != null
-                    ? `Saat keluar: ${rental.kondisiKeluar.km.toLocaleString('id-ID')} km`
-                    : 'Boleh dikosongkan.'}
+                    ? `Saat keluar: ${rental.kondisiKeluar.km.toLocaleString("id-ID")} km`
+                    : "Boleh dikosongkan."}
                 </Text>
               </View>
 
@@ -508,16 +569,23 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 
               {/* Photo strip (stub) */}
               <View>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginBottom: spacing.sm }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
+                  ]}
+                >
                   Foto Kondisi Kembali
                 </Text>
                 <TouchableOpacity
                   style={styles.photoAddTile}
-                  onPress={() => showToast('Foto belum tersedia di demo')}
+                  onPress={() => showToast("Foto belum tersedia di demo")}
                   activeOpacity={0.7}
                 >
                   <MaterialIcons name="add-a-photo" size={24} color={colors.onSurfaceVariant} />
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}>
+                  <Text
+                    style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}
+                  >
                     Tambah Foto
                   </Text>
                 </TouchableOpacity>
@@ -539,7 +607,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                   <TextInput
                     style={[textStyles.bodyMd, styles.amountInput]}
                     value={displayRupiah(rawSubtotal)}
-                    onChangeText={(t) => setRawSubtotal(t.replace(/\D/g, ''))}
+                    onChangeText={(t) => setRawSubtotal(t.replace(/\D/g, ""))}
                     keyboardType="numeric"
                     returnKeyType="done"
                     textAlign="right"
@@ -550,18 +618,22 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
               </View>
 
               {/* Fuel suggestion row */}
-              {fuelAdj && fuelAdj.direction !== 'none' && (
+              {fuelAdj && fuelAdj.direction !== "none" && (
                 <View style={styles.fuelSuggestionRow}>
                   <View style={styles.fuelSuggestionIcon}>
-                    <MaterialIcons name="local-gas-station" size={20} color={colors.onWarningContainer} />
+                    <MaterialIcons
+                      name="local-gas-station"
+                      size={20}
+                      color={colors.onWarningContainer}
+                    />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                      Bensin {fuelAdj.direction === 'add' ? 'kurang' : 'lebih'}{' '}
+                      Bensin {fuelAdj.direction === "add" ? "kurang" : "lebih"}{" "}
                       {Math.abs(fuelAdj.selisih)} kotak
                     </Text>
                     <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                      saran {fuelAdj.direction === 'add' ? '+' : '−'}
+                      saran {fuelAdj.direction === "add" ? "+" : "−"}
                       {formatRupiah(fuelAdj.deltaRupiah)}
                     </Text>
                   </View>
@@ -583,7 +655,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                   <TextInput
                     style={[textStyles.bodyMd, styles.extraFeeDesc]}
                     value={fee.description}
-                    onChangeText={(t) => updateExtraFee(fee.id, 'description', t)}
+                    onChangeText={(t) => updateExtraFee(fee.id, "description", t)}
                     placeholder="Deskripsi biaya..."
                     placeholderTextColor={colors.outlineVariant}
                     returnKeyType="next"
@@ -593,7 +665,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                     <TextInput
                       style={[textStyles.bodyMd, styles.amountInput]}
                       value={displayRupiah(fee.rawAmount)}
-                      onChangeText={(t) => updateExtraFee(fee.id, 'rawAmount', t)}
+                      onChangeText={(t) => updateExtraFee(fee.id, "rawAmount", t)}
                       keyboardType="numeric"
                       returnKeyType="done"
                       textAlign="right"
@@ -601,7 +673,10 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                       placeholderTextColor={colors.outlineVariant}
                     />
                   </View>
-                  <TouchableOpacity onPress={() => removeExtraFee(fee.id)} style={{ paddingLeft: spacing.sm }}>
+                  <TouchableOpacity
+                    onPress={() => removeExtraFee(fee.id)}
+                    style={{ paddingLeft: spacing.sm }}
+                  >
                     <MaterialIcons name="delete-outline" size={20} color={colors.error} />
                   </TouchableOpacity>
                 </View>
@@ -614,11 +689,13 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                     Diskon
                   </Text>
                   <View style={styles.amountInputRow}>
-                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>− Rp</Text>
+                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
+                      − Rp
+                    </Text>
                     <TextInput
                       style={[textStyles.bodyMd, styles.amountInput]}
                       value={displayRupiah(rawDiscount)}
-                      onChangeText={(t) => setRawDiscount(t.replace(/\D/g, ''))}
+                      onChangeText={(t) => setRawDiscount(t.replace(/\D/g, ""))}
                       keyboardType="numeric"
                       returnKeyType="done"
                       textAlign="right"
@@ -627,7 +704,10 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                     />
                   </View>
                   <TouchableOpacity
-                    onPress={() => { setShowDiscount(false); setRawDiscount('') }}
+                    onPress={() => {
+                      setShowDiscount(false)
+                      setRawDiscount("")
+                    }}
                     style={{ paddingLeft: spacing.sm }}
                   >
                     <MaterialIcons name="delete-outline" size={20} color={colors.error} />
@@ -641,7 +721,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                 <Text style={[textStyles.labelLg, { color: colors.primary }]}>Tambah Biaya</Text>
               </TouchableOpacity>
               {!showDiscount && (
-                <TouchableOpacity style={styles.addLineBtn} onPress={() => setShowDiscount(true)} activeOpacity={0.7}>
+                <TouchableOpacity
+                  style={styles.addLineBtn}
+                  onPress={() => setShowDiscount(true)}
+                  activeOpacity={0.7}
+                >
                   <MaterialIcons name="add" size={18} color={colors.primary} />
                   <Text style={[textStyles.labelLg, { color: colors.primary }]}>Diskon</Text>
                 </TouchableOpacity>
@@ -664,10 +748,15 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
           {/* ── 4. Pembayaran ──────────────────────────────────────── */}
           <View>
             <SectionLabel>Pembayaran</SectionLabel>
-            <View style={[styles.card, { padding: 0, overflow: 'hidden', gap: 0 }]}>
+            <View style={[styles.card, { padding: 0, overflow: "hidden", gap: 0 }]}>
               {rental.payments.length === 0 && pendingPayments.length === 0 ? (
                 <View style={styles.emptyPayment}>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, fontStyle: 'italic' }]}>
+                  <Text
+                    style={[
+                      textStyles.bodyMd,
+                      { color: colors.onSurfaceVariant, fontStyle: "italic" },
+                    ]}
+                  >
                     Belum ada pembayaran
                   </Text>
                 </View>
@@ -688,13 +777,18 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                       </View>
                       <View style={styles.methodBadge}>
                         <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                          {p.method === 'lainnya' ? (p.methodDescription ?? 'Lainnya') : p.method.toUpperCase()}
+                          {p.method === "lainnya"
+                            ? (p.methodDescription ?? "Lainnya")
+                            : p.method.toUpperCase()}
                         </Text>
                       </View>
                     </View>
                   ))}
                   {pendingPayments.map((p, i) => (
-                    <View key={`pending-${i}`} style={[styles.paymentRow, { backgroundColor: colors.surfaceContainerLow }]}>
+                    <View
+                      key={`pending-${i}`}
+                      style={[styles.paymentRow, { backgroundColor: colors.surfaceContainerLow }]}
+                    >
                       <View style={styles.paymentIcon}>
                         <MaterialIcons name="payments" size={20} color={colors.primary} />
                       </View>
@@ -708,7 +802,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                       </View>
                       <View style={styles.methodBadge}>
                         <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                          {p.method === 'lainnya' ? (p.methodDescription ?? 'Lainnya') : p.method.toUpperCase()}
+                          {p.method === "lainnya"
+                            ? (p.methodDescription ?? "Lainnya")
+                            : p.method.toUpperCase()}
                         </Text>
                       </View>
                     </View>
@@ -721,7 +817,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="add" size={20} color={colors.primary} />
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Tambah Pembayaran</Text>
+                <Text style={[textStyles.labelLg, { color: colors.primary }]}>
+                  Tambah Pembayaran
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -736,10 +834,20 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
                 </Text>
               </View>
               <View style={styles.paySummaryRow}>
-                <Text style={[textStyles.labelLg, { color: sisa > 0 ? colors.error : colors.onSuccessContainer }]}>
+                <Text
+                  style={[
+                    textStyles.labelLg,
+                    { color: sisa > 0 ? colors.error : colors.onSuccessContainer },
+                  ]}
+                >
                   Sisa:
                 </Text>
-                <Text style={[textStyles.labelLg, { color: sisa > 0 ? colors.error : colors.onSuccessContainer }]}>
+                <Text
+                  style={[
+                    textStyles.labelLg,
+                    { color: sisa > 0 ? colors.error : colors.onSuccessContainer },
+                  ]}
+                >
                   {formatRupiah(sisa)}
                 </Text>
               </View>
@@ -749,20 +857,30 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
           {/* ── 5. Status Jaminan ──────────────────────────────────── */}
           <View>
             <SectionLabel>Status Jaminan</SectionLabel>
-            <View style={[
-              styles.jaminanBanner,
-              { backgroundColor: sisa > 0 ? colors.warningContainer : colors.successContainer },
-            ]}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+            <View
+              style={[
+                styles.jaminanBanner,
+                { backgroundColor: sisa > 0 ? colors.warningContainer : colors.successContainer },
+              ]}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
                 <MaterialIcons
-                  name={sisa > 0 ? 'warning-amber' : 'check-circle'}
+                  name={sisa > 0 ? "warning-amber" : "check-circle"}
                   size={20}
                   color={sisa > 0 ? colors.onWarningContainer : colors.onSuccessContainer}
                 />
-                <Text style={[textStyles.labelLg, { color: sisa > 0 ? colors.onWarningContainer : colors.onSuccessContainer, flex: 1 }]}>
+                <Text
+                  style={[
+                    textStyles.labelLg,
+                    {
+                      color: sisa > 0 ? colors.onWarningContainer : colors.onSuccessContainer,
+                      flex: 1,
+                    },
+                  ]}
+                >
                   {sisa > 0
                     ? `Jaminan ditahan — akan dibuat Hutang ${formatRupiah(sisa)}`
-                    : 'Jaminan bisa dikembalikan'}
+                    : "Jaminan bisa dikembalikan"}
                 </Text>
               </View>
 
@@ -779,7 +897,12 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
               )}
 
               {sisa > 0 && (
-                <Text style={[textStyles.labelMd, { color: colors.onWarningContainer, marginTop: spacing.xs }]}>
+                <Text
+                  style={[
+                    textStyles.labelMd,
+                    { color: colors.onWarningContainer, marginTop: spacing.xs },
+                  ]}
+                >
                   Hutang otomatis dibuat saat pengembalian disimpan.
                 </Text>
               )}
@@ -818,7 +941,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
               <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
-                {sisa > 0 ? 'Selesaikan & Buat Hutang' : 'Selesaikan Pengembalian'}
+                {sisa > 0 ? "Selesaikan & Buat Hutang" : "Selesaikan Pengembalian"}
               </Text>
             )}
           </TouchableOpacity>
@@ -841,7 +964,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<'P
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const CARD_SHADOW = {
-  shadowColor: '#000',
+  shadowColor: "#000",
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.05,
   shadowRadius: 12,
@@ -850,31 +973,31 @@ const CARD_SHADOW = {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: colors.background,
+    flex: 1,
   },
   centered: {
+    alignItems: "center",
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 
   // AppBar
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
   },
   backBtn: {
-    width: 40,
+    alignItems: "center",
     height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
     marginRight: spacing.sm,
+    width: 40,
   },
   appBarTitle: {
     flex: 1,
@@ -882,46 +1005,46 @@ const styles = StyleSheet.create({
 
   // Scroll content
   scrollContent: {
-    padding: spacing.base,
     gap: spacing.md,
+    padding: spacing.base,
   },
 
   // Card
   card: {
     backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: spacing.base,
     gap: spacing.md,
+    padding: spacing.base,
     ...CARD_SHADOW,
   },
 
   // Divider
   rowDivider: {
-    height: 1,
     backgroundColor: colors.outlineVariant,
+    height: 1,
     marginVertical: 0,
   },
 
   // Time row (Waktu Sewa section)
   timeRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
+    flexDirection: "row",
     gap: spacing.sm,
   },
 
   // Generic row
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     minHeight: 40,
   },
 
   // Late caption
   lateCaption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.xs,
     paddingTop: spacing.sm,
   },
@@ -930,21 +1053,21 @@ const styles = StyleSheet.create({
   iosPickerContainer: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
-    padding: spacing.base,
     marginTop: spacing.sm,
+    padding: spacing.base,
   },
   iosPickerDone: {
-    marginTop: spacing.sm,
+    alignSelf: "flex-end",
     backgroundColor: colors.primary,
     borderRadius: 8,
-    paddingVertical: spacing.sm,
+    marginTop: spacing.sm,
     paddingHorizontal: spacing.base,
-    alignSelf: 'flex-end',
+    paddingVertical: spacing.sm,
   },
 
   // Fuel gauge
   fuelGaugeRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: spacing.sm,
   },
   fuelSegment: {
@@ -953,156 +1076,156 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
   },
   fuelSegmentFirst: {
-    borderTopLeftRadius: 6,
     borderBottomLeftRadius: 6,
+    borderTopLeftRadius: 6,
   },
   fuelSegmentLast: {
-    borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
+    borderTopRightRadius: 6,
   },
 
   // Stepper
   stepperRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   stepperBtn: {
-    width: 40,
-    height: 40,
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceContainerLowest,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
 
   // Inline inputs
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
+    alignItems: "center",
     backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    paddingHorizontal: spacing.sm,
+    flexDirection: "row",
+    gap: spacing.xs,
     height: 48,
+    paddingHorizontal: spacing.sm,
   },
   inlineInput: {
-    flex: 1,
     color: colors.onSurface,
+    flex: 1,
     minHeight: 48,
   },
 
   // Photo stub
   photoAddTile: {
-    width: 96,
-    height: 96,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: colors.outlineVariant,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
+    borderColor: colors.outlineVariant,
+    borderRadius: 8,
+    borderStyle: "dashed",
+    borderWidth: 1.5,
+    height: 96,
+    justifyContent: "center",
+    width: 96,
   },
 
   // Amount input
   amountInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
+    alignItems: "center",
+    backgroundColor: colors.surface,
     borderColor: colors.outlineVariant,
     borderRadius: 8,
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.sm,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 4,
     height: 40,
     minWidth: 140,
+    paddingHorizontal: spacing.sm,
   },
   amountInput: {
     color: colors.onSurface,
     flex: 1,
-    textAlign: 'right',
     paddingVertical: 0,
+    textAlign: "right",
   },
 
   // Fuel suggestion row
   fuelSuggestionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+    alignItems: "center",
     backgroundColor: colors.warningContainer,
     borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
     padding: spacing.sm,
   },
   fuelSuggestionIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    alignItems: "center",
     backgroundColor: colors.warningContainer,
-    borderWidth: 1,
     borderColor: colors.onWarningContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: "center",
     opacity: 0.8,
+    width: 36,
   },
   terapkanBtn: {
+    alignItems: "center",
     backgroundColor: colors.tertiaryContainer,
     borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 36,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    minHeight: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   // Extra fee row
   extraFeeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.sm,
   },
   extraFeeDesc: {
-    flex: 1,
-    color: colors.onSurface,
-    borderBottomWidth: 1,
     borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    color: colors.onSurface,
+    flex: 1,
     paddingVertical: spacing.xs,
   },
 
   // Add biaya / diskon buttons
   addLineBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    height: 44,
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    backgroundColor: colors.surface,
+    flexDirection: "row",
+    gap: spacing.xs,
+    height: 44,
+    justifyContent: "center",
   },
 
   // Payment rows
   paymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
-    gap: spacing.sm,
   },
   paymentIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
   },
   methodBadge: {
     backgroundColor: colors.surfaceContainer,
@@ -1111,48 +1234,48 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   addPaymentBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.xs,
+    justifyContent: "center",
     paddingVertical: spacing.md,
   },
   emptyPayment: {
+    alignItems: "center",
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
-    alignItems: 'center',
   },
 
   // Sisa summary
   paySummary: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
-    padding: spacing.base,
     gap: spacing.xs,
     marginTop: spacing.sm,
+    padding: spacing.base,
   },
   paySummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   // Jaminan banner
   jaminanBanner: {
     borderRadius: 12,
-    padding: spacing.base,
     gap: spacing.sm,
+    padding: spacing.base,
   },
   jaminanChips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.xs,
   },
   jaminanChip: {
     backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
@@ -1165,24 +1288,24 @@ const styles = StyleSheet.create({
 
   // Bottom bar
   bottomBar: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
+    elevation: 4,
+    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.base,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 4,
   },
   btnSelesai: {
+    alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 12,
     height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   btnDisabled: {
     opacity: 0.6,

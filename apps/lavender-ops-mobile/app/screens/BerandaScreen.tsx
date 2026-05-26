@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react"
 import {
   View,
   Text,
@@ -8,26 +9,26 @@ import {
   Platform,
   Alert,
   ToastAndroid,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useState, useCallback } from 'react'
-import { useNavigation } from '@react-navigation/native'
-import { useFocusEffect } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { colors, textStyles, borderRadius, spacing } from '@/theme/tokens'
-import { getDashboardSummary, getRentalsDueToday } from '@/services/rentals'
-import type { DashboardSummary, RentalDueToday } from '@/services/rentals/types'
-import { formatHeaderDate, formatTime, formatRupiah } from '@/utils/format'
-import type { AppStackParamList } from '@/navigators/navigationTypes'
+} from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect } from "@react-navigation/native"
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+import type { AppStackParamList } from "@/navigators/navigationTypes"
+import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
+import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
+import { colors, textStyles, borderRadius, spacing } from "@/theme/tokens"
+import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
@@ -67,29 +68,20 @@ export function BerandaScreen() {
   if (!summary) return null
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.avatar}>
             <MaterialIcons name="person" size={24} color={colors.onPrimary} />
           </View>
           <View style={styles.headerTextBlock}>
-            <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>
-              Halo!
-            </Text>
+            <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Halo!</Text>
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
               {formatHeaderDate(now)} • {formatTime(now)}
             </Text>
           </View>
-          <MaterialIcons
-            name="notifications"
-            size={24}
-            color={colors.onSurfaceVariant}
-          />
+          <MaterialIcons name="notifications" size={24} color={colors.onSurfaceVariant} />
         </View>
 
         {/* Quick Actions */}
@@ -97,22 +89,18 @@ export function BerandaScreen() {
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnFilled]}
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('SewaBaru', { screen: 'PilihUser' })}
+            onPress={() => navigation.navigate("SewaBaru", { screen: "PilihUser" })}
           >
             <MaterialIcons name="add-circle" size={28} color={colors.onPrimary} />
-            <Text style={[textStyles.headlineSm, { color: colors.onPrimary }]}>
-              Sewa Baru
-            </Text>
+            <Text style={[textStyles.headlineSm, { color: colors.onPrimary }]}>Sewa Baru</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnOutlined]}
             activeOpacity={0.8}
-            onPress={() => showToast('Belum tersedia di demo')}
+            onPress={() => showToast("Belum tersedia di demo")}
           >
             <MaterialIcons name="person-add" size={28} color={colors.primary} />
-            <Text style={[textStyles.headlineSm, { color: colors.primary }]}>
-              User Baru
-            </Text>
+            <Text style={[textStyles.headlineSm, { color: colors.primary }]}>User Baru</Text>
           </TouchableOpacity>
         </View>
 
@@ -139,11 +127,8 @@ export function BerandaScreen() {
             <TouchableOpacity
               key={item.rentalId}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('PenyewaanDetail', { rentalId: item.rentalId })}
-              style={[
-                styles.rentalCard,
-                item.status === 'terlambat' && styles.rentalCardOverdue,
-              ]}
+              onPress={() => navigation.navigate("PenyewaanDetail", { rentalId: item.rentalId })}
+              style={[styles.rentalCard, item.status === "terlambat" && styles.rentalCardOverdue]}
             >
               {/* Row 1: customer name + status chip */}
               <View style={styles.cardRow}>
@@ -156,9 +141,7 @@ export function BerandaScreen() {
                 <View
                   style={[
                     styles.statusChip,
-                    item.status === 'terlambat'
-                      ? styles.chipTerlambat
-                      : styles.chipBelumKembali,
+                    item.status === "terlambat" ? styles.chipTerlambat : styles.chipBelumKembali,
                   ]}
                 >
                   <Text
@@ -166,23 +149,18 @@ export function BerandaScreen() {
                       textStyles.labelMd,
                       {
                         color:
-                          item.status === 'terlambat'
-                            ? colors.onError
-                            : colors.onTertiaryContainer,
+                          item.status === "terlambat" ? colors.onError : colors.onTertiaryContainer,
                       },
                     ]}
                   >
-                    {item.status === 'terlambat' ? 'Terlambat' : 'Belum Kembali'}
+                    {item.status === "terlambat" ? "Terlambat" : "Belum Kembali"}
                   </Text>
                 </View>
               </View>
 
               {/* Row 2: vehicle info */}
               <Text
-                style={[
-                  textStyles.bodyMd,
-                  { color: colors.onSurfaceVariant, marginTop: 4 },
-                ]}
+                style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}
                 numberOfLines={1}
               >
                 {item.vehicleName} — {item.vehiclePlate}
@@ -194,20 +172,13 @@ export function BerandaScreen() {
                   <MaterialIcons
                     name="schedule"
                     size={16}
-                    color={
-                      item.status === 'terlambat'
-                        ? colors.error
-                        : colors.onSurfaceVariant
-                    }
+                    color={item.status === "terlambat" ? colors.error : colors.onSurfaceVariant}
                   />
                   <Text
                     style={[
                       textStyles.bodyMd,
                       {
-                        color:
-                          item.status === 'terlambat'
-                            ? colors.error
-                            : colors.onSurfaceVariant,
+                        color: item.status === "terlambat" ? colors.error : colors.onSurfaceVariant,
                         marginLeft: 4,
                       },
                     ]}
@@ -215,11 +186,7 @@ export function BerandaScreen() {
                     Pukul {formatTime(item.dueAt)}
                   </Text>
                 </View>
-                <MaterialIcons
-                  name="chevron-right"
-                  size={20}
-                  color={colors.onSurfaceVariant}
-                />
+                <MaterialIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
               </View>
             </TouchableOpacity>
           ))
@@ -227,18 +194,14 @@ export function BerandaScreen() {
 
         {/* Section: Ringkasan */}
         <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-          <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>
-            Ringkasan
-          </Text>
+          <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Ringkasan</Text>
         </View>
 
         <View style={styles.statsGrid}>
           {/* Penyewaan Aktif */}
           <View style={styles.statCard}>
             <View style={styles.statCardTop}>
-              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>
-                Penyewaan Aktif
-              </Text>
+              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Penyewaan Aktif</Text>
               <MaterialIcons name="two-wheeler" size={24} color={colors.primary} />
             </View>
             <Text style={[textStyles.displayLg, { color: colors.onSurface }]}>
@@ -249,9 +212,7 @@ export function BerandaScreen() {
           {/* Hutang Aktif */}
           <View style={styles.statCard}>
             <View style={styles.statCardTop}>
-              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>
-                Hutang Aktif
-              </Text>
+              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Hutang Aktif</Text>
               <MaterialIcons name="payments" size={24} color={colors.primary} />
             </View>
             <View>
@@ -277,7 +238,8 @@ export function BerandaScreen() {
                 {summary.availableVehiclesCount}
               </Text>
               <Text style={[textStyles.bodyLg, { color: colors.secondary, paddingBottom: 4 }]}>
-                {' '}dari {summary.totalVehiclesCount}
+                {" "}
+                dari {summary.totalVehiclesCount}
               </Text>
             </View>
           </View>
@@ -295,7 +257,8 @@ export function BerandaScreen() {
                 {summary.verifiedUsersCount}
               </Text>
               <Text style={[textStyles.bodyLg, { color: colors.secondary, paddingBottom: 4 }]}>
-                {' '}dari {summary.totalUsersCount}
+                {" "}
+                dari {summary.totalUsersCount}
               </Text>
             </View>
           </View>
@@ -309,14 +272,14 @@ export function BerandaScreen() {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: colors.background,
+    flex: 1,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
   scrollContent: {
     flexGrow: 1,
@@ -324,19 +287,19 @@ const styles = StyleSheet.create({
 
   // Header
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.base,
-    paddingBottom: spacing.sm,
   },
   avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    alignItems: "center",
     backgroundColor: colors.primaryContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
   headerTextBlock: {
     flex: 1,
@@ -345,36 +308,36 @@ const styles = StyleSheet.create({
 
   // Quick Actions
   quickActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
+    gap: 12,
     marginHorizontal: spacing.base,
     marginTop: spacing.base,
-    gap: 12,
   },
   actionBtn: {
-    flex: 1,
-    height: 80,
+    alignItems: "center",
     borderRadius: borderRadius.button,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1,
+    flexDirection: "row",
     gap: 8,
+    height: 80,
+    justifyContent: "center",
   },
   actionBtnFilled: {
     backgroundColor: colors.primary,
   },
   actionBtnOutlined: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
+    backgroundColor: "transparent",
     borderColor: colors.outline,
+    borderWidth: 1.5,
   },
 
   // Section header
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    marginBottom: spacing.sm,
     marginHorizontal: spacing.base,
     marginTop: spacing.xl,
-    marginBottom: spacing.sm,
   },
   countBadge: {
     marginLeft: spacing.xs,
@@ -382,32 +345,32 @@ const styles = StyleSheet.create({
 
   // Empty state
   emptyState: {
+    alignItems: "center",
     padding: 24,
-    alignItems: 'center',
   },
 
   // Rental card
   rentalCard: {
-    borderRadius: 12,
-    padding: spacing.base,
-    marginHorizontal: spacing.base,
-    marginBottom: 10,
     backgroundColor: colors.surfaceContainerLowest,
-    shadowColor: '#000',
+    borderRadius: 12,
+    elevation: 2,
+    marginBottom: 10,
+    marginHorizontal: spacing.base,
+    padding: spacing.base,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   rentalCardOverdue: {
     backgroundColor: colors.errorContainer,
-    borderWidth: 1,
     borderColor: colors.error,
+    borderWidth: 1,
   },
   cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statusChip: {
     borderRadius: 999,
@@ -421,35 +384,35 @@ const styles = StyleSheet.create({
     backgroundColor: colors.error,
   },
   timeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
   },
 
   // Stats grid (single-column stack)
   statsGrid: {
-    marginHorizontal: spacing.base,
     gap: 12,
+    marginHorizontal: spacing.base,
   },
   statCard: {
-    minHeight: 128,
-    borderRadius: 12,
-    padding: spacing.lg,
     backgroundColor: colors.surfaceContainerLowest,
-    justifyContent: 'space-between',
-    shadowColor: '#000',
+    borderRadius: 12,
+    elevation: 2,
+    justifyContent: "space-between",
+    minHeight: 128,
+    padding: spacing.lg,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   statCardTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statNumberRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
+    flexDirection: "row",
   },
   bottomPadding: {
     height: 32,

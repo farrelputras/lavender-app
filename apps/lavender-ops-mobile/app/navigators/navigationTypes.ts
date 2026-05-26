@@ -42,5 +42,6 @@ export type SewaBaruScreenProps<T extends keyof SewaBaruParamList> = CompositeSc
   AppStackScreenProps<keyof AppStackParamList>
 >
 
-export interface NavigationProps
-  extends Partial<ComponentProps<typeof NavigationContainer<AppStackParamList>>> {}
+export interface NavigationProps extends Partial<
+  ComponentProps<typeof NavigationContainer<AppStackParamList>>
+> {}

@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react"
 import {
   View,
   Text,
@@ -9,32 +10,39 @@ import {
   Alert,
   ToastAndroid,
   Linking,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'
-import { useState, useCallback } from 'react'
-import { useFocusEffect } from '@react-navigation/native'
-import { colors, textStyles, spacing } from '@/theme/tokens'
-import { getRental, getUserSummary, getVehicle, addPayment } from '@/services/rentals'
-import type { Rental, UserSummary, Vehicle, Payment } from '@/services/rentals/types'
-import { formatRupiah, formatHeaderDate, formatTime, initialsFromName, formatPhoneId, toWaNumber } from '@/utils/format'
-import { sumPayments, formatPaket, isOverdue, hoursLate } from '@/utils/rentalMath'
-import PembayaranSheet from '@/components/PembayaranSheet'
-import type { AppStackScreenProps } from '@/navigators/navigationTypes'
+} from "react-native"
+import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+import PembayaranSheet from "@/components/PembayaranSheet"
+import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { getRental, getUserSummary, getVehicle, addPayment } from "@/services/rentals"
+import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
+import { colors, textStyles, spacing } from "@/theme/tokens"
+import {
+  formatRupiah,
+  formatHeaderDate,
+  formatTime,
+  initialsFromName,
+  formatPhoneId,
+  toWaNumber,
+} from "@/utils/format"
+import { sumPayments, formatPaket, isOverdue, hoursLate } from "@/utils/rentalMath"
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
-const JAMINAN_LABELS: Record<string, string> = { ktp: 'KTP', ktm: 'KTM', lainnya: 'Lainnya' }
+const JAMINAN_LABELS: Record<string, string> = { ktp: "KTP", ktm: "KTM", lainnya: "Lainnya" }
 
 function paymentMethodLabel(payment: Payment): string {
-  if (payment.method === 'lainnya') return payment.methodDescription ?? 'Lainnya'
-  const MAP: Record<string, string> = { cash: 'Cash', transfer: 'Transfer', qris: 'QRIS' }
+  if (payment.method === "lainnya") return payment.methodDescription ?? "Lainnya"
+  const MAP: Record<string, string> = { cash: "Cash", transfer: "Transfer", qris: "QRIS" }
   return MAP[payment.method] ?? payment.method
 }
 
@@ -48,7 +56,7 @@ function SectionLabel({ children }: { children: string }) {
 
 function BensinGauge({ value }: { value: number }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
       {Array.from({ length: 8 }, (_, i) => (
         <View
           key={i}
@@ -65,7 +73,10 @@ function BensinGauge({ value }: { value: number }) {
   )
 }
 
-export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps<'PenyewaanDetail'>) {
+export function PenyewaanDetailScreen({
+  navigation,
+  route,
+}: AppStackScreenProps<"PenyewaanDetail">) {
   const { rentalId, justCreated, justClosed } = route.params
 
   const [rental, setRental] = useState<Rental | null>(null)
@@ -81,23 +92,28 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         setLoading(true)
         const r = await getRental(rentalId)
         if (cancelled) return
-        if (!r) { setLoading(false); return }
+        if (!r) {
+          setLoading(false)
+          return
+        }
         const [u, v] = await Promise.all([getUserSummary(r.userId), getVehicle(r.vehicleId)])
         if (cancelled) return
         setRental(r)
         setUser(u)
         setVehicle(v)
         setLoading(false)
-        if (justCreated) showToast('Penyewaan tersimpan')
-        if (justClosed) showToast('Pengembalian tersimpan')
+        if (justCreated) showToast("Penyewaan tersimpan")
+        if (justClosed) showToast("Pengembalian tersimpan")
       }
       load()
-      return () => { cancelled = true }
+      return () => {
+        cancelled = true
+      }
     }, [rentalId]),
   )
 
   function handleBack() {
-    navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] })
+    navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] })
   }
 
   if (loading) {
@@ -114,7 +130,9 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centered}>
-          <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Penyewaan tidak ditemukan.</Text>
+          <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
+            Penyewaan tidak ditemukan.
+          </Text>
         </View>
       </SafeAreaView>
     )
@@ -122,12 +140,13 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
 
   const totalPaid = sumPayments(rental.payments)
   const sisa = Math.max(0, rental.totalBill - totalPaid)
-  const initials = user ? initialsFromName(user.name) : '?'
-  const vehicleIcon: 'two-wheeler' | 'directions-car' = vehicle?.category === 'mobil' ? 'directions-car' : 'two-wheeler'
+  const initials = user ? initialsFromName(user.name) : "?"
+  const vehicleIcon: "two-wheeler" | "directions-car" =
+    vehicle?.category === "mobil" ? "directions-car" : "two-wheeler"
   const overdue = isOverdue(rental)
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       {/* AppBar */}
       <View style={styles.appBar}>
         <TouchableOpacity onPress={handleBack} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -146,12 +165,18 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View style={styles.card}>
           <View style={styles.entityRow}>
             <View style={styles.avatar}>
-              <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>{initials}</Text>
+              <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
+                {initials}
+              </Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{user?.name ?? '—'}</Text>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                {user?.name ?? "—"}
+              </Text>
               {user?.nickname ? (
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>{user.nickname}</Text>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  {user.nickname}
+                </Text>
               ) : null}
               {user?.phone ? (
                 <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
@@ -162,7 +187,11 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
             {user ? (
               <TouchableOpacity
                 style={styles.callButton}
-                onPress={() => Linking.openURL('https://wa.me/' + toWaNumber(user.phone)).catch(() => showToast('Tidak dapat membuka WhatsApp'))}
+                onPress={() =>
+                  Linking.openURL("https://wa.me/" + toWaNumber(user.phone)).catch(() =>
+                    showToast("Tidak dapat membuka WhatsApp"),
+                  )
+                }
                 hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
               >
                 <FontAwesome name="whatsapp" size={22} color="#FFFFFF" />
@@ -177,10 +206,21 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
               <MaterialIcons name={vehicleIcon} size={20} color={colors.secondary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{vehicle?.name ?? '—'}</Text>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                {vehicle?.name ?? "—"}
+              </Text>
               {vehicle ? (
                 <View style={styles.plateChip}>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurface, letterSpacing: 1, fontFamily: 'publicSansSemiBold' }]}>
+                  <Text
+                    style={[
+                      textStyles.labelMd,
+                      {
+                        color: colors.onSurface,
+                        letterSpacing: 1,
+                        fontFamily: "publicSansSemiBold",
+                      },
+                    ]}
+                  >
                     {vehicle.plate}
                   </Text>
                 </View>
@@ -193,43 +233,55 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Waktu Sewa</Text>
-            <TouchableOpacity onPress={() => showToast('Akan segera tersedia')}>
+            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
               <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.card}>
-          <View style={styles.timeRow}>
-            <MaterialIcons name="schedule" size={20} color={colors.onSurfaceVariant} style={{ marginTop: 2 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Mulai</Text>
-              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                {formatHeaderDate(rental.startAt)} · {formatTime(rental.startAt)}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.rowDivider} />
-
-          <View style={styles.timeRow}>
-            <MaterialIcons name="event" size={20} color={overdue ? colors.onWarningContainer : colors.primary} style={{ marginTop: 2 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Estimasi Kembali</Text>
-              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                {formatHeaderDate(rental.dueAt)} · {formatTime(rental.dueAt)}
-              </Text>
-              {overdue && (
-                <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
-                  Terlambat {hoursLate(rental.dueAt)} Jam
+            <View style={styles.timeRow}>
+              <MaterialIcons
+                name="schedule"
+                size={20}
+                color={colors.onSurfaceVariant}
+                style={{ marginTop: 2 }}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Mulai</Text>
+                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                  {formatHeaderDate(rental.startAt)} · {formatTime(rental.startAt)}
                 </Text>
-              )}
+              </View>
             </View>
-          </View>
 
-          <View style={styles.paketChip}>
-            <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-              Paket: {formatPaket(rental.paketHari, rental.paketJam)}
-            </Text>
-          </View>
+            <View style={styles.rowDivider} />
+
+            <View style={styles.timeRow}>
+              <MaterialIcons
+                name="event"
+                size={20}
+                color={overdue ? colors.onWarningContainer : colors.primary}
+                style={{ marginTop: 2 }}
+              />
+              <View style={{ flex: 1 }}>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  Estimasi Kembali
+                </Text>
+                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                  {formatHeaderDate(rental.dueAt)} · {formatTime(rental.dueAt)}
+                </Text>
+                {overdue && (
+                  <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
+                    Terlambat {hoursLate(rental.dueAt)} Jam
+                  </Text>
+                )}
+              </View>
+            </View>
+
+            <View style={styles.paketChip}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                Paket: {formatPaket(rental.paketHari, rental.paketJam)}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -237,26 +289,26 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View>
           <SectionLabel>Jaminan</SectionLabel>
           <View style={styles.card}>
-          <View style={styles.jaminanPills}>
-            {rental.jaminan.items.map((item) => (
-              <View key={item} style={styles.jaminanPill}>
-                <MaterialIcons name="check-circle" size={14} color={colors.primary} />
-                <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                  {JAMINAN_LABELS[item] ?? item}
-                </Text>
-              </View>
-            ))}
-          </View>
+            <View style={styles.jaminanPills}>
+              {rental.jaminan.items.map((item) => (
+                <View key={item} style={styles.jaminanPill}>
+                  <MaterialIcons name="check-circle" size={14} color={colors.primary} />
+                  <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                    {JAMINAN_LABELS[item] ?? item}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
-          {rental.jaminan.lainnyaDescription ? (
+            {rental.jaminan.lainnyaDescription ? (
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                {rental.jaminan.lainnyaDescription}
+              </Text>
+            ) : null}
+
             <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-              {rental.jaminan.lainnyaDescription}
+              Dikembalikan saat semua tagihan lunas.
             </Text>
-          ) : null}
-
-          <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-            Dikembalikan saat semua tagihan lunas.
-          </Text>
           </View>
         </View>
 
@@ -264,46 +316,50 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Kondisi Keluar</Text>
-            <TouchableOpacity onPress={() => showToast('Akan segera tersedia')}>
+            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
               <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.card}>
-          <View style={styles.infoRow}>
-            <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>Bensin</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                {rental.kondisiKeluar.bensinKotak} kotak
+            <View style={styles.infoRow}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                Bensin
               </Text>
-              <BensinGauge value={rental.kondisiKeluar.bensinKotak} />
+              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                  {rental.kondisiKeluar.bensinKotak} kotak
+                </Text>
+                <BensinGauge value={rental.kondisiKeluar.bensinKotak} />
+              </View>
             </View>
-          </View>
 
-          <View style={styles.rowDivider} />
+            <View style={styles.rowDivider} />
 
-          <View style={styles.infoRow}>
-            <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>KM</Text>
-            <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-              {rental.kondisiKeluar.km != null
-                ? `${rental.kondisiKeluar.km.toLocaleString('id-ID')} km`
-                : '—'}
-            </Text>
-          </View>
+            <View style={styles.infoRow}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                KM
+              </Text>
+              <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                {rental.kondisiKeluar.km != null
+                  ? `${rental.kondisiKeluar.km.toLocaleString("id-ID")} km`
+                  : "—"}
+              </Text>
+            </View>
 
-          {rental.kondisiKeluar.photos.length > 0 && (
-            <>
-              <View style={styles.rowDivider} />
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  {rental.kondisiKeluar.photos.map((photo) => (
-                    <View key={photo.id} style={styles.photoThumb}>
-                      <MaterialIcons name="image" size={28} color={colors.onSurfaceVariant} />
-                    </View>
-                  ))}
-                </View>
-              </ScrollView>
-            </>
-          )}
+            {rental.kondisiKeluar.photos.length > 0 && (
+              <>
+                <View style={styles.rowDivider} />
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                    {rental.kondisiKeluar.photos.map((photo) => (
+                      <View key={photo.id} style={styles.photoThumb}>
+                        <MaterialIcons name="image" size={28} color={colors.onSurfaceVariant} />
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              </>
+            )}
           </View>
         </View>
 
@@ -311,53 +367,66 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View>
           <SectionLabel>Tarif & Total</SectionLabel>
           <View style={styles.card}>
-          <View style={styles.infoRow}>
-            <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>Tarif</Text>
-            <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{formatRupiah(rental.tarif)}</Text>
-          </View>
-
-          {(rental.addOn.amount > 0 || rental.addOn.description.trim().length > 0) ? (
             <View style={styles.infoRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Add-on</Text>
-                {rental.addOn.description.trim().length > 0 ? (
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                    {rental.addOn.description}
-                  </Text>
-                ) : null}
-              </View>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                Tarif
+              </Text>
               <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                {formatRupiah(rental.addOn.amount)}
+                {formatRupiah(rental.tarif)}
               </Text>
             </View>
-          ) : null}
 
-          <View style={styles.infoRow}>
-            <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>Diskon</Text>
-            <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-              {rental.discount > 0 ? `− ${formatRupiah(rental.discount)}` : formatRupiah(0)}
-            </Text>
-          </View>
+            {rental.addOn.amount > 0 || rental.addOn.description.trim().length > 0 ? (
+              <View style={styles.infoRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
+                    Add-on
+                  </Text>
+                  {rental.addOn.description.trim().length > 0 ? (
+                    <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                      {rental.addOn.description}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                  {formatRupiah(rental.addOn.amount)}
+                </Text>
+              </View>
+            ) : null}
 
-          <View style={styles.rowDivider} />
+            <View style={styles.infoRow}>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                Diskon
+              </Text>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                {rental.discount > 0 ? `− ${formatRupiah(rental.discount)}` : formatRupiah(0)}
+              </Text>
+            </View>
 
-          <View style={styles.infoRow}>
-            <Text style={[textStyles.labelLg, { color: colors.onSurface, flex: 1 }]}>Total</Text>
-            <Text style={[textStyles.headlineSm, { color: colors.primary }]}>
-              {formatRupiah(rental.totalBill)}
-            </Text>
-          </View>
+            <View style={styles.rowDivider} />
+
+            <View style={styles.infoRow}>
+              <Text style={[textStyles.labelLg, { color: colors.onSurface, flex: 1 }]}>Total</Text>
+              <Text style={[textStyles.headlineSm, { color: colors.primary }]}>
+                {formatRupiah(rental.totalBill)}
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* ── 6. Pembayaran ────────────────────────────── */}
         <View>
           <SectionLabel>Pembayaran</SectionLabel>
-          <View style={[styles.card, { padding: 0, overflow: 'hidden', gap: 0 }]}>
+          <View style={[styles.card, { padding: 0, overflow: "hidden", gap: 0 }]}>
             <View>
               {rental.payments.length === 0 ? (
                 <View style={styles.emptyPayment}>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, fontStyle: 'italic' }]}>
+                  <Text
+                    style={[
+                      textStyles.bodyMd,
+                      { color: colors.onSurfaceVariant, fontStyle: "italic" },
+                    ]}
+                  >
                     Belum ada pembayaran
                   </Text>
                 </View>
@@ -389,20 +458,36 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="add" size={20} color={colors.primary} />
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Tambah Pembayaran</Text>
+                <Text style={[textStyles.labelLg, { color: colors.primary }]}>
+                  Tambah Pembayaran
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={styles.paySummary}>
             <View style={styles.paySummaryRow}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Sudah dibayar:</Text>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>{formatRupiah(totalPaid)}</Text>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                Sudah dibayar:
+              </Text>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                {formatRupiah(totalPaid)}
+              </Text>
             </View>
             <View style={styles.paySummaryRow}>
-              <Text style={[textStyles.labelLg, { color: sisa > 0 ? colors.error : colors.onSuccessContainer }]}>
+              <Text
+                style={[
+                  textStyles.labelLg,
+                  { color: sisa > 0 ? colors.error : colors.onSuccessContainer },
+                ]}
+              >
                 Sisa:
               </Text>
-              <Text style={[textStyles.labelLg, { color: sisa > 0 ? colors.error : colors.onSuccessContainer }]}>
+              <Text
+                style={[
+                  textStyles.labelLg,
+                  { color: sisa > 0 ? colors.error : colors.onSuccessContainer },
+                ]}
+              >
                 {formatRupiah(sisa)}
               </Text>
             </View>
@@ -413,16 +498,21 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
-            <TouchableOpacity onPress={() => showToast('Akan segera tersedia')}>
+            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
               <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.card}>
-          <View style={styles.insetBlock}>
-            <Text style={[textStyles.bodyMd, { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant }]}>
-              {rental.notes || 'Tidak ada catatan.'}
-            </Text>
-          </View>
+            <View style={styles.insetBlock}>
+              <Text
+                style={[
+                  textStyles.bodyMd,
+                  { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant },
+                ]}
+              >
+                {rental.notes || "Tidak ada catatan."}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -433,7 +523,7 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.btnProses}
-          onPress={() => navigation.navigate('Pengembalian', { rentalId: rental.id })}
+          onPress={() => navigation.navigate("Pengembalian", { rentalId: rental.id })}
           activeOpacity={0.8}
         >
           <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Proses Pengembalian</Text>
@@ -449,7 +539,7 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
             const updated = await addPayment(rental.id, p)
             setRental(updated)
           } catch {
-            showToast('Gagal menyimpan pembayaran')
+            showToast("Gagal menyimpan pembayaran")
           }
         }}
         defaultAmount={sisa > 0 ? sisa : undefined}
@@ -459,198 +549,198 @@ export function PenyewaanDetailScreen({ navigation, route }: AppStackScreenProps
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  addPaymentBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.xs,
+    justifyContent: "center",
+    padding: spacing.base,
   },
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.md,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
-    gap: spacing.md,
   },
   appBarTitle: {
     flex: 1,
   },
-  statusChip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: colors.warningContainer,
+  avatar: {
+    alignItems: "center",
+    backgroundColor: colors.primaryContainer,
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
   body: {
-    padding: spacing.base,
     gap: spacing.md,
+    padding: spacing.base,
     paddingBottom: spacing.xxxl,
+  },
+  bottomBar: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
+    padding: spacing.base,
+    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
+  },
+  btnProses: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 56,
+    justifyContent: "center",
+  },
+  callButton: {
+    alignItems: "center",
+    backgroundColor: "#25D366",
+    borderRadius: 24,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: spacing.base,
     gap: spacing.sm,
+    padding: spacing.base,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  entityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primaryContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  callButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#25D366',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  plateChip: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surfaceVariant,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: 6,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    marginTop: 2,
+  centered: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
   },
   divider: {
-    height: 1,
     backgroundColor: colors.outlineVariant,
+    height: 1,
     marginVertical: spacing.xs,
   },
-  rowDivider: {
-    height: 1,
-    backgroundColor: colors.outlineVariant,
+  emptyPayment: {
+    alignItems: "center",
+    padding: spacing.base,
+  },
+  entityRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.md,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     paddingVertical: spacing.xs,
-  },
-  timeRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-  },
-  paketChip: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-  },
-  jaminanPills: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  jaminanPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.surfaceContainerLow,
-    borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    borderRadius: 999,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  photoThumb: {
-    width: 96,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: colors.surfaceContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyPayment: {
-    padding: spacing.base,
-    alignItems: 'center',
-  },
-  paymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.base,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.outlineVariant,
-  },
-  paymentIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surfaceContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  methodBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: colors.surfaceContainer,
-  },
-  addPaymentBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    padding: spacing.base,
-  },
-  paySummary: {
-    marginTop: spacing.sm,
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
-    padding: spacing.base,
-    gap: spacing.xs,
-  },
-  paySummaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   insetBlock: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
     padding: spacing.md,
   },
-  bottomBar: {
-    padding: spacing.base,
-    paddingBottom: Platform.OS === 'ios' ? spacing.xl : spacing.base,
-    backgroundColor: colors.surfaceContainerLowest,
-    borderTopWidth: 1,
-    borderTopColor: colors.outlineVariant,
+  jaminanPill: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainerLow,
+    borderColor: colors.outlineVariant,
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
-  btnProses: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  jaminanPills: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.sm,
-    height: 56,
+  },
+  methodBadge: {
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  paketChip: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
-    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  paySummary: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    padding: spacing.base,
+  },
+  paySummaryRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  paymentIcon: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
+  },
+  paymentRow: {
+    alignItems: "center",
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.base,
+  },
+  photoThumb: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 8,
+    height: 80,
+    justifyContent: "center",
+    width: 96,
+  },
+  plateChip: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.surfaceVariant,
+    borderColor: colors.outlineVariant,
+    borderRadius: 6,
+    borderWidth: 1,
+    marginTop: 2,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  rowDivider: {
+    backgroundColor: colors.outlineVariant,
+    height: 1,
+  },
+  safeArea: {
+    backgroundColor: colors.background,
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.sm,
+  },
+  statusChip: {
+    backgroundColor: colors.warningContainer,
+    borderRadius: 999,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  timeRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: spacing.sm,
   },
 })

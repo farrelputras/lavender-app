@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react"
 import {
   View,
   Text,
@@ -10,29 +11,27 @@ import {
   Platform,
   Alert,
   ToastAndroid,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useState, useEffect, useRef } from 'react'
-import { colors, textStyles, spacing } from '@/theme/tokens'
-import { getUserSummaries } from '@/services/rentals'
-import type { UserSummary } from '@/services/rentals/types'
-import { formatRupiah, initialsFromName } from '@/utils/format'
-import type { SewaBaruScreenProps } from '@/navigators/navigationTypes'
+} from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
+import { getUserSummaries } from "@/services/rentals"
+import type { UserSummary } from "@/services/rentals/types"
+import { colors, textStyles, spacing } from "@/theme/tokens"
+import { formatRupiah, initialsFromName } from "@/utils/format"
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
-function groupByFirstLetter(
-  summaries: UserSummary[]
-): { title: string; data: UserSummary[] }[] {
+function groupByFirstLetter(summaries: UserSummary[]): { title: string; data: UserSummary[] }[] {
   const map = new Map<string, UserSummary[]>()
   for (const u of summaries) {
     const letter = u.name[0].toUpperCase()
@@ -45,13 +44,7 @@ function groupByFirstLetter(
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function UserCard({
-  summary,
-  onPress,
-}: {
-  summary: UserSummary
-  onPress: () => void
-}) {
+function UserCard({ summary, onPress }: { summary: UserSummary; onPress: () => void }) {
   return (
     <TouchableOpacity
       style={[styles.userCard, summary.debtAmount > 0 && styles.userCardDebt]}
@@ -117,7 +110,7 @@ function ListFooter() {
     <TouchableOpacity
       style={styles.footerLink}
       activeOpacity={0.8}
-      onPress={() => showToast('Belum tersedia di demo')}
+      onPress={() => showToast("Belum tersedia di demo")}
     >
       <Text style={[textStyles.labelLg, { color: colors.primary }]}>
         + Tidak ketemu? Daftarkan User Baru
@@ -128,9 +121,9 @@ function ListFooter() {
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
-export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>) {
+export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">) {
   const [summaries, setSummaries] = useState<UserSummary[]>([])
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState("")
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -145,16 +138,14 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>
 
   const q = query.toLowerCase()
   const filtered = summaries.filter(
-    (u) =>
-      u.name.toLowerCase().includes(q) ||
-      (u.nickname?.toLowerCase().includes(q) ?? false)
+    (u) => u.name.toLowerCase().includes(q) || (u.nickname?.toLowerCase().includes(q) ?? false),
   )
   const sections = groupByFirstLetter(summaries)
 
-  const handleClearQuery = () => setQuery('')
+  const handleClearQuery = () => setQuery("")
 
   const handleBatal = () => {
-    setQuery('')
+    setQuery("")
     setIsSearchMode(false)
     searchInputRef.current?.blur()
   }
@@ -168,7 +159,7 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {/* AppBar */}
       <View style={styles.appBar}>
         <TouchableOpacity
@@ -245,7 +236,7 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>
             renderItem={({ item }) => (
               <UserCard
                 summary={item}
-                onPress={() => navigation.navigate('PilihKendaraan', { userId: item.id })}
+                onPress={() => navigation.navigate("PilihKendaraan", { userId: item.id })}
               />
             )}
             contentContainerStyle={styles.listContent}
@@ -266,7 +257,7 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>
             renderItem={({ item }) => (
               <UserCard
                 summary={item}
-                onPress={() => navigation.navigate('PilihKendaraan', { userId: item.id })}
+                onPress={() => navigation.navigate("PilihKendaraan", { userId: item.id })}
               />
             )}
             renderSectionHeader={({ section }) => (
@@ -291,30 +282,30 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<'PilihUser'>
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: colors.background,
+    flex: 1,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // AppBar
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-    gap: spacing.sm,
   },
   backBtn: {
-    width: 40,
+    alignItems: "center",
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    width: 40,
   },
   titleBlock: {
     flex: 1,
@@ -325,106 +316,106 @@ const styles = StyleSheet.create({
 
   // Progress bar
   progressTrack: {
-    height: 4,
     backgroundColor: colors.surfaceVariant,
+    height: 4,
   },
   progressFill: {
-    height: 4,
-    width: '33.33%',
     backgroundColor: colors.primary,
+    height: 4,
+    width: "33.33%",
   },
 
   // Search
   searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
   searchInputContainer: {
-    flex: 1,
-    height: 48,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
     borderRadius: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    flexDirection: "row",
+    height: 48,
     paddingHorizontal: spacing.md,
   },
   searchInput: {
-    flex: 1,
     color: colors.onSurface,
+    flex: 1,
     padding: 0,
   },
 
   // Result count
   resultCount: {
-    paddingHorizontal: spacing.base,
     paddingBottom: spacing.xs,
+    paddingHorizontal: spacing.base,
   },
 
   // List
   listArea: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   listContent: {
-    paddingTop: spacing.xs,
     paddingBottom: spacing.xxxl,
+    paddingTop: spacing.xs,
   },
 
   // Section header
   sectionHeader: {
     backgroundColor: colors.background,
+    paddingBottom: spacing.xs,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
   },
 
   // User card
   userCard: {
-    borderRadius: 12,
-    padding: spacing.base,
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.sm,
     backgroundColor: colors.surfaceContainerLowest,
-    shadowColor: '#000',
+    borderRadius: 12,
+    elevation: 2,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
+    padding: spacing.base,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   userCardDebt: {
-    borderLeftWidth: 4,
     borderLeftColor: colors.error,
+    borderLeftWidth: 4,
   },
   userCardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
     gap: spacing.md,
   },
   userAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    alignItems: "center",
     backgroundColor: colors.primaryContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 24,
     flexShrink: 0,
+    height: 48,
+    justifyContent: "center",
+    width: 48,
   },
   userCardContent: {
     flex: 1,
     gap: 6,
   },
   chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 6,
   },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
     borderRadius: 999,
+    flexDirection: "row",
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
@@ -443,14 +434,14 @@ const styles = StyleSheet.create({
 
   // Footer
   footerLink: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
+    alignItems: "center",
     paddingHorizontal: spacing.base,
+    paddingVertical: spacing.lg,
   },
 
   // Empty state
   emptyState: {
+    alignItems: "center",
     padding: 24,
-    alignItems: 'center',
   },
 })

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import {
   View,
   Text,
@@ -10,29 +11,29 @@ import {
   Alert,
   ToastAndroid,
   ScrollView,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { MaterialIcons } from '@expo/vector-icons'
-import { useState, useEffect } from 'react'
-import { colors, textStyles, spacing } from '@/theme/tokens'
-import { getUserSummary, getVehicleSummaries } from '@/services/rentals'
-import type { UserSummary, VehicleSummary, VehicleCategory } from '@/services/rentals/types'
-import { initialsFromName } from '@/utils/format'
-import type { SewaBaruScreenProps } from '@/navigators/navigationTypes'
+} from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { SafeAreaView } from "react-native-safe-area-context"
+
+import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
+import { getUserSummary, getVehicleSummaries } from "@/services/rentals"
+import type { UserSummary, VehicleSummary, VehicleCategory } from "@/services/rentals/types"
+import { colors, textStyles, spacing } from "@/theme/tokens"
+import { initialsFromName } from "@/utils/format"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function showToast(msg: string) {
-  if (Platform.OS === 'android') {
+  if (Platform.OS === "android") {
     ToastAndroid.show(msg, ToastAndroid.SHORT)
   } else {
-    Alert.alert('', msg)
+    Alert.alert("", msg)
   }
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-type FilterCategory = 'semua' | VehicleCategory
+type FilterCategory = "semua" | VehicleCategory
 
 function FilterChip({
   label,
@@ -56,14 +57,8 @@ function FilterChip({
   )
 }
 
-function VehicleCard({
-  vehicle,
-  onPress,
-}: {
-  vehicle: VehicleSummary
-  onPress: () => void
-}) {
-  const isMotor = vehicle.category === 'motor'
+function VehicleCard({ vehicle, onPress }: { vehicle: VehicleSummary; onPress: () => void }) {
+  const isMotor = vehicle.category === "motor"
 
   return (
     <TouchableOpacity
@@ -75,7 +70,7 @@ function VehicleCard({
       {/* Icon panel */}
       <View style={styles.vehicleIconPanel}>
         <MaterialIcons
-          name={isMotor ? 'two-wheeler' : 'directions-car'}
+          name={isMotor ? "two-wheeler" : "directions-car"}
           size={40}
           color={vehicle.available ? colors.primary : colors.onSurfaceVariant}
         />
@@ -93,10 +88,7 @@ function VehicleCard({
         <Text style={[textStyles.headlineSm, { color: colors.onSurface }]} numberOfLines={1}>
           {vehicle.plate}
         </Text>
-        <Text
-          style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}
-          numberOfLines={1}
-        >
+        <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
           {vehicle.name}
         </Text>
       </View>
@@ -106,19 +98,19 @@ function VehicleCard({
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<'PilihKendaraan'>) {
+export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<"PilihKendaraan">) {
   const { userId } = route.params
 
   const [userSummary, setUserSummary] = useState<UserSummary | null>(null)
   const [vehicles, setVehicles] = useState<VehicleSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [query, setQuery] = useState('')
-  const [category, setCategory] = useState<FilterCategory>('semua')
+  const [query, setQuery] = useState("")
+  const [category, setCategory] = useState<FilterCategory>("semua")
   const [showUnavailable, setShowUnavailable] = useState(false)
 
   useEffect(() => {
     if (!userId) {
-      showToast('Data user tidak ditemukan')
+      showToast("Data user tidak ditemukan")
       navigation.goBack()
       return
     }
@@ -132,7 +124,7 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
   const q = query.toLowerCase()
   const filtered = vehicles.filter((v) => {
     if (!showUnavailable && !v.available) return false
-    if (category !== 'semua' && v.category !== category) return false
+    if (category !== "semua" && v.category !== category) return false
     if (q && !v.plate.toLowerCase().includes(q) && !v.name.toLowerCase().includes(q)) return false
     return true
   })
@@ -145,14 +137,14 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
     : `${availableCount} kendaraan tersedia`
 
   const handleSelectVehicle = (vehicle: VehicleSummary) => {
-    navigation.navigate('DetailSewa', { userId, vehicleId: vehicle.id })
+    navigation.navigate("DetailSewa", { userId, vehicleId: vehicle.id })
   }
 
   const displayName = userSummary
     ? userSummary.nickname
       ? `${userSummary.name} (${userSummary.nickname})`
       : userSummary.name
-    : '...'
+    : "..."
 
   if (loading) {
     return (
@@ -163,7 +155,7 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
   }
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       {/* AppBar */}
       <View style={styles.appBar}>
         <TouchableOpacity
@@ -191,13 +183,16 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
       <View style={styles.userStrip}>
         <View style={styles.userAvatar}>
           <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
-            {userSummary ? initialsFromName(userSummary.name) : '?'}
+            {userSummary ? initialsFromName(userSummary.name) : "?"}
           </Text>
         </View>
         <Text style={[textStyles.bodyMd, styles.userStripText]} numberOfLines={1}>
           {displayName}
         </Text>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
         </TouchableOpacity>
       </View>
@@ -205,7 +200,12 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
       {/* Search */}
       <View style={styles.searchRow}>
         <View style={styles.searchInputContainer}>
-          <MaterialIcons name="search" size={20} color={colors.onSurfaceVariant} style={{ marginRight: 8 }} />
+          <MaterialIcons
+            name="search"
+            size={20}
+            color={colors.onSurfaceVariant}
+            style={{ marginRight: 8 }}
+          />
           <TextInput
             style={[textStyles.bodyMd, styles.searchInput]}
             placeholder="Cari plat nomor..."
@@ -215,7 +215,10 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
             returnKeyType="search"
           />
           {query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              onPress={() => setQuery("")}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
             </TouchableOpacity>
           )}
@@ -229,11 +232,27 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterRow}
         >
-          <FilterChip label="Semua" active={category === 'semua'}  onPress={() => setCategory('semua')} />
-          <FilterChip label="Motor" active={category === 'motor'}  onPress={() => setCategory('motor')} />
-          <FilterChip label="Mobil" active={category === 'mobil'}  onPress={() => setCategory('mobil')} />
+          <FilterChip
+            label="Semua"
+            active={category === "semua"}
+            onPress={() => setCategory("semua")}
+          />
+          <FilterChip
+            label="Motor"
+            active={category === "motor"}
+            onPress={() => setCategory("motor")}
+          />
+          <FilterChip
+            label="Mobil"
+            active={category === "mobil"}
+            onPress={() => setCategory("mobil")}
+          />
           <View style={styles.filterDivider} />
-          <FilterChip label="Disewa" active={showUnavailable} onPress={() => setShowUnavailable((v) => !v)} />
+          <FilterChip
+            label="Disewa"
+            active={showUnavailable}
+            onPress={() => setShowUnavailable((v) => !v)}
+          />
         </ScrollView>
       </View>
 
@@ -266,30 +285,30 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
     backgroundColor: colors.background,
+    flex: 1,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // AppBar
   appBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-    gap: spacing.sm,
   },
   backBtn: {
-    width: 40,
+    alignItems: "center",
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    width: 40,
   },
   titleBlock: {
     flex: 1,
@@ -300,160 +319,160 @@ const styles = StyleSheet.create({
 
   // Progress bar
   progressTrack: {
-    height: 4,
     backgroundColor: colors.surfaceVariant,
+    height: 4,
   },
   progressFill: {
-    height: 4,
-    width: '66.66%',
     backgroundColor: colors.primary,
+    height: 4,
+    width: "66.66%",
   },
 
   // User strip
   userStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: spacing.base,
-    marginTop: spacing.base,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    padding: spacing.base,
+    elevation: 2,
+    flexDirection: "row",
     gap: spacing.md,
-    shadowColor: '#000',
+    marginHorizontal: spacing.base,
+    marginTop: spacing.base,
+    padding: spacing.base,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   userAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    alignItems: "center",
     backgroundColor: colors.primaryContainer,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 22,
     flexShrink: 0,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
   userStripText: {
-    flex: 1,
     color: colors.onSurface,
-    fontWeight: '500',
+    flex: 1,
+    fontWeight: "500",
   },
 
   // Search
   searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.base,
-    paddingBottom: spacing.sm,
-    gap: spacing.sm,
   },
   searchInputContainer: {
-    flex: 1,
-    height: 48,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
     borderRadius: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    flexDirection: "row",
+    height: 48,
     paddingHorizontal: spacing.md,
   },
   searchInput: {
-    flex: 1,
     color: colors.onSurface,
+    flex: 1,
     padding: 0,
   },
 
   // Filter chips
   filterRow: {
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
-    gap: spacing.sm,
-    alignItems: 'center',
   },
   chip: {
-    height: 36,
-    paddingHorizontal: spacing.base,
+    alignItems: "center",
+    borderColor: colors.outline,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.outline,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: "row",
+    height: 36,
+    justifyContent: "center",
+    paddingHorizontal: spacing.base,
   },
   chipActive: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
   filterDivider: {
-    width: 1,
-    height: 24,
     backgroundColor: colors.outlineVariant,
+    height: 24,
     marginHorizontal: spacing.xs,
+    width: 1,
   },
 
   // Count label
   countLabel: {
     color: colors.onSurfaceVariant,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.sm,
   },
 
   // Grid
   gridContent: {
-    paddingHorizontal: spacing.base,
     paddingBottom: spacing.xxxl,
+    paddingHorizontal: spacing.base,
   },
   gridRow: {
     gap: spacing.base,
+    justifyContent: "flex-start",
     marginBottom: spacing.base,
-    justifyContent: 'flex-start',
   },
 
   // Vehicle card
   vehicleCard: {
-    flexBasis: '48%',
-    flexGrow: 0,
-    flexShrink: 0,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    elevation: 2,
+    flexBasis: "48%",
+    flexGrow: 0,
+    flexShrink: 0,
+    overflow: "hidden",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   vehicleCardUnavailable: {
     opacity: 0.5,
   },
   vehicleIconPanel: {
-    height: 96,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 96,
+    justifyContent: "center",
   },
   unavailableChip: {
-    position: 'absolute',
-    bottom: 6,
-    right: 6,
     backgroundColor: colors.tertiaryContainer,
     borderRadius: 999,
+    bottom: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
+    position: "absolute",
+    right: 6,
   },
   vehicleInfo: {
-    padding: spacing.base,
     gap: 2,
+    padding: spacing.base,
   },
 
   // Empty state
   emptyState: {
+    alignItems: "center",
     padding: 24,
-    alignItems: 'center',
   },
 })

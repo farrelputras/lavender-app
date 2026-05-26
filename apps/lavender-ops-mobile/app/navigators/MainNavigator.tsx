@@ -1,7 +1,7 @@
 import { TextStyle, ViewStyle } from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { MaterialIcons } from "@expo/vector-icons"
 
 import { BerandaScreen } from "@/screens/BerandaScreen"
 import { HutangScreen } from "@/screens/HutangScreen"
@@ -38,9 +38,7 @@ export function MainNavigator() {
         component={BerandaScreen}
         options={{
           tabBarLabel: "Beranda",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="home" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -48,9 +46,7 @@ export function MainNavigator() {
         component={PenyewaanScreen}
         options={{
           tabBarLabel: "Penyewaan",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="event" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <MaterialIcons name="event" size={size} color={color} />,
         }}
       />
       <Tab.Screen
