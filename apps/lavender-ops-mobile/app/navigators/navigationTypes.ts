@@ -10,6 +10,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 export type MainTabParamList = {
   Beranda: undefined
   Penyewaan: undefined
+  Kendaraan: undefined
   User: undefined
   Hutang: undefined
 }
