@@ -11,6 +11,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 import type { MainTabParamList } from "./navigationTypes"
+import { KendaraanScreen } from "@/screens/KendaraanScreen"
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
@@ -50,22 +51,32 @@ export function MainNavigator() {
         }}
       />
       <Tab.Screen
-        name="User"
-        component={UserScreen}
-        options={{
-          tabBarLabel: "User",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
         name="Hutang"
         component={HutangScreen}
         options={{
           tabBarLabel: "Hutang",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="account-balance-wallet" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Kendaraan"
+        component={KendaraanScreen}
+        options={{
+          tabBarLabel: "Kendaraan",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="two-wheeler" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="User"
+        component={UserScreen}
+        options={{
+          tabBarLabel: "User",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="people" size={size} color={color} />
           ),
         }}
       />
