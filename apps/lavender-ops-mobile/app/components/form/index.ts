@@ -4,3 +4,6 @@
 
 export { SectionLabel } from "./SectionLabel"
 export type { SectionLabelProps } from "./SectionLabel"
+
+export { FieldCard } from "./FieldCard"
+export type { FieldCardProps } from "./FieldCard"
