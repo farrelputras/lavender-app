@@ -1,6 +1,6 @@
 # LAVENDER v1.0.0 Roadmap — Demo → Day-to-Day App
 
-**Status:** Approved design, ready for implementation plan
+**Status:** Phase 0 complete (shared form-component library). Ready for Phase 1.
 **Author:** Brainstorming session, 2026-05-26
 **Owner:** Farrel
 **Target ship:** Single APK to mom; everything post-APK delivered via OTA
@@ -86,9 +86,9 @@ WhatsApp APK trip to mom.
 - Photo upload: camera → Supabase Storage, with local cache fallback
 - Audit log columns + triggers (`created_by`, `updated_by`, `created_at`,
   `updated_at`) on all tables; no UI per handoff
-- Feedback polish (waktu sewa 3-column restructure, Paket→Durasi rename, edit/delete
+- Feedback polish (waktu sewa 3-row restructure, Paket→Durasi rename, edit/delete
   pembayaran, edit icon consistency, tujuan field adjustment, etc.) — bundled into
-  the QA pass
+  the QA pass. Tracked in `docs/feedback-and-improvements.md`.
 - Build and ship single APK to mom
 
 ### Deferred to v1.1+ (OTA after first ship)
