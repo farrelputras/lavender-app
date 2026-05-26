@@ -1,71 +1,69 @@
-// TODO: write documentation about fonts and typography along with guides on how to add custom fonts in own
-// markdown file and add links from here
-
 import { Platform } from "react-native"
 import {
-  SpaceGrotesk_300Light as spaceGroteskLight,
-  SpaceGrotesk_400Regular as spaceGroteskRegular,
-  SpaceGrotesk_500Medium as spaceGroteskMedium,
-  SpaceGrotesk_600SemiBold as spaceGroteskSemiBold,
-  SpaceGrotesk_700Bold as spaceGroteskBold,
-} from "@expo-google-fonts/space-grotesk"
+  PublicSans_400Regular as publicSansRegular,
+  PublicSans_500Medium as publicSansMedium,
+  PublicSans_600SemiBold as publicSansSemiBold,
+  PublicSans_700Bold as publicSansBold,
+} from "@expo-google-fonts/public-sans"
 
 export const customFontsToLoad = {
-  spaceGroteskLight,
-  spaceGroteskRegular,
-  spaceGroteskMedium,
-  spaceGroteskSemiBold,
-  spaceGroteskBold,
+  publicSansRegular,
+  publicSansMedium,
+  publicSansSemiBold,
+  publicSansBold,
 }
 
 const fonts = {
-  spaceGrotesk: {
-    // Cross-platform Google font.
-    light: "spaceGroteskLight",
-    normal: "spaceGroteskRegular",
-    medium: "spaceGroteskMedium",
-    semiBold: "spaceGroteskSemiBold",
-    bold: "spaceGroteskBold",
+  publicSans: {
+    regular:  "publicSansRegular",
+    normal:   "publicSansRegular",  // alias for Ignite components that use `weight="normal"`
+    medium:   "publicSansMedium",
+    semibold: "publicSansSemiBold",
+    bold:     "publicSansBold",
   },
   helveticaNeue: {
-    // iOS only font.
-    thin: "HelveticaNeue-Thin",
-    light: "HelveticaNeue-Light",
+    thin:   "HelveticaNeue-Thin",
+    light:  "HelveticaNeue-Light",
     normal: "Helvetica Neue",
     medium: "HelveticaNeue-Medium",
   },
   courier: {
-    // iOS only font.
     normal: "Courier",
   },
   sansSerif: {
-    // Android only font.
-    thin: "sans-serif-thin",
-    light: "sans-serif-light",
+    thin:   "sans-serif-thin",
+    light:  "sans-serif-light",
     normal: "sans-serif",
     medium: "sans-serif-medium",
   },
   monospace: {
-    // Android only font.
     normal: "monospace",
   },
 }
 
 export const typography = {
-  /**
-   * The fonts are available to use, but prefer using the semantic name.
-   */
   fonts,
-  /**
-   * The primary font. Used in most places.
-   */
-  primary: fonts.spaceGrotesk,
-  /**
-   * An alternate font used for perhaps titles and stuff.
-   */
+  primary:   fonts.publicSans,
   secondary: Platform.select({ ios: fonts.helveticaNeue, android: fonts.sansSerif }),
-  /**
-   * Lets get fancy with a monospace font!
-   */
-  code: Platform.select({ ios: fonts.courier, android: fonts.monospace }),
+  code:      Platform.select({ ios: fonts.courier, android: fonts.monospace }),
+
+  // M3 type-scale presets — sized up for a 50yo primary user
+  textStyles: {
+    displayLg:   { fontFamily: "publicSansBold",     fontSize: 40, lineHeight: 48 },
+    headlineLg:  { fontFamily: "publicSansSemiBold",  fontSize: 32, lineHeight: 40 },
+    headlineMd:  { fontFamily: "publicSansSemiBold",  fontSize: 24, lineHeight: 32 },
+    headlineSm:  { fontFamily: "publicSansSemiBold",  fontSize: 20, lineHeight: 28 },
+    bodyLg:      { fontFamily: "publicSansRegular",   fontSize: 18, lineHeight: 28 },
+    bodyMd:      { fontFamily: "publicSansRegular",   fontSize: 16, lineHeight: 24 },
+    labelLg:     { fontFamily: "publicSansSemiBold",  fontSize: 16, lineHeight: 20 },
+    labelMd:     { fontFamily: "publicSansMedium",    fontSize: 14, lineHeight: 18 },
+  },
+
+  borderRadius: {
+    default: 12,
+    card:    16,
+    button:  8,
+  },
+
+  tapTargetMin: 48,
 }

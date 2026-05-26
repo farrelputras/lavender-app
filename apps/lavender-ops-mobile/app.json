@@ -1,7 +1,7 @@
 {
-  "name": "lavender-ops-mobile",
+  "name": "Lavender Ops",
   "slug": "lavender-ops-mobile",
-  "scheme": "lavender-ops-mobile",
+  "scheme": "lavenderops",
   "version": "1.0.0",
   "orientation": "portrait",
   "userInterfaceStyle": "automatic",
@@ -16,7 +16,7 @@
   ],
   "android": {
     "icon": "./assets/images/app-icon-android-legacy.png",
-    "package": "com.lavenderopsmobile",
+    "package": "com.lavender.ops",
     "adaptiveIcon": {
       "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
       "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
@@ -27,7 +27,7 @@
   "ios": {
     "icon": "./assets/images/app-icon-ios.png",
     "supportsTablet": true,
-    "bundleIdentifier": "com.lavenderopsmobile"
+    "bundleIdentifier": "com.lavender.ops"
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",
@@ -62,6 +62,9 @@
   "extra": {
     "ignite": {
       "version": "11.5.0"
+    },
+    "eas": {
+      "projectId": "19ddf167-0fdf-48da-abd4-60b81cc13e70"
     }
   }
 }

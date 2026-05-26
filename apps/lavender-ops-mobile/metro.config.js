@@ -1,9 +1,12 @@
 /* eslint-env node */
 // Learn more https://docs.expo.io/guides/customizing-metro
 const { getDefaultConfig } = require("expo/metro-config")
+const path = require("path")
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname)
+const projectRoot = __dirname
+const workspaceRoot = path.resolve(projectRoot, "../..")
+const config = getDefaultConfig(projectRoot)
 
 config.transformer.getTransformOptions = async () => ({
   transform: {
@@ -15,6 +18,14 @@ config.transformer.getTransformOptions = async () => ({
     inlineRequires: true,
   },
 })
+
+// Monorepo: watch the entire workspace root and resolve from both node_modules trees.
+config.watchFolders = [workspaceRoot]
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, "node_modules"),
+  path.resolve(workspaceRoot, "node_modules"),
+]
+config.resolver.disableHierarchicalLookup = true
 
 // This is a temporary fix that helps fixing an issue with axios/apisauce.
 // See the following issues in Github for more details:
