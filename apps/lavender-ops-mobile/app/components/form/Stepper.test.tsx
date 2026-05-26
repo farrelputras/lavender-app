@@ -1,5 +1,6 @@
 import { TouchableOpacity } from "react-native"
 import { fireEvent, render } from "@testing-library/react-native"
+
 import { ThemeProvider } from "@/theme/context"
 
 import { Stepper } from "./Stepper"

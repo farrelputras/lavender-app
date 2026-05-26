@@ -5,13 +5,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { BerandaScreen } from "@/screens/BerandaScreen"
 import { HutangScreen } from "@/screens/HutangScreen"
+import { KendaraanScreen } from "@/screens/KendaraanScreen"
 import { PenyewaanScreen } from "@/screens/PenyewaanScreen"
 import { UserScreen } from "@/screens/UserScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 import type { MainTabParamList } from "./navigationTypes"
-import { KendaraanScreen } from "@/screens/KendaraanScreen"
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 

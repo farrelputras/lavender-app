@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react-native"
+
 import { ThemeProvider } from "@/theme/context"
 
 import { PhotoRow } from "./PhotoRow"

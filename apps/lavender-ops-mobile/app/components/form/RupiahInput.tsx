@@ -1,4 +1,5 @@
 import { View, Text, TextInput, StyleSheet, ViewStyle, StyleProp } from "react-native"
+
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface RupiahInputProps {
@@ -26,6 +27,11 @@ export function RupiahInput({ value, onChangeText, placeholder, style }: RupiahI
 }
 
 const styles = StyleSheet.create({
+  field: {
+    color: colors.onSurface,
+    flex: 1,
+    padding: 0,
+  },
   row: {
     alignItems: "center",
     backgroundColor: colors.surface,
@@ -36,10 +42,5 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     height: 52,
     paddingHorizontal: spacing.md,
-  },
-  field: {
-    color: colors.onSurface,
-    flex: 1,
-    padding: 0,
   },
 })

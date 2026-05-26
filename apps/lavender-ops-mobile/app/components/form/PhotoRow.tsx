@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
+
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface PhotoItem {
@@ -46,7 +47,6 @@ export function PhotoRow({ photos, onAdd, onRemove, addLabel = "Tambah Foto" }: 
 }
 
 const styles = StyleSheet.create({
-  row: { gap: spacing.sm, paddingVertical: spacing.sm },
   addTile: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
@@ -58,20 +58,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 120,
   },
-  thumb: {
-    borderColor: colors.outlineVariant,
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 120,
-    overflow: "hidden",
-    width: 120,
-  },
-  placeholder: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    flex: 1,
-    justifyContent: "center",
-  },
   close: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.85)",
@@ -82,5 +68,20 @@ const styles = StyleSheet.create({
     right: 6,
     top: 6,
     width: 22,
+  },
+  placeholder: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainer,
+    flex: 1,
+    justifyContent: "center",
+  },
+  row: { gap: spacing.sm, paddingVertical: spacing.sm },
+  thumb: {
+    borderColor: colors.outlineVariant,
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 120,
+    overflow: "hidden",
+    width: 120,
   },
 })

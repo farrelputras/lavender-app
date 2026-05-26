@@ -1,5 +1,6 @@
-import { View, StyleSheet, ViewStyle, StyleProp } from "react-native"
 import { ReactNode } from "react"
+import { View, StyleSheet, ViewStyle, StyleProp } from "react-native"
+
 import { colors, spacing } from "@/theme/tokens"
 
 export interface FieldCardProps {
@@ -17,11 +18,11 @@ const styles = StyleSheet.create({
     borderColor: colors.outlineVariant,
     borderRadius: 16,
     borderWidth: 1,
+    elevation: 2,
     padding: spacing.base,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
 })

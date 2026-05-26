@@ -1,4 +1,5 @@
 import { View, StyleSheet } from "react-native"
+
 import { colors, spacing } from "@/theme/tokens"
 
 export interface FuelGaugeProps {
@@ -25,6 +26,8 @@ export function FuelGauge({ value, max = 8 }: FuelGaugeProps) {
 }
 
 const styles = StyleSheet.create({
+  first: { borderBottomLeftRadius: 4, borderTopLeftRadius: 4 },
+  last: { borderBottomRightRadius: 4, borderTopRightRadius: 4 },
   row: {
     flexDirection: "row",
     gap: 2,
@@ -32,6 +35,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   segment: { borderRadius: 0, flex: 1 },
-  first: { borderBottomLeftRadius: 4, borderTopLeftRadius: 4 },
-  last: { borderBottomRightRadius: 4, borderTopRightRadius: 4 },
 })

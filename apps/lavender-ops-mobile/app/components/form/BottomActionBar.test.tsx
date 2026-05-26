@@ -1,5 +1,6 @@
 import { TouchableOpacity } from "react-native"
 import { fireEvent, render } from "@testing-library/react-native"
+
 import { ThemeProvider } from "@/theme/context"
 
 import { BottomActionBar } from "./BottomActionBar"
@@ -8,11 +9,7 @@ describe("BottomActionBar", () => {
   it("renders both labels", () => {
     const { getByText } = render(
       <ThemeProvider>
-        <BottomActionBar
-          primaryLabel="Simpan Penyewaan"
-          onPrimary={() => {}}
-          onCancel={() => {}}
-        />
+        <BottomActionBar primaryLabel="Simpan Penyewaan" onPrimary={() => {}} onCancel={() => {}} />
       </ThemeProvider>,
     )
     expect(getByText("Batal")).toBeDefined()
@@ -36,12 +33,7 @@ describe("BottomActionBar", () => {
   it("disables primary button while loading", () => {
     const { UNSAFE_getAllByType } = render(
       <ThemeProvider>
-        <BottomActionBar
-          primaryLabel="Simpan"
-          onPrimary={() => {}}
-          onCancel={() => {}}
-          loading
-        />
+        <BottomActionBar primaryLabel="Simpan" onPrimary={() => {}} onCancel={() => {}} loading />
       </ThemeProvider>,
     )
     const buttons = UNSAFE_getAllByType(TouchableOpacity)

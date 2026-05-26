@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
+
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface StepperProps {
@@ -11,14 +12,7 @@ export interface StepperProps {
   max?: number
 }
 
-export function Stepper({
-  value,
-  onDecrement,
-  onIncrement,
-  label,
-  min = 0,
-  max,
-}: StepperProps) {
+export function Stepper({ value, onDecrement, onIncrement, label, min = 0, max }: StepperProps) {
   const atMin = value <= min
   const atMax = max !== undefined && value >= max
   return (
@@ -60,6 +54,13 @@ export function Stepper({
 }
 
 const styles = StyleSheet.create({
+  btn: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
   row: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
@@ -67,12 +68,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: spacing.xs,
-  },
-  btn: {
-    alignItems: "center",
-    borderRadius: 8,
-    height: 44,
-    justifyContent: "center",
-    width: 44,
   },
 })

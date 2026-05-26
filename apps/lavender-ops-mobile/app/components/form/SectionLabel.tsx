@@ -1,4 +1,5 @@
 import { Text } from "react-native"
+
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface SectionLabelProps {

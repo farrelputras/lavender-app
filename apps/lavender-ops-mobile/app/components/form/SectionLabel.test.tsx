@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react-native"
+
 import { ThemeProvider } from "@/theme/context"
 
 import { SectionLabel } from "./SectionLabel"
