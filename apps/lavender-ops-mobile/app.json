@@ -54,7 +54,27 @@
         }
       }
     ],
-    "expo-build-properties"
+    "expo-build-properties",
+    [
+      "expo-camera",
+      {
+        "cameraPermission": "Lavender Ops menggunakan kamera untuk memotret KTP/KTM penyewa dan kondisi kendaraan saat keluar dan kembali.",
+        "microphonePermission": false,
+        "recordAudioAndroid": false
+      }
+    ],
+    [
+      "expo-image-picker",
+      {
+        "photosPermission": "Lavender Ops mengakses galeri untuk memilih foto KTP/KTM dan kondisi kendaraan."
+      }
+    ],
+    [
+      "expo-secure-store",
+      {
+        "faceIDPermission": "Lavender Ops menggunakan Face ID untuk mengamankan sesi login Anda."
+      }
+    ]
   ],
   "experiments": {
     "tsconfigPaths": true
