@@ -3,18 +3,23 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Phase: Demo Build
+## Current Phase: v1.0.0 Roadmap
 
-Building a **demo with in-memory data** to validate the rental workflow with the
-business owner before any backend work.
+Demo is complete and validated. Now executing the v1.0.0 roadmap:
+`docs/superpowers/specs/2026-05-26-v1-roadmap-design.md`
 
-**Do NOT implement in this phase:**
-- Supabase queries, auth, storage, realtime, or Edge Functions
-- EAS builds or APK distribution
-- User management or login screens
+| Phase | Work | Status |
+|---|---|---|
+| 0 | Shared form-component library | ✅ Done |
+| 1 | Native-dep bake + EAS smoke build | ✅ Done |
+| 2 | Branding (icon, splash) | ✅ Done |
+| 3 | Backend design (schema, RLS, auth) | In progress |
+| 4 | Supabase build + connector swap | Pending |
+| 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | Pending |
+| 6 | Photo upload | Pending |
+| 7 | Feedback polish + QA + APK ship | Pending |
 
-> After the owner validates the workflow, phase 2 replaces the connector internals
-> with Supabase — without touching the UI. See `docs/02-demo-development.md` §7.
+**Goal:** Single APK to mom that is the real day-to-day app. Everything post-APK via OTA.
 
 ## Connector-Contract Rules (`docs/02` §3)
 
@@ -42,28 +47,33 @@ any code related to:
 
 ## Stack
 
-- Expo SDK 55 (managed), React Native 0.83, Expo Router 55 (file-based, typed routes)
+- Expo SDK 55 (dev-client), React Native 0.83, **Ignite** (React Navigation — NOT Expo Router)
 - TypeScript strict mode enabled
-- Supabase (`@supabase/supabase-js` v2) — wired but **unused in demo phase**
-- EAS Build (APK), Expo Updates (OTA) — **not used in demo phase**
+- Supabase (`@supabase/supabase-js` v2)
+- EAS Build (APK), Expo Updates (OTA)
 
 ## Key Paths
 
 | Path | What |
 |------|------|
-| `apps/mobile/app/(tabs)/` | Expo Router screens (file-based routes) |
-| `apps/mobile/src/theme/index.ts` | Design tokens — always import from here |
-| `apps/mobile/src/lib/supabase.ts` | Supabase client (unused in demo phase) |
-| `packages/shared/` | Future home of shared types + business logic |
-| `docs/02-demo-development.md` | Full demo spec, connector rules, rental math |
+| `apps/lavender-ops-mobile/app/screens/` | All screen components |
+| `apps/lavender-ops-mobile/app/components/form/` | Shared form primitives (SectionLabel, FieldCard, FuelGauge, Stepper, RupiahInput, PhotoRow, BottomActionBar) |
+| `apps/lavender-ops-mobile/app/navigators/` | MainNavigator (bottom tabs) + stack navigators |
+| `apps/lavender-ops-mobile/app/theme/` | Ignite theme — import via `useAppTheme()` hook; type screen styles with `ThemedStyle<ViewStyle>` |
+| `apps/lavender-ops-mobile/app/services/rentals/` | Connector layer (async functions, types, seed data) |
+| `docs/02-demo-development.md` | Connector-contract rules, rental math |
+| `docs/superpowers/specs/2026-05-26-v1-roadmap-design.md` | Full v1.0.0 roadmap and phase ordering |
 
 ## Commands
 
 ```powershell
-npm run mobile              # Expo dev server (from monorepo root)
-cd apps/mobile
-npx tsc --noEmit            # TypeScript type-check (must pass before shipping OTA)
-npx expo start              # dev server (from mobile workspace)
+cd apps/lavender-ops-mobile
+pnpm run compile            # TypeScript check (npx tsc --noEmit also works)
+pnpm run lint               # ESLint auto-fix
+pnpm test                   # Jest unit tests
+pnpm run start              # Expo dev server (requires dev-client APK on device)
+pnpm run build:dev          # EAS cloud build — dev APK
+pnpm run build:preview      # EAS cloud build — preview APK (for mom testing)
 ```
 
 ## Windows Notes

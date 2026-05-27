@@ -1,6 +1,6 @@
 # LAVENDER v1.0.0 Roadmap — Demo → Day-to-Day App
 
-**Status:** Phase 1 complete (native deps baked; EAS dev build green; CAMERA + POST_NOTIFICATIONS confirmed in manifest). Ready for Phase 2.
+**Status:** Phase 2 complete (branding assets wired; monochrome icon, light splash `#f6faff`, notification icon configured; APK smoke test deferred to Farrel). Phase 3 in progress.
 **Author:** Brainstorming session, 2026-05-26
 **Owner:** Farrel
 **Target ship:** Single APK to mom; everything post-APK delivered via OTA
