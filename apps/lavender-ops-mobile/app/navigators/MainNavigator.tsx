@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { BerandaScreen } from "@/screens/BerandaScreen"
 import { HutangScreen } from "@/screens/HutangScreen"
 import { KendaraanScreen } from "@/screens/KendaraanScreen"
-import { PenyewaanScreen } from "@/screens/PenyewaanScreen"
+import { RentalScreen } from "@/screens/RentalScreen"
 import { UserScreen } from "@/screens/UserScreen"
 import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
@@ -43,10 +43,10 @@ export function MainNavigator() {
         }}
       />
       <Tab.Screen
-        name="Penyewaan"
-        component={PenyewaanScreen}
+        name="Rental"
+        component={RentalScreen}
         options={{
-          tabBarLabel: "Penyewaan",
+          tabBarLabel: "Rental",
           tabBarIcon: ({ color, size }) => <MaterialIcons name="event" size={size} color={color} />,
         }}
       />

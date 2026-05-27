@@ -2,10 +2,10 @@ import { View, Text, StyleSheet } from "react-native"
 
 import { colors, typography, spacing } from "@/theme/tokens"
 
-export function PenyewaanScreen() {
+export function RentalScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Penyewaan</Text>
+      <Text style={styles.text}>Rental</Text>
     </View>
   )
 }
