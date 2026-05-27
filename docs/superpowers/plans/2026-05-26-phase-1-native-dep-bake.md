@@ -1,6 +1,13 @@
 # Phase 1: Native-Dependency Bake Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
+
+> **Status: COMPLETE (2026-05-27)**
+> Tasks 0–4 executed in-session; Task 5 verified via development build (not preview) — EAS build green, APK installed, `dumpsys` confirmed CAMERA + POST_NOTIFICATIONS declared.
+> **Deviations from plan:**
+> - `expo install` auto-detected npm (monorepo root `package-lock.json` confusion); recovered with `pnpm install`. For future installs use `pnpm add` directly.
+> - `RECORD_AUDIO` appeared in dev build manifest — traced to `expo-dev-client`; will not appear in preview build.
+> - `READ_MEDIA_IMAGES` absent from manifest — expected: `expo-image-picker` v55 uses the Android system Photo Picker API (no `READ_MEDIA_IMAGES` required at the manifest level on Android 13+).
 
 **Goal:** Install and configure the seven APK-locked native dependencies (plus the `react-native-url-polyfill` JS shim) into `apps/lavender-ops-mobile`, so the v1.0.0 APK ships with every native module **and permission declaration** the post-ship OTA roadmap will need — verified by a clean type-check and Metro bundle, with a documented (deferred) EAS preview-build gate.
 
@@ -35,7 +42,7 @@ No new files are created. The EAS build (Task 5) is a cloud operation that touch
 
 **Files:** none (verification only)
 
-- [ ] **Step 1: Confirm a clean working tree**
+- [x] **Step 1: Confirm a clean working tree**
 
 Run (from repo root `C:\Users\ferna\dev\personal_projects\lavender-app`):
 ```powershell
@@ -43,7 +50,7 @@ git status
 ```
 Expected: `nothing to commit, working tree clean`. If there are uncommitted changes, stop and resolve them first — this phase commits incrementally and a dirty tree muddies the diffs.
 
-- [ ] **Step 2: Confirm the active app and package manager**
+- [x] **Step 2: Confirm the active app and package manager**
 
 Run:
 ```powershell
@@ -51,7 +58,7 @@ Test-Path apps\lavender-ops-mobile\pnpm-lock.yaml
 ```
 Expected: `True`. This confirms pnpm is the app-local package manager. All install commands below run **from inside `apps/lavender-ops-mobile`**, where `npx expo install` auto-detects pnpm from this lockfile. Do NOT run `npm install` at the monorepo root for this app's deps.
 
-- [ ] **Step 3: Confirm the baseline builds before we touch anything**
+- [x] **Step 3: Confirm the baseline builds before we touch anything**
 
 Run:
 ```powershell
@@ -68,7 +75,7 @@ Expected: no output, exit code 0. This is the baseline — if Phase 0's componen
 - Modify: `apps/lavender-ops-mobile/package.json` (via `expo install`)
 - Modify: `apps/lavender-ops-mobile/pnpm-lock.yaml` (auto)
 
-- [ ] **Step 1: Install all bake-list packages in one command**
+- [x] **Step 1: Install all bake-list packages in one command**
 
 Run (from `apps/lavender-ops-mobile`):
 ```powershell
@@ -78,7 +85,7 @@ npx expo install @supabase/supabase-js react-native-url-polyfill expo-camera exp
 
 Expected: install completes; pnpm reports the 8 packages added. The native `expo-*` packages, `react-native-webview`, `react-native-url-polyfill` are now in `node_modules`.
 
-- [ ] **Step 2: Verify all eight landed in package.json**
+- [x] **Step 2: Verify all eight landed in package.json**
 
 Run:
 ```powershell
@@ -86,7 +93,7 @@ Select-String -Path package.json -Pattern "supabase-js|url-polyfill|expo-camera|
 ```
 Expected: 8 matching lines in the `dependencies` block. If any is missing, re-run the install for that package.
 
-- [ ] **Step 3: Verify SDK version compatibility**
+- [x] **Step 3: Verify SDK version compatibility**
 
 Run:
 ```powershell
@@ -94,7 +101,7 @@ npx expo install --check
 ```
 Expected: `Dependencies are up to date` (or it prints a list and offers to fix — if it lists mismatches, run `npx expo install --fix` and re-check). This catches the most common Phase-1 footgun: a native lib pinned to a version that doesn't match Expo SDK 55.
 
-- [ ] **Step 4: Type-check still passes**
+- [x] **Step 4: Type-check still passes**
 
 Run:
 ```powershell
@@ -102,7 +109,7 @@ npx tsc --noEmit -p .
 ```
 Expected: no output, exit 0. The new packages ship their own types; this confirms they resolve and don't conflict with strict mode.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 Run (from repo root):
 ```powershell
@@ -131,7 +138,7 @@ Expected: commit succeeds.
 - `expo-notifications` adds its `POST_NOTIFICATIONS` (Android 13+) permission automatically from the package's own manifest contribution when autolinked — **no plugin entry is required for the permission**. Its config plugin only customizes the notification icon/color/sounds, which are branding assets owned by Phase 2. So we install the package (Task 1) but defer its plugin entry.
 - `expo-file-system` and `react-native-webview` need no plugin — they autolink and declare nothing permission-gated for our use.
 
-- [ ] **Step 1: Replace the `plugins` array in app.json**
+- [x] **Step 1: Replace the `plugins` array in app.json**
 
 The current `plugins` array (`apps/lavender-ops-mobile/app.json`) ends with `"expo-build-properties"`. Replace the entire array with the block below (appends the three permission plugins; leaves the existing entries untouched):
 
@@ -185,7 +192,7 @@ Notes on the camera options: `microphonePermission: false` skips the iOS microph
 
 > **Fallback:** if the Task 5 prebuild errors on the `expo-camera` plugin schema (some versions don't accept a literal `false` for `microphonePermission`), remove the `microphonePermission` key entirely and keep only `recordAudioAndroid: false` — that alone suppresses the Android `RECORD_AUDIO` permission, which is the part that matters for our Android APK.
 
-- [ ] **Step 2: Verify app.json is still valid and config resolves**
+- [x] **Step 2: Verify app.json is still valid and config resolves**
 
 Run (from `apps/lavender-ops-mobile`):
 ```powershell
@@ -193,7 +200,7 @@ npx expo config --type public > $null; if ($?) { "config resolves OK" }
 ```
 Expected: `config resolves OK`. This evaluates `app.config.ts` (which spreads `app.json`'s `plugins`) and fails loudly if the JSON is malformed or a plugin name is wrong. (`app.config.ts` merges `config.plugins ?? []`, so the new entries flow through automatically — no edit to `app.config.ts` needed.)
 
-- [ ] **Step 3: Type-check**
+- [x] **Step 3: Type-check**
 
 Run:
 ```powershell
@@ -201,7 +208,7 @@ npx tsc --noEmit -p .
 ```
 Expected: no output, exit 0 (config edits shouldn't affect TS, but confirm nothing regressed).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 Run (from repo root):
 ```powershell
@@ -229,7 +236,7 @@ Expected: commit succeeds.
 
 `@supabase/supabase-js` uses the WHATWG `URL` API, which React Native's runtime implements incompletely. `react-native-url-polyfill/auto` patches `global.URL` and must be imported **before** any code that constructs a URL — i.e. at the very top of the entry file. Importing it now (rather than in Phase 4) is correct and harmless: it makes the bake self-proving (the polyfill must resolve and bundle) and means Supabase "just works" when the connector swap happens.
 
-- [ ] **Step 1: Add the polyfill import as the first line of `index.tsx`**
+- [x] **Step 1: Add the polyfill import as the first line of `index.tsx`**
 
 The file currently starts with `import "@expo/metro-runtime"`. Add the polyfill import as the new first line:
 
@@ -246,7 +253,7 @@ import { App } from "@/app"
 registerRootComponent(App)
 ```
 
-- [ ] **Step 2: Type-check**
+- [x] **Step 2: Type-check**
 
 Run (from `apps/lavender-ops-mobile`):
 ```powershell
@@ -254,7 +261,7 @@ npx tsc --noEmit -p .
 ```
 Expected: no output, exit 0.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 Run (from repo root):
 ```powershell
@@ -278,7 +285,7 @@ This is the strongest verification available **without a native build**: Metro r
 
 **Files:** none (verification only; `dist/` output is throwaway and gitignored via `.easignore` patterns)
 
-- [ ] **Step 1: Export an Android bundle**
+- [x] **Step 1: Export an Android bundle**
 
 Run (from `apps/lavender-ops-mobile`):
 ```powershell
@@ -286,7 +293,7 @@ npx expo export --platform android
 ```
 Expected: completes with `Exported: dist` (or similar) and no "Unable to resolve module" errors. Any unresolved import from the new packages would fail here.
 
-- [ ] **Step 2: Clean up the throwaway bundle output**
+- [x] **Step 2: Clean up the throwaway bundle output**
 
 Run:
 ```powershell
@@ -294,7 +301,7 @@ Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
 ```
 Expected: `dist/` removed. (It is build output, not committed.)
 
-- [ ] **Step 3: Optional health check**
+- [x] **Step 3: Optional health check**
 
 Run:
 ```powershell
@@ -312,14 +319,14 @@ No commit — this task produces no source changes.
 
 The `preview` profile in `eas.json` builds an internal-distribution **APK** (`"android": { "buildType": "apk" }`) — the closest thing to what eventually ships to mom, which makes it the right smoke target.
 
-- [ ] **Step 1: Pre-flight — confirm EAS auth**
+- [x] **Step 1: Pre-flight — confirm EAS auth**
 
 ```powershell
 eas whoami
 ```
 Expected: prints Farrel's Expo account. If it errors with "not logged in," run `eas login` first. If `eas` is not found, install the CLI: `npm install -g eas-cli`. (Tip: in a Claude Code session, prefix interactive commands with `!`, e.g. `!eas login`.)
 
-- [ ] **Step 2: Kick off the cloud APK build**
+- [x] **Step 2: Kick off the cloud APK build**
 
 Run (from `apps/lavender-ops-mobile`):
 ```powershell
@@ -327,12 +334,12 @@ eas build --profile preview --platform android
 ```
 Expected: build is queued, then runs. The build performs `expo prebuild` on a Linux runner (regenerating `android/`, which is why `.easignore` excludes the local one), autolinks the native modules, and compiles the APK. **A green build is the proof that the seven native modules autolink correctly.**
 
-- [ ] **Step 3: Download and install the APK on a real Android device**
+- [x] **Step 3: Download and install the APK on a real Android device**
 
 Use the EAS build URL (printed at completion) to download the APK, then install it (`adb install <path>.apk`, or open the link on the device). Launch the app.
 Expected: the app boots to the Beranda screen and Phase 0 screens render — i.e., no native crash from a mismatched/missing native module.
 
-- [ ] **Step 4: Verify the baked permissions are actually declared**
+- [x] **Step 4: Verify the baked permissions are actually declared**
 
 With the app installed, confirm the permission declarations made it into the manifest:
 ```powershell

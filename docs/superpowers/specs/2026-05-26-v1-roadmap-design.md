@@ -1,6 +1,6 @@
 # LAVENDER v1.0.0 Roadmap — Demo → Day-to-Day App
 
-**Status:** Phase 0 complete (shared form-component library). Ready for Phase 1.
+**Status:** Phase 1 complete (native deps baked; EAS dev build green; CAMERA + POST_NOTIFICATIONS confirmed in manifest). Ready for Phase 2.
 **Author:** Brainstorming session, 2026-05-26
 **Owner:** Farrel
 **Target ship:** Single APK to mom; everything post-APK delivered via OTA
