@@ -13,7 +13,7 @@ Demo is complete and validated. Now executing the v1.0.0 roadmap:
 | 0 | Shared form-component library | ✅ Done |
 | 1 | Native-dep bake + EAS smoke build | ✅ Done |
 | 2 | Branding (icon, splash) | ✅ Done |
-| 3 | Backend design (schema, RLS, auth) | In progress |
+| 3 | Backend design (schema, RLS, auth) | ✅ Done |
 | 4 | Supabase build + connector swap | Pending |
 | 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | Pending |
 | 6 | Photo upload | Pending |
