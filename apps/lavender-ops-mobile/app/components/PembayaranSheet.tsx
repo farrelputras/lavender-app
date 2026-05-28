@@ -25,10 +25,10 @@ type Props = {
 }
 
 const METHODS: { key: PaymentMethod; label: string }[] = [
-  { key: "cash", label: "Cash" },
-  { key: "transfer", label: "Transfer" },
-  { key: "qris", label: "QRIS" },
-  { key: "lainnya", label: "Lainnya" },
+  { key: "CASH", label: "Cash" },
+  { key: "TRANSFER", label: "Transfer" },
+  { key: "QRIS", label: "QRIS" },
+  { key: "LAINNYA", label: "Lainnya" },
 ]
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
@@ -41,7 +41,7 @@ function todayMidnight(): Date {
 
 export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmount }: Props) {
   const [rawDigits, setRawDigits] = useState(defaultAmount ? String(defaultAmount) : "")
-  const [method, setMethod] = useState<PaymentMethod>("cash")
+  const [method, setMethod] = useState<PaymentMethod>("CASH")
   const [methodDesc, setMethodDesc] = useState("")
   const [paidAt, setPaidAt] = useState<Date>(todayMidnight)
   const [notes, setNotes] = useState("")
@@ -70,7 +70,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
 
   function reset() {
     setRawDigits(defaultAmount ? String(defaultAmount) : "")
-    setMethod("cash")
+    setMethod("CASH")
     setMethodDesc("")
     setPaidAt(todayMidnight())
     setNotes("")
@@ -92,7 +92,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
     onSubmit({
       amount,
       method,
-      methodDescription: method === "lainnya" ? methodDesc : undefined,
+      methodDescription: method === "LAINNYA" ? methodDesc : undefined,
       paidAt,
       notes: notes.trim() || undefined,
     })
@@ -197,7 +197,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
                   </TouchableOpacity>
                 ))}
               </View>
-              {method === "lainnya" && (
+              {method === "LAINNYA" && (
                 <TextInput
                   style={[textStyles.bodyMd, styles.textInput, { marginTop: spacing.sm }]}
                   placeholder="Contoh: DANA, Gopay, Voucher"

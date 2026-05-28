@@ -56,7 +56,7 @@ function displayRupiah(digits: string): string {
 
 type ExtraFee = { id: string; description: string; rawAmount: string }
 
-const JAMINAN_LABELS: Record<string, string> = { ktp: "KTP", ktm: "KTM", lainnya: "Lainnya" }
+const JAMINAN_LABELS: Record<string, string> = { KTP: "KTP", KTM: "KTM", LAINNYA: "Lainnya" }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -777,7 +777,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                       </View>
                       <View style={styles.methodBadge}>
                         <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                          {p.method === "lainnya"
+                          {p.method === "LAINNYA"
                             ? (p.methodDescription ?? "Lainnya")
                             : p.method.toUpperCase()}
                         </Text>
@@ -802,7 +802,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                       </View>
                       <View style={styles.methodBadge}>
                         <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                          {p.method === "lainnya"
+                          {p.method === "LAINNYA"
                             ? (p.methodDescription ?? "Lainnya")
                             : p.method.toUpperCase()}
                         </Text>

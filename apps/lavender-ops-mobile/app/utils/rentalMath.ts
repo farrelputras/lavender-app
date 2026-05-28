@@ -68,7 +68,7 @@ export function formatPaket(hari: number, jam: 0 | 6 | 12): string {
 }
 
 export function isOverdue(rental: Pick<Rental, "dueAt" | "status">, now?: Date): boolean {
-  return rental.status === "active" && rental.dueAt.getTime() < (now ?? new Date()).getTime()
+  return rental.status === "ACTIVE" && rental.dueAt.getTime() < (now ?? new Date()).getTime()
 }
 
 export function hoursLate(dueAt: Date, now?: Date): number {

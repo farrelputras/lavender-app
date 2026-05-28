@@ -128,7 +128,7 @@ export function BerandaScreen() {
               key={item.rentalId}
               activeOpacity={0.8}
               onPress={() => navigation.navigate("PenyewaanDetail", { rentalId: item.rentalId })}
-              style={[styles.rentalCard, item.status === "terlambat" && styles.rentalCardOverdue]}
+              style={[styles.rentalCard, item.status === "TERLAMBAT" && styles.rentalCardOverdue]}
             >
               {/* Row 1: customer name + status chip */}
               <View style={styles.cardRow}>
@@ -141,7 +141,7 @@ export function BerandaScreen() {
                 <View
                   style={[
                     styles.statusChip,
-                    item.status === "terlambat" ? styles.chipTerlambat : styles.chipBelumKembali,
+                    item.status === "TERLAMBAT" ? styles.chipTerlambat : styles.chipBelumKembali,
                   ]}
                 >
                   <Text
@@ -149,11 +149,11 @@ export function BerandaScreen() {
                       textStyles.labelMd,
                       {
                         color:
-                          item.status === "terlambat" ? colors.onError : colors.onTertiaryContainer,
+                          item.status === "TERLAMBAT" ? colors.onError : colors.onTertiaryContainer,
                       },
                     ]}
                   >
-                    {item.status === "terlambat" ? "Terlambat" : "Belum Kembali"}
+                    {item.status === "TERLAMBAT" ? "Terlambat" : "Belum Kembali"}
                   </Text>
                 </View>
               </View>
@@ -172,13 +172,13 @@ export function BerandaScreen() {
                   <MaterialIcons
                     name="schedule"
                     size={16}
-                    color={item.status === "terlambat" ? colors.error : colors.onSurfaceVariant}
+                    color={item.status === "TERLAMBAT" ? colors.error : colors.onSurfaceVariant}
                   />
                   <Text
                     style={[
                       textStyles.bodyMd,
                       {
-                        color: item.status === "terlambat" ? colors.error : colors.onSurfaceVariant,
+                        color: item.status === "TERLAMBAT" ? colors.error : colors.onSurfaceVariant,
                         marginLeft: 4,
                       },
                     ]}

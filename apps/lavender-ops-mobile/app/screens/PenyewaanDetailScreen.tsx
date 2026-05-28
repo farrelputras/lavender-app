@@ -38,11 +38,11 @@ function showToast(msg: string) {
   }
 }
 
-const JAMINAN_LABELS: Record<string, string> = { ktp: "KTP", ktm: "KTM", lainnya: "Lainnya" }
+const JAMINAN_LABELS: Record<string, string> = { KTP: "KTP", KTM: "KTM", LAINNYA: "Lainnya" }
 
 function paymentMethodLabel(payment: Payment): string {
-  if (payment.method === "lainnya") return payment.methodDescription ?? "Lainnya"
-  const MAP: Record<string, string> = { cash: "Cash", transfer: "Transfer", qris: "QRIS" }
+  if (payment.method === "LAINNYA") return payment.methodDescription ?? "Lainnya"
+  const MAP: Record<string, string> = { CASH: "Cash", TRANSFER: "Transfer", QRIS: "QRIS" }
   return MAP[payment.method] ?? payment.method
 }
 
@@ -142,7 +142,7 @@ export function PenyewaanDetailScreen({
   const sisa = Math.max(0, rental.totalBill - totalPaid)
   const initials = user ? initialsFromName(user.name) : "?"
   const vehicleIcon: "two-wheeler" | "directions-car" =
-    vehicle?.category === "mobil" ? "directions-car" : "two-wheeler"
+    vehicle?.category === "MOBIL" ? "directions-car" : "two-wheeler"
   const overdue = isOverdue(rental)
 
   return (

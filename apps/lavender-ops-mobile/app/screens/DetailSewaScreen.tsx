@@ -155,7 +155,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   }, [userId, vehicleId])
 
   // ─── Jaminan
-  const [jaminanItems, setJaminanItems] = useState<Set<JaminanItem>>(new Set(["ktp", "ktm"]))
+  const [jaminanItems, setJaminanItems] = useState<Set<JaminanItem>>(new Set(["KTP", "KTM"]))
   const [jaminanLainnya, setJaminanLainnya] = useState("")
   const [jaminanError, setJaminanError] = useState(false)
 
@@ -342,7 +342,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
         discount,
         jaminan: {
           items: Array.from(jaminanItems),
-          lainnyaDescription: jaminanItems.has("lainnya") ? jaminanLainnya : undefined,
+          lainnyaDescription: jaminanItems.has("LAINNYA") ? jaminanLainnya : undefined,
         },
         kondisiKeluar: {
           bensinKotak: bensin,
@@ -372,7 +372,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
       : userSummary.name
     : "..."
 
-  const isMotor = vehicle?.category === "motor"
+  const isMotor = vehicle?.category === "MOTOR"
 
   const mulaiLabel = `${formatHeaderDate(mulai)} · ${formatTime(mulai)}`
   const estimasiLabel = `${formatHeaderDate(estimasi)} · ${formatTime(estimasi)}`
@@ -516,7 +516,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
           <View>
             <SectionLabel>Jaminan</SectionLabel>
             <FieldCard style={jaminanError ? styles.cardError : undefined}>
-              {(["ktp", "ktm", "lainnya"] as JaminanItem[]).map((item) => (
+              {(["KTP", "KTM", "LAINNYA"] as JaminanItem[]).map((item) => (
                 <TouchableOpacity
                   key={item}
                   style={styles.checkboxRow}
@@ -529,11 +529,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                     )}
                   </View>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                    {item === "ktp" ? "KTP" : item === "ktm" ? "KTM" : "Lainnya"}
+                    {item === "KTP" ? "KTP" : item === "KTM" ? "KTM" : "Lainnya"}
                   </Text>
                 </TouchableOpacity>
               ))}
-              {jaminanItems.has("lainnya") && (
+              {jaminanItems.has("LAINNYA") && (
                 <TextInput
                   style={[textStyles.bodyMd, styles.inlineInput, { marginTop: spacing.sm }]}
                   placeholder="Sebutkan jaminan lainnya..."

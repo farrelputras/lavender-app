@@ -58,7 +58,7 @@ function FilterChip({
 }
 
 function VehicleCard({ vehicle, onPress }: { vehicle: VehicleSummary; onPress: () => void }) {
-  const isMotor = vehicle.category === "motor"
+  const isMotor = vehicle.category === "MOTOR"
 
   return (
     <TouchableOpacity
@@ -239,13 +239,13 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
           />
           <FilterChip
             label="Motor"
-            active={category === "motor"}
-            onPress={() => setCategory("motor")}
+            active={category === "MOTOR"}
+            onPress={() => setCategory("MOTOR")}
           />
           <FilterChip
             label="Mobil"
-            active={category === "mobil"}
-            onPress={() => setCategory("mobil")}
+            active={category === "MOBIL"}
+            onPress={() => setCategory("MOBIL")}
           />
           <View style={styles.filterDivider} />
           <FilterChip

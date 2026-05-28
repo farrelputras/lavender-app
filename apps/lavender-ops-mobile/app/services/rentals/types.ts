@@ -1,12 +1,14 @@
-export type RentalStatus = "active" | "completed" | "cancelled"
+export type RentalStatus = "ACTIVE" | "COMPLETED" | "CANCELLED"
 
-export type ReturnStatus = "belumKembali" | "terlambat"
+export type ReturnStatus = "BELUM_KEMBALI" | "TERLAMBAT"
 
-export type VehicleCategory = "motor" | "mobil"
+export type VehicleCategory = "MOTOR" | "MOBIL"
 
-export type PaymentMethod = "cash" | "transfer" | "qris" | "lainnya"
+export type PaymentMethod = "CASH" | "TRANSFER" | "QRIS" | "LAINNYA"
 
-export type JaminanItem = "ktp" | "ktm" | "lainnya"
+export type JaminanItem = "KTP" | "KTM" | "LAINNYA"
+
+export type VerificationStatus = "BELUM_DIVERIFIKASI" | "TERVERIFIKASI_PDDIKTI" | "VERIFIKASI_GAGAL"
 
 export interface User {
   id: string
@@ -18,9 +20,9 @@ export interface User {
 
 export interface Hutang {
   id: string
-  rentalId: string
+  rentalId: string | null // null for manual hutang (no associated rental)
   userId: string
-  amount: number
+  amount: number // sisa (remaining balance) at query time
   createdAt: Date
 }
 
@@ -54,7 +56,15 @@ export interface UserSummary {
   name: string
   nickname: string | null
   phone: string
-  isVerified: boolean
+  // Verification (Phase 4 widening — always BELUM_DIVERIFIKASI until v1.1 PDDikti)
+  isMahasiswa: boolean
+  isVerified: boolean // true when verificationStatus === 'TERVERIFIKASI_PDDIKTI'
+  verificationStatus: VerificationStatus
+  namaPddikti: string | null // populated by v1.1 PDDikti verify
+  tahunMasuk: number | null
+  universitas: string | null
+  prodi: string | null
+  // Computed aggregates
   activeRentalsCount: number
   debtAmount: number
 }
