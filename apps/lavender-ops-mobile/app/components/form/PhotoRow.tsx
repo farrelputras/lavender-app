@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native"
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Image, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
 import { colors, textStyles, spacing } from "@/theme/tokens"
@@ -6,6 +6,7 @@ import { colors, textStyles, spacing } from "@/theme/tokens"
 export interface PhotoItem {
   id: string
   uri: string | null
+  status?: "uploaded" | "pending" | "failed"
 }
 
 export interface PhotoRowProps {
@@ -30,9 +31,19 @@ export function PhotoRow({ photos, onAdd, onRemove, addLabel = "Tambah Foto" }: 
       </TouchableOpacity>
       {photos.map((p) => (
         <View key={p.id} style={styles.thumb}>
-          <View style={styles.placeholder}>
-            <MaterialIcons name="image" size={32} color={colors.outlineVariant} />
-          </View>
+          {p.uri != null ? (
+            <Image source={{ uri: p.uri }} style={styles.image} resizeMode="cover" />
+          ) : (
+            <View style={styles.placeholder}>
+              <MaterialIcons name="image" size={32} color={colors.outlineVariant} />
+            </View>
+          )}
+          {p.status === "pending" && (
+            <View style={styles.pendingOverlay}>
+              <ActivityIndicator size="small" color={colors.onSurface} />
+            </View>
+          )}
+          {p.status === "failed" && <View style={styles.failedOverlay} />}
           <TouchableOpacity
             style={styles.close}
             onPress={() => onRemove(p.id)}
@@ -68,6 +79,19 @@ const styles = StyleSheet.create({
     right: 6,
     top: 6,
     width: 22,
+  },
+  failedOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(176,0,32,0.35)",
+  },
+  image: {
+    flex: 1,
+  },
+  pendingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
   },
   placeholder: {
     alignItems: "center",
