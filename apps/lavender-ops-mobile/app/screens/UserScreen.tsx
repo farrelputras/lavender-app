@@ -62,7 +62,7 @@ function UserRow({ u, onPress }: { u: UserSummary; onPress: () => void }) {
           {u.activeRentalsCount > 0 && (
             <View style={[styles.chip, styles.chipActive]}>
               <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
-                Sewa Aktif ({u.activeRentalsCount})
+                Active Rentals ({u.activeRentalsCount})
               </Text>
             </View>
           )}

@@ -15,7 +15,7 @@ Demo is complete and validated. Now executing the v1.0.0 roadmap:
 | 2 | Branding (icon, splash) | ✅ Done |
 | 3 | Backend design (schema, RLS, auth) | ✅ Done |
 | 4 | Supabase build + connector swap | Pending |
-| 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | Pending |
+| 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | ✅ Done |
 | 6 | Photo upload | Pending |
 | 7 | Feedback polish + QA + APK ship | Pending |
 

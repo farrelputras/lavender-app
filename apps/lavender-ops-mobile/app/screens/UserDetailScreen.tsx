@@ -109,7 +109,7 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Sewa Aktif</Text>
+            <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Active Rentals</Text>
             <Text style={[textStyles.headlineMd, { color: colors.onSurface }]}>
               {summary.activeRentalsCount}
             </Text>
