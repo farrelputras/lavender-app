@@ -30,4 +30,8 @@ describe("extFromMime", () => {
   it("returns 'jpg' for null (default)", () => {
     expect(extFromMime(null)).toBe("jpg")
   })
+
+  it("returns 'jpg' for undefined (default)", () => {
+    expect(extFromMime(undefined)).toBe("jpg")
+  })
 })
