@@ -117,7 +117,7 @@ export function BerandaScreen() {
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnOutlined]}
             activeOpacity={0.8}
-            onPress={() => showToast("Belum tersedia di demo")}
+            onPress={() => navigation.navigate("UserForm", { mode: "create" })}
           >
             <MaterialIcons name="person-add" size={28} color={colors.primary} />
             <Text style={[textStyles.headlineSm, { color: colors.primary }]}>User Baru</Text>
