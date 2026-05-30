@@ -21,6 +21,7 @@ import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
 import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
 import { colors, textStyles, borderRadius, spacing } from "@/theme/tokens"
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
+import { useSession } from "@/services/auth/useSession"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 
@@ -34,10 +35,24 @@ function showToast(msg: string) {
 
 export function BerandaScreen() {
   const navigation = useNavigation<BerandaNavProp>()
+  const { signOut } = useSession()
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [rentalsDue, setRentalsDue] = useState<RentalDueToday[]>([])
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
+
+  const handleSignOut = () => {
+    Alert.alert("Keluar?", "Anda akan diminta login lagi.", [
+      { text: "Batal", style: "cancel" },
+      {
+        text: "Keluar",
+        style: "destructive",
+        onPress: () => {
+          signOut()
+        },
+      },
+    ])
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -72,9 +87,14 @@ export function BerandaScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.avatar}>
+          <TouchableOpacity
+            style={styles.avatar}
+            onPress={handleSignOut}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <MaterialIcons name="person" size={24} color={colors.onPrimary} />
-          </View>
+          </TouchableOpacity>
           <View style={styles.headerTextBlock}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Halo!</Text>
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
