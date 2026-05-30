@@ -77,6 +77,7 @@ export function rowToRental(row: Record<string, unknown>): Rental {
 }
 
 export function rowToUserSummary(row: Record<string, unknown>): UserSummary {
+  const profil = row.profil_photo as { id: string; path: string } | null
   return {
     id: row.id as string,
     name: row.name as string,
@@ -91,6 +92,7 @@ export function rowToUserSummary(row: Record<string, unknown>): UserSummary {
     prodi: (row.prodi as string | null) ?? null,
     activeRentalsCount: (row.active_rentals_count as number) ?? 0,
     debtAmount: (row.debt_amount as number) ?? 0,
+    profilPhoto: profil ? { id: profil.id, uri: null } : null,
   }
 }
 
@@ -133,6 +135,7 @@ export function rowToHutang(row: Record<string, unknown>, sisa: number): Hutang 
 export function rowToUser(row: Record<string, unknown>): User {
   const ktp = row.ktp_photo as { id: string; path: string } | null
   const ktm = row.ktm_photo as { id: string; path: string } | null
+  const profil = row.profil_photo as { id: string; path: string } | null
   return {
     id: row.id as string,
     name: row.name as string,
@@ -150,6 +153,7 @@ export function rowToUser(row: Record<string, unknown>): User {
     notes: (row.notes as string | null) ?? null,
     ktpPhoto: ktp ? { id: ktp.id, uri: null } : null,
     ktmPhoto: ktm ? { id: ktm.id, uri: null } : null,
+    profilPhoto: profil ? { id: profil.id, uri: null } : null,
   }
 }
 

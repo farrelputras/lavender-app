@@ -38,6 +38,7 @@ describe("rowToUser", () => {
       notes: null,
       ktpPhoto: null,
       ktmPhoto: null,
+      profilPhoto: null,
     })
   })
 
@@ -52,5 +53,19 @@ describe("rowToUser", () => {
     }
     const user = rowToUser(row)
     expect(user.ktpPhoto).toEqual({ id: "p1", uri: null })
+  })
+
+  it("maps profil_photo {id,path} to profilPhoto {id, uri:null}", () => {
+    const row = {
+      id: "u1", name: "X", nickname: null, phone: "0",
+      is_mahasiswa: false, verification_status: "BELUM_DIVERIFIKASI",
+      verified_at: null, nama_pddikti: null, tahun_masuk: null,
+      universitas: null, prodi: null, alamat: null, kontak_darurat: null, notes: null,
+      ktp_photo: null,
+      ktm_photo: null,
+      profil_photo: { id: "p3", path: "users/u1/profil/p3.jpg" },
+    }
+    const user = rowToUser(row)
+    expect(user.profilPhoto).toEqual({ id: "p3", uri: null })
   })
 })

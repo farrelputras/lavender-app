@@ -68,7 +68,7 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         notes: notes.trim() || null,
       }
       if (mode === "create") {
-        const user = await createUser(payload)
+        const { user } = await createUser(payload)
         navigation.replace("UserDetail", { userId: user.id })
       } else if (userId) {
         await updateUser(userId, payload)

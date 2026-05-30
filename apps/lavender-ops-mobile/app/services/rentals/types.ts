@@ -27,7 +27,13 @@ export interface User {
   notes: string | null
   ktpPhoto: { id: string; uri: string | null } | null
   ktmPhoto: { id: string; uri: string | null } | null
+  profilPhoto: { id: string; uri: string | null } | null
 }
+
+export type PhotoInput =
+  | { kind: "keep" }
+  | { kind: "remove" }
+  | { kind: "new"; uri: string; mimeType?: string }
 
 export interface CreateUserInput {
   name: string
@@ -37,6 +43,9 @@ export interface CreateUserInput {
   alamat: string | null
   kontakDarurat: string | null
   notes: string | null
+  profilPhoto?: PhotoInput
+  ktpPhoto?: PhotoInput
+  ktmPhoto?: PhotoInput
 }
 
 export type UpdateUserInput = CreateUserInput
@@ -90,6 +99,7 @@ export interface UserSummary {
   // Computed aggregates
   activeRentalsCount: number
   debtAmount: number
+  profilPhoto: { id: string; uri: string | null } | null
 }
 
 export interface Vehicle {

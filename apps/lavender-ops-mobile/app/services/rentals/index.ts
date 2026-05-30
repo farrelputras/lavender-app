@@ -15,6 +15,7 @@ import {
   User,
   CreateUserInput,
   UpdateUserInput,
+  PhotoInput,
   UserSummary,
   VehicleSummary,
   Vehicle,
@@ -28,6 +29,9 @@ import {
 } from "./types"
 import { supabase } from "../supabase/client"
 import { uuidv4 } from "@/utils/uuid"
+import { uploadPhoto, signPaths } from "@/services/photos/storage"
+import type { UserPhotoSlot } from "@/services/photos/paths"
+import { buildUserPhotoPath, extFromMime } from "@/services/photos/paths"
 
 export interface CloseRentalInput {
   returnedAt: Date
@@ -47,7 +51,22 @@ export async function getUserSummaries(): Promise<UserSummary[]> {
     .select("*")
     .order("name", { ascending: true })
   if (error) throw error
-  return (data as Record<string, unknown>[]).map(rowToUserSummary)
+  const rawRows = data as Record<string, unknown>[]
+  const users = rawRows.map(rowToUserSummary)
+  // gather all profil paths for batch signing
+  const allPaths: string[] = []
+  rawRows.forEach((row) => {
+    const profil = row.profil_photo as { id: string; path: string } | null
+    if (profil) allPaths.push(profil.path)
+  })
+  if (allPaths.length > 0) {
+    const signed = await signPaths(allPaths)
+    users.forEach((u, i) => {
+      const profil = rawRows[i].profil_photo as { id: string; path: string } | null
+      if (profil && u.profilPhoto) u.profilPhoto = { ...u.profilPhoto, uri: signed.get(profil.path) ?? null }
+    })
+  }
+  return users
 }
 
 export async function getUserSummary(id: string): Promise<UserSummary | null> {
@@ -57,7 +76,16 @@ export async function getUserSummary(id: string): Promise<UserSummary | null> {
     .eq("id", id)
     .maybeSingle()
   if (error) throw error
-  return data ? rowToUserSummary(data as Record<string, unknown>) : null
+  if (!data) return null
+  const raw = data as Record<string, unknown>
+  const user = rowToUserSummary(raw)
+  // hydrate profil photo URI
+  const profil = raw.profil_photo as { id: string; path: string } | null
+  if (profil && user.profilPhoto) {
+    const signed = await signPaths([profil.path])
+    user.profilPhoto = { ...user.profilPhoto, uri: signed.get(profil.path) ?? null }
+  }
+  return user
 }
 
 export async function getUser(id: string): Promise<User | null> {
@@ -68,10 +96,29 @@ export async function getUser(id: string): Promise<User | null> {
     .is("deleted_at", null)
     .maybeSingle()
   if (error) throw error
-  return data ? rowToUser(data as Record<string, unknown>) : null
+  if (!data) return null
+  const raw = data as Record<string, unknown>
+  const user = rowToUser(raw)
+  // hydrate photo URIs
+  const pathsToSign: string[] = []
+  const ktp = raw.ktp_photo as { id: string; path: string } | null
+  const ktm = raw.ktm_photo as { id: string; path: string } | null
+  const profil = raw.profil_photo as { id: string; path: string } | null
+  if (ktp) pathsToSign.push(ktp.path)
+  if (ktm) pathsToSign.push(ktm.path)
+  if (profil) pathsToSign.push(profil.path)
+  if (pathsToSign.length > 0) {
+    const signed = await signPaths(pathsToSign)
+    if (ktp && user.ktpPhoto) user.ktpPhoto = { ...user.ktpPhoto, uri: signed.get(ktp.path) ?? null }
+    if (ktm && user.ktmPhoto) user.ktmPhoto = { ...user.ktmPhoto, uri: signed.get(ktm.path) ?? null }
+    if (profil && user.profilPhoto) user.profilPhoto = { ...user.profilPhoto, uri: signed.get(profil.path) ?? null }
+  }
+  return user
 }
 
-export async function createUser(input: CreateUserInput): Promise<User> {
+export async function createUser(
+  input: CreateUserInput,
+): Promise<{ user: User; failedPhotoSlots: string[] }> {
   const { data, error } = await supabase
     .from("users")
     .insert({
@@ -87,26 +134,66 @@ export async function createUser(input: CreateUserInput): Promise<User> {
     .select("*")
     .single()
   if (error) throw error
-  return rowToUser(data as Record<string, unknown>)
+  const userId = (data as Record<string, unknown>).id as string
+  // Best-effort upload each photo slot — never throw on photo failure
+  const photoFailures: string[] = []
+  const photoUpdates: Record<string, unknown> = {}
+  for (const [slot, photoInput] of [
+    ["ktp_photo", input.ktpPhoto],
+    ["ktm_photo", input.ktmPhoto],
+    ["profil_photo", input.profilPhoto],
+  ] as [string, PhotoInput | undefined][]) {
+    if (!photoInput || photoInput.kind !== "new") continue
+    try {
+      const ext = extFromMime(photoInput.mimeType)
+      const path = buildUserPhotoPath(userId, slot.replace("_photo", "") as UserPhotoSlot, ext)
+      await uploadPhoto(photoInput.uri, path, photoInput.mimeType ?? "image/jpeg")
+      photoUpdates[slot] = { id: uuidv4(), path }
+    } catch {
+      photoFailures.push(slot)
+    }
+  }
+  // if any photos succeeded, update the row
+  if (Object.keys(photoUpdates).length > 0) {
+    await supabase.from("users").update(photoUpdates).eq("id", userId)
+  }
+  // re-fetch the full user with hydrated photo URIs
+  const user = await getUser(userId)
+  if (!user) throw new Error(`User ${userId} not found after createUser`)
+  return { user, failedPhotoSlots: photoFailures }
 }
 
 export async function updateUser(id: string, input: UpdateUserInput): Promise<User> {
-  const { data, error } = await supabase
-    .from("users")
-    .update({
-      name: input.name,
-      nickname: input.nickname,
-      phone: input.phone,
-      is_mahasiswa: input.isMahasiswa,
-      alamat: input.alamat,
-      kontak_darurat: input.kontakDarurat,
-      notes: input.notes,
-    })
-    .eq("id", id)
-    .select("*")
-    .single()
+  const colUpdates: Record<string, unknown> = {
+    name: input.name,
+    nickname: input.nickname,
+    phone: input.phone,
+    is_mahasiswa: input.isMahasiswa,
+    alamat: input.alamat,
+    kontak_darurat: input.kontakDarurat,
+    notes: input.notes,
+  }
+  for (const [col, photoInput, slot] of [
+    ["ktp_photo", input.ktpPhoto, "ktp"],
+    ["ktm_photo", input.ktmPhoto, "ktm"],
+    ["profil_photo", input.profilPhoto, "profil"],
+  ] as [string, PhotoInput | undefined, string][]) {
+    if (!photoInput) continue // keep — don't include in update
+    if (photoInput.kind === "remove") { colUpdates[col] = null; continue }
+    if (photoInput.kind === "new") {
+      const ext = extFromMime(photoInput.mimeType)
+      const path = buildUserPhotoPath(id, slot as UserPhotoSlot, ext)
+      await uploadPhoto(photoInput.uri, path, photoInput.mimeType ?? "image/jpeg")
+      colUpdates[col] = { id: uuidv4(), path }
+    }
+    // "keep" → don't include col in updates (handled by the `!photoInput` guard above)
+  }
+  const { error } = await supabase.from("users").update(colUpdates).eq("id", id)
   if (error) throw error
-  return rowToUser(data as Record<string, unknown>)
+  // re-fetch to return a fully hydrated User with signed URIs
+  const user = await getUser(id)
+  if (!user) throw new Error(`User ${id} not found after updateUser`)
+  return user
 }
 
 // ─── Vehicles ─────────────────────────────────────────────────────────────────
