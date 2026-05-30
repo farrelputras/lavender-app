@@ -21,6 +21,10 @@ export type SewaBaruParamList = {
   DetailSewa: { userId: string; vehicleId: string }
 }
 
+export type AuthStackParamList = {
+  Login: undefined
+}
+
 export type AppStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined
   PenyewaanDetail: { rentalId: string; justCreated?: boolean; justClosed?: boolean }
