@@ -11,6 +11,7 @@ import type {
   RentalAddOn,
   Jaminan,
   RentalStatus,
+  RentalListItem,
   VehicleCategory,
   PaymentMethod,
   VerificationStatus,
@@ -174,5 +175,20 @@ export function rowToHutangFull(row: Record<string, unknown>): HutangFull {
     notes: (row.notes as string | null) ?? null,
     createdAt: new Date(row.created_at as string),
     payments,
+  }
+}
+
+export function rowToRentalListItem(row: Record<string, unknown>): RentalListItem {
+  return {
+    id: row.id as string,
+    userName: (row.user_name as string) ?? "",
+    vehicleName: (row.vehicle_name as string) ?? "",
+    vehiclePlate: (row.vehicle_plate as string) ?? "",
+    startAt: new Date(row.start_at as string),
+    dueAt: new Date(row.due_at as string),
+    returnedAt: row.returned_at ? new Date(row.returned_at as string) : null,
+    status: row.status as RentalStatus,
+    totalBill: (row.total_bill as number) ?? 0,
+    totalPaid: (row.total_paid as number) ?? 0,
   }
 }

@@ -188,3 +188,16 @@ export interface HutangFull {
   createdAt: Date
   payments: Payment[]
 }
+
+export interface RentalListItem {
+  id: string
+  userName: string
+  vehicleName: string
+  vehiclePlate: string
+  startAt: Date
+  dueAt: Date
+  returnedAt: Date | null
+  status: RentalStatus
+  totalBill: number
+  totalPaid: number
+}

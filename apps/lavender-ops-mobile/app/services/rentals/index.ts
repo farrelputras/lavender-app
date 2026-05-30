@@ -6,6 +6,7 @@ import {
   rowToVehicleSummary,
   rowToHutang,
   rowToHutangFull,
+  rowToRentalListItem,
 } from "./translators"
 import {
   DashboardSummary,
@@ -23,6 +24,7 @@ import {
   KondisiSnapshot,
   Hutang,
   HutangFull,
+  RentalListItem,
 } from "./types"
 import { supabase } from "../supabase/client"
 
@@ -328,4 +330,16 @@ export async function addHutangPayment(
   const h = await getHutangFull(hutangId)
   if (!h) throw new Error(`Hutang ${hutangId} not found after addHutangPayment`)
   return h
+}
+
+// ─── Rental list (Phase 5d) ───────────────────────────────────────────────────
+
+export async function getRentals(): Promise<RentalListItem[]> {
+  const { data, error } = await supabase
+    .from("v_rental_list")
+    .select("*")
+    .order("start_at", { ascending: false })
+    .limit(200)
+  if (error) throw error
+  return (data as Record<string, unknown>[]).map(rowToRentalListItem)
 }

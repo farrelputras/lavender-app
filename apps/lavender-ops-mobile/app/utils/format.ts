@@ -72,3 +72,10 @@ export function parseRupiahInput(raw: string): number {
   const n = parseInt(cleaned, 10)
   return isNaN(n) ? 0 : n
 }
+
+/**
+ * Format date as "16 Mei" (compact, no year) — used in Rental list row "start → due" display.
+ */
+export function formatDateShort(date: Date): string {
+  return `${date.getDate()} ${MONTHS[date.getMonth()]}`
+}
