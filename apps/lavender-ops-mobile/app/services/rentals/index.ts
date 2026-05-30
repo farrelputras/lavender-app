@@ -1,6 +1,7 @@
 import {
   rowToRental,
   rowToUserSummary,
+  rowToUser,
   rowToVehicle,
   rowToVehicleSummary,
   rowToHutang,
@@ -9,6 +10,9 @@ import {
   DashboardSummary,
   RentalDueToday,
   ReturnStatus,
+  User,
+  CreateUserInput,
+  UpdateUserInput,
   UserSummary,
   VehicleSummary,
   Vehicle,
@@ -49,6 +53,55 @@ export async function getUserSummary(id: string): Promise<UserSummary | null> {
     .maybeSingle()
   if (error) throw error
   return data ? rowToUserSummary(data as Record<string, unknown>) : null
+}
+
+export async function getUser(id: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .maybeSingle()
+  if (error) throw error
+  return data ? rowToUser(data as Record<string, unknown>) : null
+}
+
+export async function createUser(input: CreateUserInput): Promise<User> {
+  const { data, error } = await supabase
+    .from("users")
+    .insert({
+      name: input.name,
+      nickname: input.nickname,
+      phone: input.phone,
+      is_mahasiswa: input.isMahasiswa,
+      alamat: input.alamat,
+      kontak_darurat: input.kontakDarurat,
+      notes: input.notes,
+      verification_status: "BELUM_DIVERIFIKASI",
+    })
+    .select("*")
+    .single()
+  if (error) throw error
+  return rowToUser(data as Record<string, unknown>)
+}
+
+export async function updateUser(id: string, input: UpdateUserInput): Promise<User> {
+  const { data, error } = await supabase
+    .from("users")
+    .update({
+      name: input.name,
+      nickname: input.nickname,
+      phone: input.phone,
+      is_mahasiswa: input.isMahasiswa,
+      alamat: input.alamat,
+      kontak_darurat: input.kontakDarurat,
+      notes: input.notes,
+    })
+    .eq("id", id)
+    .select("*")
+    .single()
+  if (error) throw error
+  return rowToUser(data as Record<string, unknown>)
 }
 
 // ─── Vehicles ─────────────────────────────────────────────────────────────────
