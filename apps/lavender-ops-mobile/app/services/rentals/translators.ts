@@ -1,5 +1,6 @@
 import type {
   Rental,
+  User,
   UserSummary,
   Vehicle,
   VehicleSummary,
@@ -124,5 +125,28 @@ export function rowToHutang(row: Record<string, unknown>, sisa: number): Hutang 
     userId: row.user_id as string,
     amount: sisa,
     createdAt: new Date(row.created_at as string),
+  }
+}
+
+export function rowToUser(row: Record<string, unknown>): User {
+  const ktp = row.ktp_photo as { id: string; path: string } | null
+  const ktm = row.ktm_photo as { id: string; path: string } | null
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    nickname: (row.nickname as string | null) ?? null,
+    phone: row.phone as string,
+    isMahasiswa: (row.is_mahasiswa as boolean) ?? false,
+    verifiedAt: row.verified_at ? new Date(row.verified_at as string) : null,
+    verificationStatus: (row.verification_status as VerificationStatus) ?? "BELUM_DIVERIFIKASI",
+    namaPddikti: (row.nama_pddikti as string | null) ?? null,
+    tahunMasuk: (row.tahun_masuk as number | null) ?? null,
+    universitas: (row.universitas as string | null) ?? null,
+    prodi: (row.prodi as string | null) ?? null,
+    alamat: (row.alamat as string | null) ?? null,
+    kontakDarurat: (row.kontak_darurat as string | null) ?? null,
+    notes: (row.notes as string | null) ?? null,
+    ktpPhoto: ktp ? { id: ktp.id, uri: null } : null,
+    ktmPhoto: ktm ? { id: ktm.id, uri: null } : null,
   }
 }
