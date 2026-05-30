@@ -101,6 +101,8 @@ export function rowToVehicle(row: Record<string, unknown>): Vehicle {
     rate12h: row.rate_12h as number,
     rate24h: row.rate_24h as number,
     available: row.status === "TERSEDIA",
+    gps: (row.gps as string | null) ?? null,
+    imei: (row.imei as string | null) ?? null,
   }
 }
 

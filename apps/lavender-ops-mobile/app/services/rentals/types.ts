@@ -78,6 +78,8 @@ export interface Vehicle {
   rate12h: number
   rate24h: number
   available: boolean
+  gps: string | null
+  imei: string | null
 }
 
 export interface VehicleSummary {

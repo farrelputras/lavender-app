@@ -3,7 +3,7 @@
 -- Two rows seeded in 0007_seed.sql. Rotation = one UPDATE, no app rebuild.
 
 CREATE TABLE app_config (
-  role        TEXT PRIMARY KEY,          -- 'mom' | 'farrel'
+  role        TEXT PRIMARY KEY,          -- 'ops' | 'admin'
   user_id     UUID NOT NULL,             -- auth.users.id
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );

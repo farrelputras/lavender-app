@@ -1,19 +1,20 @@
 # Phase 4 — Supabase Build + Connector Swap
 
-> **Status: COMPLETE (2026-05-28)**
+> **Status: COMPLETE (2026-05-30)**
 > All 7 tasks executed in-session. `pnpm run compile` clean (0 errors), 43/43 tests pass.
 > Lint exits 1 but all 127 errors are **pre-existing** from Phase 0/demo screens — 0 new Phase 4 errors.
+> All manual steps completed 2026-05-30.
 >
 > **Deviations from plan:**
 > - `PembayaranSheet.tsx` was identified as an additional file needing ALL_CAPS enum migration (not in the original 6-file list) — caught and fixed during the sweep.
 > - `rentalMath.ts:71` also had a `"active"` comparison that needed migrating — caught and fixed.
 > - Both are in-scope (connector-contract correctness), not scope creep.
 >
-> **Pending (manual, user-run):**
-> - Apply migrations 0001–0006 to Supabase project
-> - Create `mom@lavender.local` + `farrel@lavender.local` in Supabase Auth dashboard; fill UUIDs into `0007_seed.sql`, then run it
-> - Create `rental-photos` private storage bucket
-> - Set `EXPO_PUBLIC_SUPABASE_URL` + `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `.env`
+> **Post-plan amendments (2026-05-30):**
+> - `app_config` roles renamed: `'mom'` → `'ops'`, `'farrel'` → `'admin'` — updated in `0002`, `0005`, `0006`, and `seed.sql`
+> - `0007_vehicle_gps_imei.sql` added: `ALTER TABLE vehicles ADD COLUMN gps TEXT, imei TEXT`
+> - `seed.sql` (formerly `0007_seed.sql`) replaced with real fleet data: 30 vehicles with real plates, GPS, IMEI, and rates; Ertiga and Evalia seeded as `TIDAK_AKTIF`
+> - `Vehicle` type and `rowToVehicle` translator updated with `gps: string | null`, `imei: string | null`
 >
 > **Next phase:** Phase 5a (Auth — login screen + session persistence)
 
@@ -32,9 +33,10 @@
 | Decision | Choice |
 |---|---|
 | Supabase project state | Already created; URL + anon key in hand |
-| Migration delivery | 7 numbered files in `supabase/migrations/` |
+| Migration delivery | 7 numbered files in `supabase/migrations/` + `seed.sql` (unnumbered, manual-run) |
 | In-memory fallback | Replaced outright — `seed.ts` deleted, no flag |
-| Seed scope | Vehicles only + commented `app_config` template |
+| Seed scope | Real fleet (30 vehicles) + commented `app_config` template |
+| Operator roles | `'ops'` (mom) and `'admin'` (farrel) — TEXT PK values in `app_config` |
 
 ---
 
@@ -45,19 +47,20 @@
 | File | Contents |
 |---|---|
 | `0001_enums.sql` | 6 enum types: `user_verification_status`, `vehicle_category`, `vehicle_status`, `rental_status`, `payment_method`, `hutang_status` — ALL_CAPS values |
-| `0002_app_config.sql` | `app_config(role TEXT PK, user_id UUID, updated_at)` — operator UID config table |
+| `0002_app_config.sql` | `app_config(role TEXT PK, user_id UUID, updated_at)` — operator UID config table; roles are `'ops'` and `'admin'` |
 | `0003_tables.sql` | 6 main tables with audit columns; `deleted_at` only on `users` and `vehicles`; `rentals.id` has no DEFAULT (client-minted); `payments` XOR check constraint; `hutang_id` FK added via ALTER TABLE after both tables exist |
 | `0004_triggers.sql` | `set_audit_fields()` BEFORE INSERT/UPDATE on all 6 tables; `trg_fn_recompute_hutang_status()` AFTER INSERT/UPDATE/DELETE on `payments` — uses TG_OP to pick NEW vs OLD |
 | `0005_views_rpcs.sql` | `v_rentals` (totalBill, totalPaid, payments/charges as JSONB via LATERAL joins), `v_user_summaries` (activeRentalsCount, debtAmount), `v_vehicle_summaries` (available bool), `v_rentals_due_today`; RPCs `rpc_get_dashboard_summary`, `rpc_create_rental(payload jsonb)`, `rpc_close_rental(p_rental_id uuid, payload jsonb)` — write RPCs SECURITY DEFINER with auth.uid() check |
-| `0006_rls.sql` | RLS on all 7 tables; SELECT/INSERT/UPDATE for operators; no DELETE; `app_config` SELECT = all authenticated, UPDATE = farrel only; storage policies for `rental-photos` |
-| `0007_seed.sql` | 14 vehicles (TERSEDIA, ALL_CAPS); commented `app_config` INSERT template. **User reviews and runs manually.** |
+| `0006_rls.sql` | RLS on all 7 tables; SELECT/INSERT/UPDATE for operators; no DELETE; `app_config` SELECT = all authenticated, UPDATE = `'admin'` only; storage policies for `rental-photos` |
+| `0007_vehicle_gps_imei.sql` | `ALTER TABLE vehicles ADD COLUMN gps TEXT, imei TEXT` — added post-plan to store GPS tracker number and IMEI as dedicated columns |
+| `seed.sql` | 30 real fleet vehicles with plate, GPS, IMEI, rates, `tahun`; Ertiga and Evalia seeded as `TIDAK_AKTIF`; commented `app_config` INSERT template. **User reviews and runs manually.** |
 
 ### TypeScript — new files
 
 | File | Purpose |
 |---|---|
 | `app/services/supabase/client.ts` | Singleton Supabase client; ExpoSecureStoreAdapter for session persistence; `react-native-url-polyfill/auto` at top; reads `EXPO_PUBLIC_SUPABASE_*` env vars |
-| `app/services/rentals/translators.ts` | Pure row-to-UI-type functions: `rowToRental`, `rowToUserSummary`, `rowToVehicle`, `rowToVehicleSummary`, `rowToHutang`; snake_case → camelCase; `toKondisi` strips photo `path` → `uri: null` (Phase 6 will generate signed URLs) |
+| `app/services/rentals/translators.ts` | Pure row-to-UI-type functions: `rowToRental`, `rowToUserSummary`, `rowToVehicle`, `rowToVehicleSummary`, `rowToHutang`; snake_case → camelCase; `toKondisi` strips photo `path` → `uri: null` (Phase 6 will generate signed URLs); `rowToVehicle` maps `gps` and `imei` |
 
 ---
 
@@ -65,7 +68,7 @@
 
 | File | Change |
 |---|---|
-| `app/services/rentals/types.ts` | ALL_CAPS enums (`RentalStatus`, `ReturnStatus`, `VehicleCategory`, `PaymentMethod`, `JaminanItem`); new `VerificationStatus` type; `Hutang.rentalId: string \| null`; `UserSummary` widened with `isMahasiswa`, `verificationStatus`, `namaPddikti`, `tahunMasuk`, `universitas`, `prodi` |
+| `app/services/rentals/types.ts` | ALL_CAPS enums (`RentalStatus`, `ReturnStatus`, `VehicleCategory`, `PaymentMethod`, `JaminanItem`); new `VerificationStatus` type; `Hutang.rentalId: string \| null`; `UserSummary` widened with `isMahasiswa`, `verificationStatus`, `namaPddikti`, `tahunMasuk`, `universitas`, `prodi`; `Vehicle` widened with `gps: string \| null`, `imei: string \| null` |
 | `app/services/rentals/index.ts` | Full Supabase rewrite of all 10 existing functions; 3 new connectors (`createManualHutang`, `softDeleteUser`, `softDeleteVehicle`); `createRental` mints UUID client-side then calls `rpc_create_rental`; `closeRental` calls `rpc_close_rental`; both strip `photos: []` (Phase 6 will wire real photo paths) |
 | `app/services/rentals/seed.ts` | **Deleted** |
 | `app/utils/rentalMath.ts` | `rental.status === "active"` → `"ACTIVE"` in `isOverdue` (line 71) |
@@ -118,6 +121,6 @@ Both `createRental` and `closeRental` strip `photos: []` before sending to the R
 - [x] `app_config` RLS — SELECT = all authenticated; UPDATE = farrel only; INSERT/DELETE = blocked
 - [x] Hutang status trigger — `trg_fn_recompute_hutang_status` in `0004_triggers.sql` with TG_OP pattern
 - [x] `subtotal_sewa` always written — RPC sets it unconditionally at close
-- [ ] Migrations applied to Supabase project — **pending user action**
-- [ ] `app_config` rows seeded with real UIDs — **pending user action**
-- [ ] `rental-photos` bucket created — **pending user action**
+- [x] Migrations applied to Supabase project — applied 2026-05-30 (0001–0007 + seed.sql)
+- [x] `app_config` rows seeded with real UIDs — `'ops'` + `'admin'` rows inserted 2026-05-30
+- [x] `rental-photos` bucket created — private bucket created 2026-05-30

@@ -188,7 +188,7 @@ AS $$
 DECLARE
   result jsonb;
 BEGIN
-  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('mom', 'farrel')) THEN
+  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('ops', 'admin')) THEN
     RAISE EXCEPTION 'unauthorized';
   END IF;
 
@@ -234,7 +234,7 @@ DECLARE
   v_rental_id  UUID;
   v_payment    jsonb;
 BEGIN
-  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('mom', 'farrel')) THEN
+  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('ops', 'admin')) THEN
     RAISE EXCEPTION 'unauthorized';
   END IF;
 
@@ -307,7 +307,7 @@ DECLARE
   v_payment      jsonb;
   v_hutang_id    UUID;
 BEGIN
-  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('mom', 'farrel')) THEN
+  IF auth.uid() NOT IN (SELECT user_id FROM app_config WHERE role IN ('ops', 'admin')) THEN
     RAISE EXCEPTION 'unauthorized';
   END IF;
 
