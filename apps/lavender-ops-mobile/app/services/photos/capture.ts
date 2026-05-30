@@ -12,6 +12,7 @@ export interface CapturedPhoto {
 async function copyAssetToDocumentDirectory(asset: ImagePicker.ImagePickerAsset): Promise<CapturedPhoto> {
   const mimeType = asset.mimeType ?? "image/jpeg"
   const ext = extFromMime(mimeType)
+  if (!FileSystem.documentDirectory) throw new Error("documentDirectory unavailable")
   const destUri = FileSystem.documentDirectory + uuidv4() + "." + ext
   await FileSystem.copyAsync({ from: asset.uri, to: destUri })
   return { uri: destUri, mimeType }
@@ -24,7 +25,7 @@ export async function captureFromCamera(): Promise<CapturedPhoto | null> {
   const result = await ImagePicker.launchCameraAsync({
     quality: 0.8,
     allowsEditing: false,
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"] as ImagePicker.MediaType[],
   })
 
   if (result.canceled || result.assets.length === 0) return null
@@ -39,7 +40,7 @@ export async function captureFromGallery(): Promise<CapturedPhoto | null> {
   const result = await ImagePicker.launchImageLibraryAsync({
     quality: 0.8,
     allowsEditing: false,
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"] as ImagePicker.MediaType[],
   })
 
   if (result.canceled || result.assets.length === 0) return null
@@ -49,10 +50,15 @@ export async function captureFromGallery(): Promise<CapturedPhoto | null> {
 
 export async function choosePhotoSource(): Promise<CapturedPhoto | null> {
   return new Promise((resolve) => {
-    Alert.alert("Tambah Foto", "Pilih sumber foto", [
-      { text: "Kamera", onPress: () => captureFromCamera().then(resolve) },
-      { text: "Galeri", onPress: () => captureFromGallery().then(resolve) },
-      { text: "Batal", style: "cancel", onPress: () => resolve(null) },
-    ])
+    Alert.alert(
+      "Tambah Foto",
+      "Pilih sumber foto",
+      [
+        { text: "Kamera", onPress: () => captureFromCamera().then(resolve).catch(() => resolve(null)) },
+        { text: "Galeri", onPress: () => captureFromGallery().then(resolve).catch(() => resolve(null)) },
+        { text: "Batal", style: "cancel", onPress: () => resolve(null) },
+      ],
+      { cancelable: true, onDismiss: () => resolve(null) },
+    )
   })
 }
