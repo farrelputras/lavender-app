@@ -47,11 +47,6 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ error: null, errorInfo: null })
   }
 
-  // To avoid unnecessary re-renders
-  shouldComponentUpdate(nextProps: Readonly<Props>, nextState: Readonly<State>): boolean {
-    return nextState.error !== this.state.error
-  }
-
   // Only enable if we're catching errors in the right environment
   isEnabled(): boolean {
     return (

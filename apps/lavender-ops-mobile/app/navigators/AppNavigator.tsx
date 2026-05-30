@@ -11,7 +11,7 @@ import { HutangDetailScreen } from "@/screens/HutangDetailScreen"
 import { HutangFormScreen } from "@/screens/HutangFormScreen"
 import { UserDetailScreen } from "@/screens/UserDetailScreen"
 import { UserFormScreen } from "@/screens/UserFormScreen"
-import { useSession } from "@/services/auth/useSession"
+import { useAuth } from "@/context/AuthContext"
 import { useAppTheme } from "@/theme/context"
 import { colors } from "@/theme/tokens"
 
@@ -55,7 +55,7 @@ const AppStack = () => {
 
 export const AppNavigator = (props: NavigationProps) => {
   const { navigationTheme } = useAppTheme()
-  const { session, loading } = useSession()
+  const { session, loading } = useAuth()
   useBackButtonHandler((routeName) => exitRoutes.includes(routeName))
 
   if (loading) {

@@ -7,18 +7,19 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import { useSession } from "@/services/auth/useSession"
+import { useAuth } from "@/context/AuthContext"
 import { colors, textStyles, spacing, borderRadius } from "@/theme/tokens"
 
 export function LoginScreen() {
-  const { signIn } = useSession()
+  const { signIn } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [passwordVisible, setPasswordVisible] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,11 +40,11 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}
       >
-        <View style={styles.container}>
           <Text style={[textStyles.headlineLg, { color: colors.onSurface }]}>Lavender Ops</Text>
           <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, marginBottom: 24 }]}>
             Masuk untuk mulai kelola rental
@@ -58,20 +59,31 @@ export function LoginScreen() {
             keyboardType="email-address"
             autoCorrect={false}
             editable={!submitting}
-            placeholder="mom@lavender.local"
             placeholderTextColor={colors.onSurfaceVariant}
           />
 
           <Text style={[textStyles.labelLg, styles.label]}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            editable={!submitting}
-            placeholder="••••••••"
-            placeholderTextColor={colors.onSurfaceVariant}
-          />
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={styles.passwordInput}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!passwordVisible}
+              editable={!submitting}
+              placeholderTextColor={colors.onSurfaceVariant}
+            />
+            <TouchableOpacity
+              style={styles.eyeBtn}
+              onPress={() => setPasswordVisible((v) => !v)}
+              hitSlop={8}
+            >
+              <MaterialIcons
+                name={passwordVisible ? "visibility-off" : "visibility"}
+                size={22}
+                color={colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+          </View>
 
           {error && (
             <View style={styles.errorBanner}>
@@ -91,16 +103,14 @@ export function LoginScreen() {
               <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Masuk</Text>
             )}
           </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  flex: { flex: 1 },
-  container: { flex: 1, paddingHorizontal: spacing.lg, justifyContent: "center" },
+  container: { flexGrow: 1, paddingHorizontal: spacing.lg, justifyContent: "center" },
   label: { color: colors.onSurfaceVariant, marginBottom: spacing.xs, marginTop: spacing.md },
   input: {
     height: 48,
@@ -108,6 +118,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainer,
     paddingHorizontal: spacing.md,
     color: colors.onSurface,
+  },
+  passwordRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 48,
+    borderRadius: borderRadius.default,
+    backgroundColor: colors.surfaceContainer,
+  },
+  passwordInput: {
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: spacing.md,
+    color: colors.onSurface,
+  },
+  eyeBtn: {
+    paddingHorizontal: spacing.md,
+    height: "100%",
+    justifyContent: "center",
   },
   errorBanner: {
     marginTop: spacing.md,

@@ -21,7 +21,7 @@ import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
 import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
 import { colors, textStyles, borderRadius, spacing } from "@/theme/tokens"
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
-import { useSession } from "@/services/auth/useSession"
+import { useAuth } from "@/context/AuthContext"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 
@@ -35,7 +35,7 @@ function showToast(msg: string) {
 
 export function BerandaScreen() {
   const navigation = useNavigation<BerandaNavProp>()
-  const { signOut } = useSession()
+  const { signOut } = useAuth()
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [rentalsDue, setRentalsDue] = useState<RentalDueToday[]>([])
   const [loading, setLoading] = useState(true)
