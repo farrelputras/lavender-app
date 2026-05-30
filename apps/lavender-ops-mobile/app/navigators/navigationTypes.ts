@@ -32,6 +32,8 @@ export type AppStackParamList = {
   SewaBaru: NavigatorScreenParams<SewaBaruParamList> | undefined
   UserDetail: { userId: string }
   UserForm: { mode: "create" } | { mode: "edit"; userId: string }
+  HutangDetail: { hutangId: string }
+  HutangForm: undefined
 }
 
 export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<

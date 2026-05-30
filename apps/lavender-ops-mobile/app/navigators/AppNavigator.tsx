@@ -7,6 +7,7 @@ import Config from "@/config"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { PengembalianScreen } from "@/screens/PengembalianScreen"
 import { PenyewaanDetailScreen } from "@/screens/PenyewaanDetailScreen"
+import { HutangFormScreen } from "@/screens/HutangFormScreen"
 import { UserFormScreen } from "@/screens/UserFormScreen"
 import { useSession } from "@/services/auth/useSession"
 import { useAppTheme } from "@/theme/context"
@@ -43,6 +44,7 @@ const AppStack = () => {
       <Stack.Screen name="Pengembalian" component={PengembalianScreen} />
       <Stack.Screen name="SewaBaru" component={SewaBaruNavigator} />
       <Stack.Screen name="UserForm" component={UserFormScreen} />
+      <Stack.Screen name="HutangForm" component={HutangFormScreen} />
     </Stack.Navigator>
   )
 }
