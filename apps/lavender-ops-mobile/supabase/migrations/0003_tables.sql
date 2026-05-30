@@ -43,7 +43,6 @@ CREATE TABLE vehicles (
   rate_24h    INTEGER NOT NULL,
   status      vehicle_status NOT NULL DEFAULT 'TERSEDIA',
   tahun       SMALLINT,
-  warna       TEXT,
   notes       TEXT,
   -- Soft-delete
   deleted_at  TIMESTAMPTZ,

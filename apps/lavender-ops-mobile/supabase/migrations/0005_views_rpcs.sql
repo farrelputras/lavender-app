@@ -144,6 +144,8 @@ SELECT
   status,
   tahun,
   warna,
+  gps,
+  imei,
   notes,
   deleted_at,
   created_at,

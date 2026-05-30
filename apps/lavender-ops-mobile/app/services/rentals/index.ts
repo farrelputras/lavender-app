@@ -221,13 +221,17 @@ export async function closeRental(rentalId: string, input: CloseRentalInput): Pr
   return rental
 }
 
+function uuidv4(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
+  })
+}
+
 export async function createRental(input: CreateRentalInput): Promise<Rental> {
   // Client mints the rental UUID so photo paths are known before the DB insert.
   // Phase 6 will upload photos to rentals/{rentalId}/kondisi-keluar/{uuid}.jpg
-  // before calling this RPC. In Phase 4, photos are always [].
-  // crypto.randomUUID() requires Hermes ≥ 0.71 (RN 0.83 ships it). Verify on
-  // first dev-client build in Phase 5a: console.log(crypto.randomUUID())
-  const rentalId = crypto.randomUUID()
+  const rentalId = uuidv4()
 
   const { error } = await supabase.rpc("rpc_create_rental", {
     payload: {

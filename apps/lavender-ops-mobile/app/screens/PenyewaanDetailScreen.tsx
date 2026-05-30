@@ -155,8 +155,29 @@ export function PenyewaanDetailScreen({
         <View style={styles.appBarTitle}>
           <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>Detail Penyewaan</Text>
         </View>
-        <View style={styles.statusChip}>
-          <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>Aktif</Text>
+        <View
+          style={[
+            styles.statusChip,
+            rental
+              ? rental.status === "ACTIVE"
+                ? { backgroundColor: colors.warningContainer }
+                : { backgroundColor: colors.successContainer }
+              : { backgroundColor: colors.warningContainer },
+          ]}
+        >
+          <Text
+            style={[
+              textStyles.labelMd,
+              {
+                color:
+                  rental?.status === "ACTIVE"
+                    ? colors.onWarningContainer
+                    : colors.onSuccessContainer,
+              },
+            ]}
+          >
+            {rental?.status === "ACTIVE" ? "Aktif" : "Selesai"}
+          </Text>
         </View>
       </View>
 
@@ -452,16 +473,18 @@ export function PenyewaanDetailScreen({
                   </View>
                 ))
               )}
-              <TouchableOpacity
-                style={styles.addPaymentBtn}
-                onPress={() => setShowPaySheet(true)}
-                activeOpacity={0.8}
-              >
-                <MaterialIcons name="add" size={20} color={colors.primary} />
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>
-                  Tambah Pembayaran
-                </Text>
-              </TouchableOpacity>
+              {rental.status === "ACTIVE" && (
+                <TouchableOpacity
+                  style={styles.addPaymentBtn}
+                  onPress={() => setShowPaySheet(true)}
+                  activeOpacity={0.8}
+                >
+                  <MaterialIcons name="add" size={20} color={colors.primary} />
+                  <Text style={[textStyles.labelLg, { color: colors.primary }]}>
+                    Tambah Pembayaran
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <View style={styles.paySummary}>
@@ -519,17 +542,21 @@ export function PenyewaanDetailScreen({
         <View style={{ height: spacing.xxxl + 64 }} />
       </ScrollView>
 
-      {/* Sticky bottom CTA */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.btnProses}
-          onPress={() => navigation.navigate("Pengembalian", { rentalId: rental.id })}
-          activeOpacity={0.8}
-        >
-          <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Proses Pengembalian</Text>
-          <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />
-        </TouchableOpacity>
-      </View>
+      {/* Sticky bottom CTA — only for active rentals */}
+      {rental.status === "ACTIVE" && (
+        <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={styles.btnProses}
+            onPress={() => navigation.navigate("Pengembalian", { rentalId: rental.id })}
+            activeOpacity={0.8}
+          >
+            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
+              Proses Pengembalian
+            </Text>
+            <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       <PembayaranSheet
         visible={showPaySheet}
@@ -733,7 +760,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   statusChip: {
-    backgroundColor: colors.warningContainer,
     borderRadius: 999,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,

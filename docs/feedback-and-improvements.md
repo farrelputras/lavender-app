@@ -47,3 +47,20 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   the scattered "edit" / "ubah" / bare-pencil variants so label and icon are
   consistent across all screens. Per-screen occurrence inventory: TBD.
 - **Status:** open
+
+### 6. Replace Math.random() UUID with cryptographically secure UUID
+- **Detail:** `createRental` currently uses a `Math.random()`-based UUID v4 because
+  `crypto.randomUUID()` wasn't available in the current dev client build. At the
+  next dev client rebuild (Phase 6 or later), swap to:
+  ```
+  pnpm add react-native-get-random-values uuid
+  pnpm add -D @types/uuid
+  ```
+  Then in `app/services/rentals/index.ts`, replace `uuidv4()` with:
+  ```ts
+  import 'react-native-get-random-values'  // must be first import in entry file
+  import { v4 as uuidv4 } from 'uuid'
+  ```
+  Note: the polyfill import must appear before `uuid` is loaded — put it at the
+  top of `index.tsx` (app entry), not in the connector file.
+- **Status:** open
