@@ -15,8 +15,31 @@ export interface User {
   name: string
   nickname: string | null
   phone: string
+  isMahasiswa: boolean
   verifiedAt: Date | null
+  verificationStatus: VerificationStatus
+  namaPddikti: string | null
+  tahunMasuk: number | null
+  universitas: string | null
+  prodi: string | null
+  alamat: string | null
+  kontakDarurat: string | null
+  notes: string | null
+  ktpPhoto: { id: string; uri: string | null } | null
+  ktmPhoto: { id: string; uri: string | null } | null
 }
+
+export interface CreateUserInput {
+  name: string
+  nickname: string | null
+  phone: string
+  isMahasiswa: boolean
+  alamat: string | null
+  kontakDarurat: string | null
+  notes: string | null
+}
+
+export type UpdateUserInput = CreateUserInput
 
 export interface Hutang {
   id: string
