@@ -5,25 +5,17 @@ import * as ReactNative from "react-native"
 import mockFile from "./mockFile"
 
 // libraries to mock
-jest.doMock("react-native", () => {
-  // Extend ReactNative
-  return Object.setPrototypeOf(
-    {
-      Image: {
-        ...ReactNative.Image,
-        resolveAssetSource: jest.fn((_source) => mockFile), // eslint-disable-line @typescript-eslint/no-unused-vars
-        getSize: jest.fn(
-          (
-            uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
-            success: (width: number, height: number) => void,
-            failure?: (_error: any) => void, // eslint-disable-line @typescript-eslint/no-unused-vars
-          ) => success(100, 100),
-        ),
-      },
-    },
-    ReactNative,
-  )
-})
+// Attach static method stubs directly onto the Image class so it remains a valid React component
+// (spreading Image into a plain object loses its function/class nature and breaks <Image> rendering).
+ReactNative.Image.resolveAssetSource = jest.fn((_source) => mockFile) // eslint-disable-line @typescript-eslint/no-unused-vars
+// @ts-ignore — getSize is a static method not in the public type, but exists at runtime
+ReactNative.Image.getSize = jest.fn(
+  (
+    uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
+    success: (width: number, height: number) => void,
+    _failure?: (_error: any) => void, // eslint-disable-line @typescript-eslint/no-unused-vars
+  ) => success(100, 100),
+)
 
 jest.mock("i18next", () => ({
   currentLocale: "en",
