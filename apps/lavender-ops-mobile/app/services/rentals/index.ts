@@ -27,6 +27,7 @@ import {
   RentalListItem,
 } from "./types"
 import { supabase } from "../supabase/client"
+import { uuidv4 } from "@/utils/uuid"
 
 export interface CloseRentalInput {
   returnedAt: Date
@@ -219,13 +220,6 @@ export async function closeRental(rentalId: string, input: CloseRentalInput): Pr
   const rental = await getRental(rentalId)
   if (!rental) throw new Error(`Rental ${rentalId} not found after closeRental`)
   return rental
-}
-
-function uuidv4(): string {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16)
-  })
 }
 
 export async function createRental(input: CreateRentalInput): Promise<Rental> {
