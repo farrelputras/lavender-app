@@ -5,6 +5,7 @@ import type {
   Vehicle,
   VehicleSummary,
   Hutang,
+  HutangFull,
   Payment,
   KondisiSnapshot,
   RentalAddOn,
@@ -148,5 +149,30 @@ export function rowToUser(row: Record<string, unknown>): User {
     notes: (row.notes as string | null) ?? null,
     ktpPhoto: ktp ? { id: ktp.id, uri: null } : null,
     ktmPhoto: ktm ? { id: ktm.id, uri: null } : null,
+  }
+}
+
+export function rowToHutangFull(row: Record<string, unknown>): HutangFull {
+  const payments = ((row.payments as Record<string, unknown>[] | null) ?? []).map((p): Payment => ({
+    id: p.id as string,
+    amount: p.amount as number,
+    method: p.method as Payment["method"],
+    methodDescription: (p.method_description as string | undefined) ?? undefined,
+    paidAt: new Date(p.paid_at as string),
+    notes: (p.notes as string | undefined) ?? undefined,
+  }))
+  const totalPaid = payments.reduce((s, p) => s + p.amount, 0)
+  const jumlahAwal = row.jumlah_awal as number
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    userName: (row.user_name as string | null) ?? "",
+    rentalId: (row.rental_id as string | null) ?? null,
+    jumlahAwal,
+    sisa: Math.max(0, jumlahAwal - totalPaid),
+    status: row.status as HutangFull["status"],
+    notes: (row.notes as string | null) ?? null,
+    createdAt: new Date(row.created_at as string),
+    payments,
   }
 }

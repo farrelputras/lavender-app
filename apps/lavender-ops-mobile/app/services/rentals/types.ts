@@ -173,3 +173,18 @@ export interface RentalDueToday {
   dueAt: Date
   status: ReturnStatus
 }
+
+export type HutangStatus = "AKTIF" | "LUNAS"
+
+export interface HutangFull {
+  id: string
+  userId: string
+  userName: string
+  rentalId: string | null
+  jumlahAwal: number
+  sisa: number
+  status: HutangStatus
+  notes: string | null
+  createdAt: Date
+  payments: Payment[]
+}

@@ -5,6 +5,7 @@ import {
   rowToVehicle,
   rowToVehicleSummary,
   rowToHutang,
+  rowToHutangFull,
 } from "./translators"
 import {
   DashboardSummary,
@@ -21,6 +22,7 @@ import {
   Payment,
   KondisiSnapshot,
   Hutang,
+  HutangFull,
 } from "./types"
 import { supabase } from "../supabase/client"
 
@@ -291,4 +293,39 @@ export async function softDeleteVehicle(id: string): Promise<void> {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
   if (error) throw error
+}
+
+// ─── Hutang (Phase 5c) ────────────────────────────────────────────────────────
+
+export async function getHutangs(activeOnly: boolean = true): Promise<HutangFull[]> {
+  let q = supabase.from("v_hutang").select("*").order("created_at", { ascending: false })
+  if (activeOnly) q = q.eq("status", "AKTIF")
+  const { data, error } = await q
+  if (error) throw error
+  return (data as Record<string, unknown>[]).map(rowToHutangFull)
+}
+
+export async function getHutangFull(id: string): Promise<HutangFull | null> {
+  const { data, error } = await supabase.from("v_hutang").select("*").eq("id", id).maybeSingle()
+  if (error) throw error
+  return data ? rowToHutangFull(data as Record<string, unknown>) : null
+}
+
+export async function addHutangPayment(
+  hutangId: string,
+  input: Omit<Payment, "id">,
+): Promise<HutangFull> {
+  const { error } = await supabase.from("payments").insert({
+    hutang_id: hutangId,
+    rental_id: null,
+    amount: input.amount,
+    method: input.method,
+    method_description: input.methodDescription,
+    paid_at: input.paidAt.toISOString(),
+    notes: input.notes,
+  })
+  if (error) throw error
+  const h = await getHutangFull(hutangId)
+  if (!h) throw new Error(`Hutang ${hutangId} not found after addHutangPayment`)
+  return h
 }
