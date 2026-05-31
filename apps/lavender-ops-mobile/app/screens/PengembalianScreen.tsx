@@ -17,12 +17,15 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import PembayaranSheet from "@/components/PembayaranSheet"
+import { PhotoRow } from "@/components/form/PhotoRow"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getRental, getUserSummary, getVehicle, closeRental } from "@/services/rentals"
 import type { CloseRentalInput } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime } from "@/utils/format"
+import { choosePhotoSource } from "@/services/photos/capture"
+import { uuidv4 } from "@/utils/uuid"
 import {
   sumPayments,
   hoursLate,
@@ -174,6 +177,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
   const [pendingPayments, setPendingPayments] = useState<Omit<Payment, "id">[]>([])
   const [showPaySheet, setShowPaySheet] = useState(false)
 
+  // ── Kondisi Kembali Photos ────────────────────────────────────────────────
+  const [kembaliPhotos, setKembaliPhotos] = useState<{ id: string; uri: string | null; mimeType?: string }[]>([])
+
   // ── Catatan ───────────────────────────────────────────────────────────────
   const [notes, setNotes] = useState("")
 
@@ -294,7 +300,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
         kondisiKembali: {
           bensinKotak: bensinKembali,
           km: km !== null && !isNaN(km) ? km : null,
-          photos: [],
+          photos: kembaliPhotos,
         },
         subtotalSewa,
         extraFees: extraFeesComputed,
@@ -567,29 +573,20 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
               <View style={styles.rowDivider} />
 
-              {/* Photo strip (stub) */}
-              <View>
-                <Text
-                  style={[
-                    textStyles.labelMd,
-                    { color: colors.onSurfaceVariant, marginBottom: spacing.sm },
-                  ]}
-                >
-                  Foto Kondisi Kembali
-                </Text>
-                <TouchableOpacity
-                  style={styles.photoAddTile}
-                  onPress={() => showToast("Foto belum tersedia di demo")}
-                  activeOpacity={0.7}
-                >
-                  <MaterialIcons name="add-a-photo" size={24} color={colors.onSurfaceVariant} />
-                  <Text
-                    style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}
-                  >
-                    Tambah Foto
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {/* Photos */}
+              <PhotoRow
+                photos={kembaliPhotos}
+                onAdd={async () => {
+                  const captured = await choosePhotoSource()
+                  if (captured) {
+                    setKembaliPhotos((prev) => [
+                      ...prev,
+                      { id: uuidv4(), uri: captured.uri, mimeType: captured.mimeType },
+                    ])
+                  }
+                }}
+                onRemove={(id) => setKembaliPhotos((prev) => prev.filter((p) => p.id !== id))}
+              />
             </FieldCard>
           </View>
 
@@ -1117,19 +1114,6 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     flex: 1,
     minHeight: 48,
-  },
-
-  // Photo stub
-  photoAddTile: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainerLow,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderStyle: "dashed",
-    borderWidth: 1.5,
-    height: 96,
-    justifyContent: "center",
-    width: 96,
   },
 
   // Amount input

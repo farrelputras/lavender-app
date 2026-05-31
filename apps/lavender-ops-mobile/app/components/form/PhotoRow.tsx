@@ -16,23 +16,26 @@ export interface PhotoRowProps {
   onAdd: () => void
   onRemove: (id: string) => void
   addLabel?: string
+  readonly?: boolean
 }
 
-export function PhotoRow({ photos, onAdd, onRemove, addLabel = "Tambah Foto" }: PhotoRowProps) {
+export function PhotoRow({ photos, onAdd, onRemove, addLabel = "Tambah Foto", readonly }: PhotoRowProps) {
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.row}
     >
-      <TouchableOpacity style={styles.addTile} onPress={onAdd} activeOpacity={0.8}>
-        <MaterialIcons name="add-a-photo" size={28} color={colors.primary} />
-        <Text style={[textStyles.labelMd, { color: colors.primary, marginTop: 4 }]}>
-          {addLabel}
-        </Text>
-      </TouchableOpacity>
+      {!readonly && (
+        <TouchableOpacity style={styles.addTile} onPress={onAdd} activeOpacity={0.8}>
+          <MaterialIcons name="add-a-photo" size={28} color={colors.primary} />
+          <Text style={[textStyles.labelMd, { color: colors.primary, marginTop: 4 }]}>
+            {addLabel}
+          </Text>
+        </TouchableOpacity>
+      )}
       {photos.map((p) => (
-        <PhotoThumb key={p.id} photo={p} onRemove={() => onRemove(p.id)} />
+        <PhotoThumb key={p.id} photo={p} onRemove={() => onRemove(p.id)} readonly={readonly} />
       ))}
     </ScrollView>
   )

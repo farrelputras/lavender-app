@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import PembayaranSheet from "@/components/PembayaranSheet"
+import { PhotoRow } from "@/components/form/PhotoRow"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getRental, getUserSummary, getVehicle, addPayment } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
@@ -370,19 +371,62 @@ export function PenyewaanDetailScreen({
             {rental.kondisiKeluar.photos.length > 0 && (
               <>
                 <View style={styles.rowDivider} />
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View style={{ flexDirection: "row", gap: spacing.sm }}>
-                    {rental.kondisiKeluar.photos.map((photo) => (
-                      <View key={photo.id} style={styles.photoThumb}>
-                        <MaterialIcons name="image" size={28} color={colors.onSurfaceVariant} />
-                      </View>
-                    ))}
-                  </View>
-                </ScrollView>
+                <PhotoRow
+                  photos={rental.kondisiKeluar.photos}
+                  readonly
+                  onAdd={() => {}}
+                  onRemove={() => {}}
+                />
               </>
             )}
           </View>
         </View>
+
+        {/* ── 4b. Kondisi Kembali ───────────────────────── */}
+        {rental.kondisiKembali && (
+          <View>
+            <View style={styles.sectionHeader}>
+              <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>
+                Kondisi Kembali
+              </Text>
+            </View>
+            <View style={styles.card}>
+              <View style={styles.infoRow}>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                  Bensin
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                    {rental.kondisiKembali.bensinKotak} kotak
+                  </Text>
+                  <BensinGauge value={rental.kondisiKembali.bensinKotak} />
+                </View>
+              </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.infoRow}>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                  KM
+                </Text>
+                <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                  {rental.kondisiKembali.km != null
+                    ? `${rental.kondisiKembali.km.toLocaleString("id-ID")} km`
+                    : "—"}
+                </Text>
+              </View>
+              {rental.kondisiKembali.photos.length > 0 && (
+                <>
+                  <View style={styles.rowDivider} />
+                  <PhotoRow
+                    photos={rental.kondisiKembali.photos}
+                    readonly
+                    onAdd={() => {}}
+                    onRemove={() => {}}
+                  />
+                </>
+              )}
+            </View>
+          </View>
+        )}
 
         {/* ── 5. Tarif & Total ──────────────────────────── */}
         <View>
@@ -726,14 +770,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.md,
     padding: spacing.base,
-  },
-  photoThumb: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 8,
-    height: 80,
-    justifyContent: "center",
-    width: 96,
   },
   plateChip: {
     alignSelf: "flex-start",

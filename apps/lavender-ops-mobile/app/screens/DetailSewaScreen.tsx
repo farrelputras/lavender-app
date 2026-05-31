@@ -18,6 +18,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import PembayaranSheet from "@/components/PembayaranSheet"
+import { PhotoRow } from "@/components/form/PhotoRow"
 import type { SewaBaruScreenProps, AppStackParamList } from "@/navigators/navigationTypes"
 import { getUserSummary, getVehicle, createRental } from "@/services/rentals"
 import type {
@@ -29,6 +30,8 @@ import type {
 } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime, initialsFromName } from "@/utils/format"
+import { choosePhotoSource } from "@/services/photos/capture"
+import { uuidv4 } from "@/utils/uuid"
 import {
   composeTarif,
   addDuration,
@@ -162,7 +165,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   // ─── Kondisi Keluar
   const [bensin, setBensin] = useState(4)
   const [km, setKm] = useState("")
-  const [photos, setPhotos] = useState<{ id: string; uri: string | null }[]>([])
+  const [photos, setPhotos] = useState<{ id: string; uri: string | null; mimeType?: string }[]>([])
 
   // ─── Paket Sewa
   const [hari, setHari] = useState(0)
@@ -292,13 +295,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
     setJaminanError(false)
   }
 
-  // ─── Photos (stub — no camera)
-  function addPhoto() {
-    setPhotos((prev) => [...prev, { id: `photo-${Date.now()}`, uri: null }])
-  }
-
-  function removePhoto(id: string) {
-    setPhotos((prev) => prev.filter((p) => p.id !== id))
+  async function handleAddPhoto() {
+    const captured = await choosePhotoSource()
+    if (captured) {
+      setPhotos((prev) => [...prev, { id: uuidv4(), uri: captured.uri, mimeType: captured.mimeType }])
+    }
   }
 
   // ─── Validate & Save
@@ -615,32 +616,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
               <View style={styles.kondisiDivider} />
 
               {/* Photos */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.photoRow}
-              >
-                <TouchableOpacity style={styles.photoAdd} onPress={addPhoto} activeOpacity={0.8}>
-                  <MaterialIcons name="add-a-photo" size={28} color={colors.primary} />
-                  <Text style={[textStyles.labelMd, { color: colors.primary, marginTop: 4 }]}>
-                    Tambah Foto
-                  </Text>
-                </TouchableOpacity>
-                {photos.map((p) => (
-                  <View key={p.id} style={styles.photoThumb}>
-                    <View style={styles.photoPlaceholder}>
-                      <MaterialIcons name="image" size={32} color={colors.outlineVariant} />
-                    </View>
-                    <TouchableOpacity
-                      style={styles.photoClose}
-                      onPress={() => removePhoto(p.id)}
-                      hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-                    >
-                      <MaterialIcons name="close" size={14} color={colors.onSurface} />
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </ScrollView>
+              <PhotoRow
+                photos={photos}
+                onAdd={handleAddPhoto}
+                onRemove={(id) => setPhotos((prev) => prev.filter((p) => p.id !== id))}
+              />
             </FieldCard>
           </View>
 
@@ -1216,48 +1196,6 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     flex: 1,
     padding: 0,
-  },
-
-  // Photo row
-  photoRow: {
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-  },
-  photoAdd: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainerLow,
-    borderColor: colors.primary,
-    borderRadius: 14,
-    borderStyle: "dashed",
-    borderWidth: 2,
-    height: 120,
-    justifyContent: "center",
-    width: 120,
-  },
-  photoThumb: {
-    borderColor: colors.outlineVariant,
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 120,
-    overflow: "hidden",
-    width: 120,
-  },
-  photoPlaceholder: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    flex: 1,
-    justifyContent: "center",
-  },
-  photoClose: {
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.85)",
-    borderRadius: 11,
-    height: 22,
-    justifyContent: "center",
-    position: "absolute",
-    right: 6,
-    top: 6,
-    width: 22,
   },
 
   // Stepper
