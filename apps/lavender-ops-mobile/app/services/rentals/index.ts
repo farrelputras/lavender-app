@@ -30,8 +30,8 @@ import {
 import { supabase } from "../supabase/client"
 import { uuidv4 } from "@/utils/uuid"
 import { uploadPhoto, signPaths } from "@/services/photos/storage"
-import type { UserPhotoSlot } from "@/services/photos/paths"
-import { buildUserPhotoPath, extFromMime } from "@/services/photos/paths"
+import type { UserPhotoSlot, RentalPhotoPhase } from "@/services/photos/paths"
+import { buildUserPhotoPath, buildRentalPhotoPath, extFromMime } from "@/services/photos/paths"
 
 export interface CloseRentalInput {
   returnedAt: Date
@@ -275,7 +275,50 @@ export async function getRentalsDueToday(): Promise<RentalDueToday[]> {
 export async function getRental(id: string): Promise<Rental | null> {
   const { data, error } = await supabase.from("v_rentals").select("*").eq("id", id).maybeSingle()
   if (error) throw error
-  return data ? rowToRental(data as Record<string, unknown>) : null
+  if (!data) return null
+
+  const raw = data as Record<string, unknown>
+  const rental = rowToRental(raw)
+
+  // Batch-sign kondisi photo paths. Paths live in the raw row; translator drops them.
+  type RawPhoto = { id: string; path?: string }
+  const keluarRaw = raw.kondisi_keluar as { photos?: RawPhoto[] } | null
+  const kembaliRaw = raw.kondisi_kembali as { photos?: RawPhoto[] } | null
+  const pathById = new Map<string, string>()
+  for (const p of keluarRaw?.photos ?? []) if (p.path) pathById.set(p.id, p.path)
+  for (const p of kembaliRaw?.photos ?? []) if (p.path) pathById.set(p.id, p.path)
+
+  if (pathById.size > 0) {
+    const urlMap = await signPaths([...pathById.values()])
+    for (const photo of rental.kondisiKeluar.photos) {
+      const path = pathById.get(photo.id)
+      if (path) photo.uri = urlMap.get(path) ?? null
+    }
+    if (rental.kondisiKembali) {
+      for (const photo of rental.kondisiKembali.photos) {
+        const path = pathById.get(photo.id)
+        if (path) photo.uri = urlMap.get(path) ?? null
+      }
+    }
+  }
+
+  return rental
+}
+
+async function uploadKondisiPhotos(
+  rentalId: string,
+  phase: RentalPhotoPhase,
+  photos: { id: string; uri: string | null; mimeType?: string }[],
+): Promise<{ id: string; path: string }[]> {
+  const result: { id: string; path: string }[] = []
+  for (const photo of photos) {
+    if (!photo.uri) continue
+    const mimeType = photo.mimeType ?? "image/jpeg"
+    const path = buildRentalPhotoPath(rentalId, phase, extFromMime(mimeType))
+    await uploadPhoto(photo.uri, path, mimeType)
+    result.push({ id: photo.id, path })
+  }
+  return result
 }
 
 export async function addPayment(rentalId: string, input: Omit<Payment, "id">): Promise<Rental> {
@@ -294,11 +337,18 @@ export async function addPayment(rentalId: string, input: Omit<Payment, "id">): 
 }
 
 export async function closeRental(rentalId: string, input: CloseRentalInput): Promise<Rental> {
+  // Upload kondisi-kembali photos BEFORE the RPC — same rationale as createRental.
+  const kembaliPhotos = await uploadKondisiPhotos(
+    rentalId,
+    "kondisi-kembali",
+    input.kondisiKembali.photos,
+  )
+
   const { error } = await supabase.rpc("rpc_close_rental", {
     p_rental_id: rentalId,
     payload: {
       returnedAt: input.returnedAt.toISOString(),
-      kondisiKembali: { ...input.kondisiKembali, photos: [] }, // Phase 6: wire photo paths here
+      kondisiKembali: { ...input.kondisiKembali, photos: kembaliPhotos },
       subtotalSewa: input.subtotalSewa,
       extraFees: input.extraFees,
       discount: input.discount,
@@ -320,8 +370,15 @@ export async function closeRental(rentalId: string, input: CloseRentalInput): Pr
 
 export async function createRental(input: CreateRentalInput): Promise<Rental> {
   // Client mints the rental UUID so photo paths are known before the DB insert.
-  // Phase 6 will upload photos to rentals/{rentalId}/kondisi-keluar/{uuid}.jpg
   const rentalId = uuidv4()
+
+  // Upload kondisi-keluar photos BEFORE the RPC — if upload fails, no DB row exists,
+  // so the screen can retry without duplicating the rental.
+  const keluarPhotos = await uploadKondisiPhotos(
+    rentalId,
+    "kondisi-keluar",
+    input.kondisiKeluar.photos,
+  )
 
   const { error } = await supabase.rpc("rpc_create_rental", {
     payload: {
@@ -335,7 +392,7 @@ export async function createRental(input: CreateRentalInput): Promise<Rental> {
       tarif: input.tarif,
       addOn: input.addOn,
       jaminan: input.jaminan,
-      kondisiKeluar: { ...input.kondisiKeluar, photos: [] }, // Phase 6: real photo paths
+      kondisiKeluar: { ...input.kondisiKeluar, photos: keluarPhotos },
       discount: input.discount,
       notes: input.notes ?? "",
       newPayments: input.payments.map((p) => ({

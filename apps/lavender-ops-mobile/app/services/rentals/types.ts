@@ -75,7 +75,7 @@ export interface RentalAddOn {
 export interface KondisiSnapshot {
   bensinKotak: number
   km: number | null
-  photos: { id: string; uri: string | null }[]
+  photos: { id: string; uri: string | null; mimeType?: string }[]
 }
 
 export interface Jaminan {
