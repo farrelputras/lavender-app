@@ -6,9 +6,10 @@ import type { PhotoItem } from "./PhotoRow"
 interface PhotoThumbProps {
   photo: PhotoItem
   onRemove: () => void
+  readonly?: boolean
 }
 
-export function PhotoThumb({ photo, onRemove }: PhotoThumbProps) {
+export function PhotoThumb({ photo, onRemove, readonly }: PhotoThumbProps) {
   return (
     <View style={styles.thumb}>
       {photo.uri != null ? (
@@ -26,13 +27,15 @@ export function PhotoThumb({ photo, onRemove }: PhotoThumbProps) {
       {photo.status === "failed" && (
         <View style={[StyleSheet.absoluteFillObject, styles.failedOverlay]} />
       )}
-      <TouchableOpacity
-        style={styles.close}
-        onPress={onRemove}
-        hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-      >
-        <MaterialIcons name="close" size={14} color={colors.onSurface} />
-      </TouchableOpacity>
+      {!readonly && (
+        <TouchableOpacity
+          style={styles.close}
+          onPress={onRemove}
+          hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
+        >
+          <MaterialIcons name="close" size={14} color={colors.onSurface} />
+        </TouchableOpacity>
+      )}
     </View>
   )
 }

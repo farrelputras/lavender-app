@@ -3,6 +3,7 @@ import { useState, useCallback, useRef } from "react"
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   TouchableOpacity,
   TextInput,
@@ -39,11 +40,15 @@ function groupByFirstLetter(rows: UserSummary[]) {
 function UserRow({ u, onPress }: { u: UserSummary; onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.8}>
-      <View style={styles.avatarCircle}>
-        <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
-          {initialsFromName(u.name)}
-        </Text>
-      </View>
+      {u.profilPhoto?.uri ? (
+        <Image source={{ uri: u.profilPhoto.uri }} style={styles.avatarImage} />
+      ) : (
+        <View style={styles.avatarCircle}>
+          <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
+            {initialsFromName(u.name)}
+          </Text>
+        </View>
+      )}
       <View style={styles.rowBody}>
         <Text style={[textStyles.bodyLg, { color: colors.onSurface }]} numberOfLines={1}>
           {u.nickname ? `${u.name} (${u.nickname})` : u.name}
@@ -248,6 +253,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.primaryContainer,
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   rowBody: { flex: 1, gap: 4 },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 2 },

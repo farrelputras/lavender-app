@@ -1,5 +1,4 @@
-// app/screens/UserFormScreen.tsx
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from "react"
 import {
   View,
   Text,
@@ -16,11 +15,33 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { SectionLabel } from "@/components/form/SectionLabel"
 import { FieldCard } from "@/components/form/FieldCard"
-import { PhotoRow } from "@/components/form/PhotoRow"
+import { PhotoSlot } from "@/components/form/PhotoSlot"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { createUser, getUser, updateUser } from "@/services/rentals"
+import type { PhotoInput } from "@/services/rentals/types"
+import { choosePhotoSource } from "@/services/photos/capture"
 import { colors, textStyles, spacing } from "@/theme/tokens"
+
+type SlotState =
+  | { status: "none" }
+  | { status: "existing"; id: string; uri: string | null }
+  | { status: "new"; uri: string; mimeType: string }
+  | { status: "removed" }
+
+function toDisplayItem(s: SlotState) {
+  if (s.status === "none" || s.status === "removed") return null
+  return { id: s.status === "existing" ? s.id : "local", uri: s.uri }
+}
+
+function toPhotoInput(s: SlotState): PhotoInput | undefined {
+  if (s.status === "none") return undefined
+  if (s.status === "existing") return { kind: "keep" }
+  if (s.status === "new") return { kind: "new", uri: s.uri, mimeType: s.mimeType }
+  return { kind: "remove" }
+}
+
+const NONE: SlotState = { status: "none" }
 
 export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserForm">) {
   const mode = route.params.mode
@@ -37,6 +58,12 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
   const [kontakDarurat, setKontakDarurat] = useState("")
   const [notes, setNotes] = useState("")
 
+  const [profilSlot, setProfilSlot] = useState<SlotState>(NONE)
+  const [ktpSlot, setKtpSlot] = useState<SlotState>(NONE)
+  const [ktmSlot, setKtmSlot] = useState<SlotState>(NONE)
+  // Originals allow restoring the pre-capture state when user cancels a new capture
+  const originals = useRef({ profil: NONE as SlotState, ktp: NONE as SlotState, ktm: NONE as SlotState })
+
   useEffect(() => {
     if (mode !== "edit" || !userId) return
     getUser(userId).then((u) => {
@@ -48,12 +75,47 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         setAlamat(u.alamat ?? "")
         setKontakDarurat(u.kontakDarurat ?? "")
         setNotes(u.notes ?? "")
+
+        const profil: SlotState = u.profilPhoto
+          ? { status: "existing", id: u.profilPhoto.id, uri: u.profilPhoto.uri }
+          : NONE
+        const ktp: SlotState = u.ktpPhoto
+          ? { status: "existing", id: u.ktpPhoto.id, uri: u.ktpPhoto.uri }
+          : NONE
+        const ktm: SlotState = u.ktmPhoto
+          ? { status: "existing", id: u.ktmPhoto.id, uri: u.ktmPhoto.uri }
+          : NONE
+
+        originals.current = { profil, ktp, ktm }
+        setProfilSlot(profil)
+        setKtpSlot(ktp)
+        setKtmSlot(ktm)
       }
       setLoading(false)
     })
   }, [mode, userId])
 
   const canSave = name.trim().length > 0 && phone.trim().length > 0 && !saving
+
+  function makeCapture(setter: Dispatch<SetStateAction<SlotState>>) {
+    return async () => {
+      const captured = await choosePhotoSource()
+      if (captured) setter({ status: "new", uri: captured.uri, mimeType: captured.mimeType })
+    }
+  }
+
+  function makeRemove(
+    setter: Dispatch<SetStateAction<SlotState>>,
+    getOriginal: () => SlotState,
+  ) {
+    return () => {
+      setter((prev) => {
+        if (prev.status === "existing") return { status: "removed" }
+        if (prev.status === "new") return getOriginal()
+        return prev
+      })
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -66,9 +128,15 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         alamat: alamat.trim() || null,
         kontakDarurat: kontakDarurat.trim() || null,
         notes: notes.trim() || null,
+        profilPhoto: toPhotoInput(profilSlot),
+        ktpPhoto: toPhotoInput(ktpSlot),
+        ktmPhoto: toPhotoInput(ktmSlot),
       }
       if (mode === "create") {
-        const { user } = await createUser(payload)
+        const { user, failedPhotoSlots } = await createUser(payload)
+        if (failedPhotoSlots.length > 0) {
+          Alert.alert("User tersimpan", "Beberapa foto gagal diupload — coba lagi dari Edit.")
+        }
         navigation.replace("UserDetail", { userId: user.id })
       } else if (userId) {
         await updateUser(userId, payload)
@@ -163,15 +231,25 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
           />
         </FieldCard>
 
-        <SectionLabel>Foto KTP / KTM</SectionLabel>
-        <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, marginHorizontal: spacing.base, marginBottom: spacing.sm }]}>
-          Upload foto akan diaktifkan setelah Phase 6 (sementara: placeholder).
-        </Text>
-        <View style={{ paddingHorizontal: spacing.base }}>
-          <PhotoRow
-            photos={[]}
-            onAdd={() => Alert.alert("Belum aktif", "Foto user akan tersedia di Phase 6")}
-            onRemove={() => {}}
+        <SectionLabel>Foto</SectionLabel>
+        <View style={styles.photoRow}>
+          <PhotoSlot
+            label="Foto Profil"
+            photo={toDisplayItem(profilSlot)}
+            onCapture={makeCapture(setProfilSlot)}
+            onRemove={makeRemove(setProfilSlot, () => originals.current.profil)}
+          />
+          <PhotoSlot
+            label="KTP"
+            photo={toDisplayItem(ktpSlot)}
+            onCapture={makeCapture(setKtpSlot)}
+            onRemove={makeRemove(setKtpSlot, () => originals.current.ktp)}
+          />
+          <PhotoSlot
+            label="KTM"
+            photo={toDisplayItem(ktmSlot)}
+            onCapture={makeCapture(setKtmSlot)}
+            onRemove={makeRemove(setKtmSlot, () => originals.current.ktm)}
           />
         </View>
       </ScrollView>
@@ -211,5 +289,12 @@ const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  photoRow: {
+    flexDirection: "row",
+    gap: spacing.md,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.sm,
+    flexWrap: "wrap",
   },
 })

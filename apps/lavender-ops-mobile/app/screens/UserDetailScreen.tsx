@@ -13,6 +13,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { SectionLabel } from "@/components/form/SectionLabel"
+import { PhotoSlot } from "@/components/form/PhotoSlot"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getUser, getUserSummary, softDeleteUser } from "@/services/rentals"
 import type { User, UserSummary } from "@/services/rentals/types"
@@ -122,6 +123,31 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
           </View>
         </View>
 
+        <SectionLabel>Foto</SectionLabel>
+        <View style={styles.photoRow}>
+          <PhotoSlot
+            label="Foto Profil"
+            photo={user.profilPhoto ? { id: user.profilPhoto.id, uri: user.profilPhoto.uri } : null}
+            readonly
+            onCapture={() => {}}
+            onRemove={() => {}}
+          />
+          <PhotoSlot
+            label="KTP"
+            photo={user.ktpPhoto ? { id: user.ktpPhoto.id, uri: user.ktpPhoto.uri } : null}
+            readonly
+            onCapture={() => {}}
+            onRemove={() => {}}
+          />
+          <PhotoSlot
+            label="KTM"
+            photo={user.ktmPhoto ? { id: user.ktmPhoto.id, uri: user.ktmPhoto.uri } : null}
+            readonly
+            onCapture={() => {}}
+            onRemove={() => {}}
+          />
+        </View>
+
         <SectionLabel>Kontak & Catatan</SectionLabel>
         <View style={styles.field}>
           <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Alamat</Text>
@@ -183,6 +209,13 @@ const styles = StyleSheet.create({
     padding: spacing.base,
     borderRadius: borderRadius.card,
     elevation: 2,
+  },
+  photoRow: {
+    flexDirection: "row",
+    gap: spacing.md,
+    paddingHorizontal: spacing.base,
+    paddingBottom: spacing.sm,
+    flexWrap: "wrap",
   },
   field: { paddingHorizontal: spacing.base, paddingVertical: spacing.sm, gap: 2 },
   deleteBtn: {

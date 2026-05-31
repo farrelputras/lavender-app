@@ -11,10 +11,21 @@ export interface PhotoSlotProps {
   photo: PhotoItem | null
   onCapture: () => void
   onRemove: () => void
+  readonly?: boolean
 }
 
-export function PhotoSlot({ label, photo, onCapture, onRemove }: PhotoSlotProps) {
+export function PhotoSlot({ label, photo, onCapture, onRemove, readonly }: PhotoSlotProps) {
   if (photo == null) {
+    if (readonly) {
+      return (
+        <View style={styles.container}>
+          <View style={[styles.emptyTile, styles.emptyTileReadonly]}>
+            <MaterialIcons name="image" size={28} color={colors.outlineVariant} />
+          </View>
+          <Text style={[textStyles.labelMd, styles.label]}>{label}</Text>
+        </View>
+      )
+    }
     return (
       <TouchableOpacity style={styles.emptyTile} onPress={onCapture} activeOpacity={0.8}>
         <MaterialIcons name="camera-alt" size={28} color={colors.primary} />
@@ -25,7 +36,7 @@ export function PhotoSlot({ label, photo, onCapture, onRemove }: PhotoSlotProps)
 
   return (
     <View style={styles.container}>
-      <PhotoThumb photo={photo} onRemove={onRemove} />
+      <PhotoThumb photo={photo} onRemove={onRemove} readonly={readonly} />
       <Text style={[textStyles.labelMd, styles.label]}>{label}</Text>
     </View>
   )
@@ -45,6 +56,10 @@ const styles = StyleSheet.create({
     height: 120,
     justifyContent: "center",
     width: 120,
+  },
+  emptyTileReadonly: {
+    borderColor: colors.outlineVariant,
+    borderStyle: "solid",
   },
   label: {
     color: colors.onSurfaceVariant,
