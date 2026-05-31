@@ -138,24 +138,33 @@ export async function createUser(
   // Best-effort upload each photo slot — never throw on photo failure
   const photoFailures: string[] = []
   const photoUpdates: Record<string, unknown> = {}
-  for (const [slot, photoInput] of [
-    ["ktp_photo", input.ktpPhoto],
-    ["ktm_photo", input.ktmPhoto],
-    ["profil_photo", input.profilPhoto],
-  ] as [string, PhotoInput | undefined][]) {
+  for (const [col, uiSlot, photoInput] of [
+    ["ktp_photo",    "ktpPhoto",    input.ktpPhoto],
+    ["ktm_photo",    "ktmPhoto",    input.ktmPhoto],
+    ["profil_photo", "profilPhoto", input.profilPhoto],
+  ] as [string, string, PhotoInput | undefined][]) {
     if (!photoInput || photoInput.kind !== "new") continue
     try {
       const ext = extFromMime(photoInput.mimeType)
-      const path = buildUserPhotoPath(userId, slot.replace("_photo", "") as UserPhotoSlot, ext)
+      const path = buildUserPhotoPath(userId, col.replace("_photo", "") as UserPhotoSlot, ext)
       await uploadPhoto(photoInput.uri, path, photoInput.mimeType ?? "image/jpeg")
-      photoUpdates[slot] = { id: uuidv4(), path }
+      photoUpdates[col] = { id: uuidv4(), path }
     } catch {
-      photoFailures.push(slot)
+      photoFailures.push(uiSlot)
     }
   }
-  // if any photos succeeded, update the row
+  // if any photos succeeded, update the row; capture failures per slot
   if (Object.keys(photoUpdates).length > 0) {
-    await supabase.from("users").update(photoUpdates).eq("id", userId)
+    const colToUiSlot: Record<string, string> = {
+      ktp_photo: "ktpPhoto", ktm_photo: "ktmPhoto", profil_photo: "profilPhoto",
+    }
+    const { error: updateError } = await supabase
+      .from("users")
+      .update(photoUpdates)
+      .eq("id", userId)
+    if (updateError) {
+      for (const col of Object.keys(photoUpdates)) photoFailures.push(colToUiSlot[col] ?? col)
+    }
   }
   // re-fetch the full user with hydrated photo URIs
   const user = await getUser(userId)
