@@ -10,10 +10,6 @@ import {
   Alert,
   ToastAndroid,
 } from "react-native"
-// [TEMP - Phase 6 spike, remove in Task 9]
-import * as ImagePicker from "expo-image-picker"
-import { uploadPhoto, signPaths } from "@/services/photos/storage"
-import { buildUserPhotoPath } from "@/services/photos/paths"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
 import { useFocusEffect } from "@react-navigation/native"
@@ -56,20 +52,6 @@ export function BerandaScreen() {
         },
       },
     ])
-  }
-
-  // [TEMP - Phase 6 spike, remove in Task 9]
-  const handlePhotoSpike = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    })
-    if (result.canceled || !result.assets?.[0]) return
-    const asset = result.assets[0]
-    const path = buildUserPhotoPath("spike-test", "profil", "jpg")
-    await uploadPhoto(asset.uri, path, "image/jpeg")
-    const urls = await signPaths([path])
-    console.log("SPIKE signed URL:", urls.get(path))
-    Alert.alert("Spike OK", "Check console for signed URL. Object uploaded to rental-photos bucket.")
   }
 
   useFocusEffect(
@@ -141,14 +123,6 @@ export function BerandaScreen() {
             <Text style={[textStyles.headlineSm, { color: colors.primary }]}>User Baru</Text>
           </TouchableOpacity>
         </View>
-
-        {/* [TEMP - Phase 6 spike, remove in Task 9] */}
-        <TouchableOpacity
-          onPress={handlePhotoSpike}
-          style={{ margin: 16, padding: 12, backgroundColor: "#ff0", borderRadius: 8 }}
-        >
-          <Text style={{ color: "#000", fontWeight: "bold" }}>🧪 Photo Spike [TEMP]</Text>
-        </TouchableOpacity>
 
         {/* Section: Harus Kembali Hari Ini */}
         <View style={styles.sectionHeader}>

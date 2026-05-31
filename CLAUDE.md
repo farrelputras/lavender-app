@@ -14,9 +14,9 @@ Demo is complete and validated. Now executing the v1.0.0 roadmap:
 | 1 | Native-dep bake + EAS smoke build | ✅ Done |
 | 2 | Branding (icon, splash) | ✅ Done |
 | 3 | Backend design (schema, RLS, auth) | ✅ Done |
-| 4 | Supabase build + connector swap | Pending |
+| 4 | Supabase build + connector swap | ✅ Done |
 | 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | ✅ Done |
-| 6 | Photo upload | Pending |
+| 6 | Photo upload | ✅ Done |
 | 7 | Feedback polish + QA + APK ship | Pending |
 
 **Goal:** Single APK to mom that is the real day-to-day app. Everything post-APK via OTA.
