@@ -9,6 +9,8 @@ Phase definitions live in the roadmap:
 bundled into **Phase 7 (Feedback polish + QA)**.
 
 ## v1.0 — Phase 7 (Feedback polish + QA)
+- **Status:** in-progress
+- **Due:** 5 June 2026
 
 ### 0. Replace Math.random() UUID with cryptographically secure UUID
 - **Detail:** `createRental` currently uses a `Math.random()`-based UUID v4 because
@@ -25,11 +27,21 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   ```
   Note: the polyfill import must appear before `uuid` is loaded — put it at the
   top of `index.tsx` (app entry), not in the connector file.
-- **Status:** open
+- **Resolution:** `app/utils/uuid.ts` now delegates to `uuid` v11's `v4()`;
+  `react-native-get-random-values` is the first import in `index.tsx`. No
+  `@types/uuid` needed (uuid v11 ships its own types). The `uuidv4()` signature is
+  unchanged, so all callers are untouched (contract-safe). Guarded by a jest Web-Crypto
+  polyfill in `test/setup.ts` so the suite stays green.
+- **Status:** done (Phase 7 Stage A — shipped in v1.0.0 preview APK, 2026-06-02)
 
 ### 1. Setup OTA update infrastructure
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** EAS Update (`expo-updates`) wired to a single `preview` channel with
+  silent check-on-launch (`fallbackToCacheTimeout: 0`). `runtimeVersion` policy is
+  **`appVersion`** — `fingerprint` was tried first but fell back: it computed differently
+  Windows↔EAS-Linux, which would have stranded OTA delivery. JS/asset updates ship via
+  `pnpm ota:publish`; bump `version` + rebuild the APK only when native deps change. See
+  `docs/superpowers/specs/2026-06-02-phase-7-iteration-1-design.md`.
+- **Status:** done (Phase 7 Stage A — shipped in v1.0.0 preview APK, 2026-06-02)
 
 ### 2. Make UI screen designs through Google Stitch and update all screens accordingly
 - **Detail:** TBD
@@ -75,4 +87,30 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 
 ### 8. Change all "Penyewaan" into "Rental"
 - **Detail:** TBD
+- **Status:** open
+
+## v1.0.1
+- **Status:** open
+- **Due:** TBD
+
+### 1. When opening camera, default to main camera instead of selfie camera
+- **Detail:** TBD
+- **Status:** open
+
+### 2. Add "Kembali ke Beranda" button in Detail Rental Selesai screen
+- **Detail:** TBD
+- **Status:** open
+
+### 3. Never pre-fill the following fields
+- **Detail:** To make my mom aware, never pre-fill these fields:
+  - Jumlah Pembayaran (in Tambah Pembayaran)
+
+- **Status:** open
+
+## v1.1
+- **Status:** open
+- **Due:** TBD
+
+### 1. Rather than using supabase library, make seperate backend service
+- **Detail:** TBD (need to be discussed critically because this is a major architectural change)
 - **Status:** open

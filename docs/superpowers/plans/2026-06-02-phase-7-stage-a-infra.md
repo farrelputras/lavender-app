@@ -1,5 +1,17 @@
 # Phase 7 — Stage A (Infra + APK Ship) Implementation Plan
 
+> **✅ COMPLETE — shipped 2026-06-02.** All four tasks executed.
+> Commits: `9bbf269` (UUID), `e6c34bc` (OTA), `9994cc7` (build identity),
+> `667f92e` (appVersion fallback). Verification:
+> - `pnpm run compile` → 0 errors; `pnpm test` → 63/63 green.
+> - `eas env:list --environment preview` confirms `EXPO_PUBLIC_SUPABASE_URL` +
+>   `EXPO_PUBLIC_SUPABASE_ANON_KEY` are set on the EAS server (resolves the cloud-build
+>   Supabase force-close crash — local `.env` isn't uploaded by EAS).
+> - `eas update:list --branch preview` shows the "stage-a OTA smoke test" update published
+>   at runtime `1.0.0`, matching the `appVersion` policy → OTA round-trip (DoD step 4) passed.
+> - `runtimeVersion` shipped as **`appVersion`**, not the planned `fingerprint` — it fell
+>   back due to host-drift (Windows↔EAS-Linux hashed differently). Task 4 Step 1 gate fired.
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Bake the two invisible-but-blocking infra changes — a crypto-secure UUID and EAS Update (OTA) — plus a dev/preview build-identity split into one native rebuild, then ship mom her first real `preview` APK so every later stage reaches her via OTA.
