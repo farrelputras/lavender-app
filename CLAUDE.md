@@ -74,7 +74,14 @@ pnpm test                   # Jest unit tests
 pnpm run start              # Expo dev server (requires dev-client APK on device)
 pnpm run build:dev          # EAS cloud build — dev APK
 pnpm run build:preview      # EAS cloud build — preview APK (for mom testing)
+pnpm ota:publish --message "..."   # Publish an OTA JS update to mom (preview channel)
+eas update:list --branch preview   # See published OTA updates
 ```
+
+> **OTA model:** mom runs the `preview` APK (channel `preview`). Ship JS/asset changes with
+> `pnpm ota:publish` — applied on her next app launch. A new APK is only needed when native
+> deps change (the `fingerprint` runtimeVersion enforces this automatically). `expo-updates`
+> is disabled in `dev` builds, so verify OTA behavior on a `preview` build, not via Metro.
 
 ## Windows Notes
 

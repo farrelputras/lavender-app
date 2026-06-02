@@ -7,7 +7,8 @@
   "userInterfaceStyle": "automatic",
   "icon": "./assets/images/app-icon-all.png",
   "updates": {
-    "fallbackToCacheTimeout": 0
+    "fallbackToCacheTimeout": 0,
+    "url": "https://u.expo.dev/19ddf167-0fdf-48da-abd4-60b81cc13e70"
   },
   "newArchEnabled": true,
   "jsEngine": "hermes",
@@ -22,12 +23,26 @@
       "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
     },
     "allowBackup": false,
-    "edgeToEdgeEnabled": true
+    "edgeToEdgeEnabled": true,
+    "permissions": [
+      "android.permission.CAMERA",
+      "android.permission.RECORD_AUDIO"
+    ]
   },
   "ios": {
     "icon": "./assets/images/app-icon-ios.png",
     "supportsTablet": true,
-    "bundleIdentifier": "com.lavender.ops"
+    "bundleIdentifier": "com.lavender.ops",
+    "privacyManifests": {
+      "NSPrivacyAccessedAPITypes": [
+        {
+          "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+          "NSPrivacyAccessedAPITypeReasons": [
+            "CA92.1"
+          ]
+        }
+      ]
+    }
   },
   "web": {
     "favicon": "./assets/images/app-icon-web-favicon.png",
@@ -86,5 +101,8 @@
     "eas": {
       "projectId": "19ddf167-0fdf-48da-abd4-60b81cc13e70"
     }
+  },
+  "runtimeVersion": {
+    "policy": "fingerprint"
   }
 }
