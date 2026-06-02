@@ -103,6 +103,6 @@
     }
   },
   "runtimeVersion": {
-    "policy": "fingerprint"
+    "policy": "appVersion"
   }
 }

@@ -79,9 +79,11 @@ eas update:list --branch preview   # See published OTA updates
 ```
 
 > **OTA model:** mom runs the `preview` APK (channel `preview`). Ship JS/asset changes with
-> `pnpm ota:publish` — applied on her next app launch. A new APK is only needed when native
-> deps change (the `fingerprint` runtimeVersion enforces this automatically). `expo-updates`
-> is disabled in `dev` builds, so verify OTA behavior on a `preview` build, not via Metro.
+> `pnpm ota:publish` — applied on her next app launch. The `runtimeVersion` policy is
+> `appVersion` (fingerprint computed differently Windows↔EAS, so it would have stranded OTA
+> delivery), meaning OTA updates target the app `version`; when native deps change, bump
+> `version` in app.json and ship a new APK. `expo-updates` is disabled in `dev` builds, so
+> verify OTA behavior on a `preview` build, not via Metro.
 
 ## Windows Notes
 
