@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Baru</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#e1e3e4",
+                        "primary-fixed-dim": "#cfbcff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "background": "#f6faff",
+                        "primary-container": "#7c6ba8",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#676011",
+                        "secondary": "#5c5f60",
+                        "on-primary-fixed-variant": "#4d3d76",
+                        "inverse-on-surface": "#e9f2fb",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#1f1c00",
+                        "surface-container-high": "#e0e9f2",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f6faff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#d3c970",
+                        "on-primary-container": "#fffbff",
+                        "surface-container-low": "#ecf5fe",
+                        "outline": "#7a7580",
+                        "surface-dim": "#d2dbe4",
+                        "surface-container": "#e6eff8",
+                        "on-secondary-fixed": "#191c1d",
+                        "on-secondary-container": "#626566",
+                        "on-surface-variant": "#49454f",
+                        "on-primary-fixed": "#200f48",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dbe4ed",
+                        "on-tertiary-fixed-variant": "#4e4800",
+                        "surface": "#f6faff",
+                        "outline-variant": "#cac4d0",
+                        "inverse-primary": "#cfbcff",
+                        "tertiary-container": "#b7ad58",
+                        "primary-fixed": "#e9ddff",
+                        "on-background": "#141d23",
+                        "inverse-surface": "#293138",
+                        "surface-tint": "#655590",
+                        "surface-container-highest": "#dbe4ed",
+                        "secondary-container": "#e1e3e4",
+                        "on-tertiary-container": "#464000",
+                        "primary": "#62528d",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "on-secondary-fixed-variant": "#454748",
+                        "on-surface": "#141d23",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#f0e589"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "md": "16px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "label-md": ["Public Sans"],
+                        "headline-sm": ["Public Sans"],
+                        "body-md": ["Public Sans"],
+                        "body-lg": ["Public Sans"],
+                        "label-lg": ["Public Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pt-16 pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center px-4 h-16 bg-surface dark:bg-surface-dim shadow-sm transition-all duration-200">
+<button aria-label="Back" class="p-2 -ml-2 text-primary dark:text-primary-fixed-dim hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-full transition-colors active:scale-95">
+<span aria-hidden="true" class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="ml-2 font-headline-sm text-headline-sm font-semibold text-on-surface">User Baru</h1>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow px-margin-mobile md:px-margin-desktop py-lg max-w-3xl mx-auto w-full flex flex-col gap-lg">
+<!-- Identitas Section -->
+<section>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Identitas</h2>
+<div class="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col">
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="nama_lengkap">Nama Lengkap *</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline" id="nama_lengkap" placeholder="Masukkan nama lengkap" type="text"/>
+</div>
+<hr class="border-outline-variant/30 mx-md"/>
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="panggilan">Panggilan</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline" id="panggilan" placeholder="Masukkan nama panggilan" type="text"/>
+</div>
+<hr class="border-outline-variant/30 mx-md"/>
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="no_hp">No. HP *</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline" id="no_hp" placeholder="Contoh: 08123456789" type="tel"/>
+</div>
+</div>
+</section>
+<!-- Status Section -->
+<section>
+<div class="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30 p-md flex items-center justify-between">
+<span class="font-body-md text-body-md text-on-surface">Mahasiswa</span>
+<!-- Toggle Switch -->
+<button aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-surface-variant" id="mahasiswa-toggle" role="switch" type="button">
+<span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-outline shadow ring-0 transition duration-200 ease-in-out translate-x-0" id="mahasiswa-toggle-knob"></span>
+</button>
+</div>
+</section>
+<!-- Kontak & Catatan Section -->
+<section>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Kontak &amp; Catatan</h2>
+<div class="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col">
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="alamat">Alamat</label>
+<textarea class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline resize-none" id="alamat" placeholder="Masukkan alamat lengkap" rows="2"></textarea>
+</div>
+<hr class="border-outline-variant/30 mx-md"/>
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="kontak_darurat">Kontak Darurat</label>
+<input class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline" id="kontak_darurat" placeholder="Nama / No. HP" type="text"/>
+</div>
+<hr class="border-outline-variant/30 mx-md"/>
+<div class="p-md relative">
+<label class="block font-label-md text-label-md text-on-surface-variant mb-xs" for="catatan">Catatan</label>
+<textarea class="w-full bg-transparent border-none p-0 focus:ring-0 font-body-md text-body-md text-on-surface placeholder-outline resize-none" id="catatan" placeholder="Tambahkan catatan jika ada" rows="2"></textarea>
+</div>
+</div>
+</section>
+<!-- Foto Section -->
+<section>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Foto</h2>
+<div class="grid grid-cols-3 gap-md">
+<!-- Foto Profil -->
+<button class="aspect-[3/4] bg-surface-container-highest rounded-lg flex flex-col items-center justify-center gap-xs border border-dashed border-outline-variant hover:bg-surface-variant transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[32px]">photo_camera</span>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-primary transition-colors">Foto Profil</span>
+</button>
+<!-- KTP -->
+<button class="aspect-[3/4] bg-surface-container-highest rounded-lg flex flex-col items-center justify-center gap-xs border border-dashed border-outline-variant hover:bg-surface-variant transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[32px]">photo_camera</span>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-primary transition-colors">KTP</span>
+</button>
+<!-- KTM -->
+<button class="aspect-[3/4] bg-surface-container-highest rounded-lg flex flex-col items-center justify-center gap-xs border border-dashed border-outline-variant hover:bg-surface-variant transition-colors group" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[32px]">photo_camera</span>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-primary transition-colors">KTM</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Action Bar for Forms) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-md bg-surface-container-lowest dark:bg-surface-container-low border-t border-outline-variant dark:border-outline shadow-[0px_-4px_12px_rgba(0,0,0,0.05)] rounded-t-xl">
+<div class="flex w-full gap-md max-w-3xl mx-auto">
+<button class="flex-1 h-12 flex items-center justify-center gap-2 border border-outline text-on-surface font-label-lg text-label-lg rounded-full px-6 hover:bg-surface-container-high active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined">close</span>
+                Batal
+            </button>
+<button class="flex-1 h-12 flex items-center justify-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg rounded-full px-6 hover:opacity-90 active:scale-[0.98] transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined">check_circle</span>
+                Simpan
+            </button>
+</div>
+</footer>
+<script>
+        // Simple toggle logic for the "Mahasiswa" switch
+        const toggleBtn = document.getElementById('mahasiswa-toggle');
+        const toggleKnob = document.getElementById('mahasiswa-toggle-knob');
+        let isToggled = false;
+
+        toggleBtn.addEventListener('click', () => {
+            isToggled = !isToggled;
+            toggleBtn.setAttribute('aria-checked', isToggled);
+            
+            if (isToggled) {
+                toggleBtn.classList.remove('bg-surface-variant');
+                toggleBtn.classList.add('bg-primary');
+                toggleKnob.classList.remove('translate-x-0', 'bg-outline');
+                toggleKnob.classList.add('translate-x-5', 'bg-on-primary');
+            } else {
+                toggleBtn.classList.remove('bg-primary');
+                toggleBtn.classList.add('bg-surface-variant');
+                toggleKnob.classList.remove('translate-x-5', 'bg-on-primary');
+                toggleKnob.classList.add('translate-x-0', 'bg-outline');
+            }
+        });
+    </script>
+</body></html>

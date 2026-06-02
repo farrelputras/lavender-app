@@ -1,4 +1,3 @@
-// app/screens/UserScreen.tsx
 import { useState, useCallback, useRef } from "react"
 import {
   View,
@@ -19,10 +18,20 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
-import { colors, textStyles, spacing, borderRadius } from "@/theme/tokens"
+import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, initialsFromName } from "@/utils/format"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
+
+// Cycles through two palette options so the same user always gets the same avatar color.
+const AVATAR_PALETTES = [
+  { bg: colors.primaryContainer, text: colors.onPrimaryContainer },
+  { bg: colors.secondaryContainer, text: colors.onSurface },
+] as const
+
+function avatarPalette(name: string) {
+  return AVATAR_PALETTES[name.charCodeAt(0) % AVATAR_PALETTES.length]
+}
 
 function groupByFirstLetter(rows: UserSummary[]) {
   const m = new Map<string, UserSummary[]>()
@@ -38,42 +47,47 @@ function groupByFirstLetter(rows: UserSummary[]) {
 }
 
 function UserRow({ u, onPress }: { u: UserSummary; onPress: () => void }) {
+  const palette = avatarPalette(u.name)
+  const hasChips = u.debtAmount > 0 || u.activeRentalsCount > 0
   return (
-    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.8}>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       {u.profilPhoto?.uri ? (
         <Image source={{ uri: u.profilPhoto.uri }} style={styles.avatarImage} />
       ) : (
-        <View style={styles.avatarCircle}>
-          <Text style={[textStyles.labelLg, { color: colors.onPrimaryContainer }]}>
+        <View style={[styles.avatarCircle, { backgroundColor: palette.bg }]}>
+          <Text style={[textStyles.labelLg, { color: palette.text }]}>
             {initialsFromName(u.name)}
           </Text>
         </View>
       )}
-      <View style={styles.rowBody}>
-        <Text style={[textStyles.bodyLg, { color: colors.onSurface }]} numberOfLines={1}>
-          {u.nickname ? `${u.name} (${u.nickname})` : u.name}
+      <View style={styles.cardBody}>
+        <Text style={styles.nameText} numberOfLines={1}>
+          {u.name}
+          {u.nickname ? <Text style={styles.nicknameText}> ({u.nickname})</Text> : null}
         </Text>
-        <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
+        <Text style={styles.phoneText} numberOfLines={1}>
           {u.phone}
         </Text>
-        <View style={styles.chipRow}>
-          {u.debtAmount > 0 && (
-            <View style={[styles.chip, styles.chipDebt]}>
-              <Text style={[textStyles.labelMd, { color: colors.onErrorContainer }]}>
-                Hutang {formatRupiah(u.debtAmount)}
-              </Text>
-            </View>
-          )}
-          {u.activeRentalsCount > 0 && (
-            <View style={[styles.chip, styles.chipActive]}>
-              <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
-                Sewa Aktif ({u.activeRentalsCount})
-              </Text>
-            </View>
-          )}
-        </View>
+        {hasChips && (
+          <View style={styles.chipRow}>
+            {u.debtAmount > 0 && (
+              <View style={[styles.chip, styles.chipDebt]}>
+                <Text style={[textStyles.labelMd, { color: colors.onErrorContainer }]}>
+                  Hutang {formatRupiah(u.debtAmount)}
+                </Text>
+              </View>
+            )}
+            {u.activeRentalsCount > 0 && (
+              <View style={[styles.chip, styles.chipActive]}>
+                <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
+                  Sewa Aktif ({u.activeRentalsCount})
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
       </View>
-      <MaterialIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
+      <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
     </TouchableOpacity>
   )
 }
@@ -113,15 +127,18 @@ export function UserScreen() {
   return (
     <SafeAreaView edges={["top"]} style={styles.safe}>
       <View style={styles.header}>
-        <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>User</Text>
-        <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-          {rows.length} total
-        </Text>
+        <Text style={styles.title}>User</Text>
+        <Text style={styles.subtitle}>{rows.length} total</Text>
       </View>
 
       <View style={styles.searchRow}>
         <View style={styles.searchInputContainer}>
-          <MaterialIcons name="search" size={20} color={colors.onSurfaceVariant} style={{ marginRight: 8 }} />
+          <MaterialIcons
+            name="search"
+            size={20}
+            color={colors.secondary}
+            style={{ marginRight: spacing.sm }}
+          />
           <TextInput
             ref={searchRef}
             style={[textStyles.bodyMd, styles.searchInput]}
@@ -129,11 +146,11 @@ export function UserScreen() {
             onChangeText={setQuery}
             onFocus={() => setSearchMode(true)}
             placeholder="Cari nama atau panggilan..."
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholderTextColor={colors.outlineVariant}
           />
           {searchMode && query.length > 0 && (
             <TouchableOpacity onPress={() => setQuery("")}>
-              <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
+              <MaterialIcons name="close" size={20} color={colors.secondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -155,7 +172,10 @@ export function UserScreen() {
           data={filtered}
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => (
-            <UserRow u={item} onPress={() => navigation.navigate("UserDetail", { userId: item.id })} />
+            <UserRow
+              u={item}
+              onPress={() => navigation.navigate("UserDetail", { userId: item.id })}
+            />
           )}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
@@ -172,11 +192,14 @@ export function UserScreen() {
           sections={sections}
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => (
-            <UserRow u={item} onPress={() => navigation.navigate("UserDetail", { userId: item.id })} />
+            <UserRow
+              u={item}
+              onPress={() => navigation.navigate("UserDetail", { userId: item.id })}
+            />
           )}
           renderSectionHeader={({ section }) => (
             <View style={styles.sectionHeader}>
-              <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>{section.title}</Text>
+              <Text style={styles.sectionLetter}>{section.title}</Text>
             </View>
           )}
           stickySectionHeadersEnabled
@@ -189,30 +212,56 @@ export function UserScreen() {
         activeOpacity={0.85}
         onPress={() => navigation.navigate("UserForm", { mode: "create" })}
       >
-        <MaterialIcons name="person-add" size={24} color={colors.onPrimary} />
+        <MaterialIcons name="person-add" size={22} color={colors.onPrimary} />
         <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>User Baru</Text>
       </TouchableOpacity>
     </SafeAreaView>
   )
 }
 
+const CARD_SHADOW = {
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.05,
+  shadowRadius: 12,
+  elevation: 2,
+} as const
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+
+  // Header
   header: {
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.base,
-    paddingBottom: spacing.xs,
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
+    paddingTop: spacing.lg,
+    paddingBottom: 0,
   },
+  title: {
+    fontFamily: "publicSansBold",
+    fontSize: 40,
+    lineHeight: 48,
+    color: colors.primary,
+  },
+  subtitle: {
+    ...textStyles.bodyMd,
+    color: colors.secondary,
+    marginTop: spacing.xs,
+  },
+
+  // Search
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.sm,
   },
   searchInputContainer: {
     flex: 1,
@@ -220,31 +269,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.surfaceContainer,
+    backgroundColor: colors.surfaceContainerLowest,
     paddingHorizontal: spacing.md,
+    ...CARD_SHADOW,
   },
   searchInput: { flex: 1, color: colors.onSurface, padding: 0 },
+
+  // Section header (sticky)
   sectionHeader: {
     backgroundColor: colors.background,
     paddingHorizontal: spacing.base,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.xs,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.sm,
   },
-  listContent: { paddingBottom: 120, paddingTop: spacing.xs },
-  row: {
+  sectionLetter: {
+    ...textStyles.headlineSm,
+    color: colors.secondary,
+    paddingLeft: spacing.xs,
+  },
+
+  // List
+  listContent: { paddingBottom: 120 },
+
+  // Card
+  card: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
     marginHorizontal: spacing.base,
     marginBottom: spacing.sm,
-    padding: spacing.base,
+    padding: spacing.md,
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: borderRadius.card,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
+    borderRadius: 16,
+    ...CARD_SHADOW,
   },
   avatarCircle: {
     width: 48,
@@ -252,30 +309,53 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.primaryContainer,
   },
-  avatarImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  avatarImage: { width: 48, height: 48, borderRadius: 24 },
+  cardBody: { flex: 1 },
+  nameText: {
+    ...textStyles.bodyLg,
+    fontFamily: "publicSansSemiBold",
+    color: colors.onSurface,
   },
-  rowBody: { flex: 1, gap: 4 },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 2 },
-  chip: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  nicknameText: {
+    ...textStyles.bodyLg,
+    fontFamily: "publicSansRegular",
+    color: colors.secondary,
+  },
+  phoneText: {
+    ...textStyles.bodyMd,
+    color: colors.secondary,
+    marginTop: 2,
+  },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: spacing.xs,
+  },
+  chip: { borderRadius: 999, paddingHorizontal: 12, paddingVertical: 4 },
   chipDebt: { backgroundColor: colors.errorContainer },
   chipActive: { backgroundColor: colors.warningContainer },
+
+  // Empty
   emptyState: { alignItems: "center", padding: 24 },
+
+  // FAB
   fab: {
     position: "absolute",
     right: spacing.base,
-    bottom: spacing.lg,
+    bottom: spacing.xl,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
-    paddingHorizontal: spacing.base,
-    height: 52,
-    borderRadius: 26,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: 999,
     backgroundColor: colors.primary,
-    elevation: 6,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
   },
 })

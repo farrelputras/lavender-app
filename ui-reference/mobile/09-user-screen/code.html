@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#655590",
+                      "on-error": "#ffffff",
+                      "on-primary-container": "#fffbff",
+                      "tertiary-fixed-dim": "#d3c970",
+                      "surface-container-low": "#ecf5fe",
+                      "on-tertiary-container": "#464000",
+                      "inverse-on-surface": "#e9f2fb",
+                      "outline": "#7a7580",
+                      "on-primary-fixed": "#200f48",
+                      "primary": "#62528d",
+                      "background": "#f6faff",
+                      "on-error-container": "#93000a",
+                      "primary-fixed-dim": "#cfbcff",
+                      "inverse-primary": "#cfbcff",
+                      "inverse-surface": "#293138",
+                      "on-primary": "#ffffff",
+                      "on-background": "#141d23",
+                      "on-secondary-fixed": "#191c1d",
+                      "secondary": "#5c5f60",
+                      "on-secondary-fixed-variant": "#454748",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#1f1c00",
+                      "error-container": "#ffdad6",
+                      "on-surface-variant": "#49454f",
+                      "tertiary-fixed": "#f0e589",
+                      "surface-container": "#e6eff8",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed-variant": "#4d3d76",
+                      "surface-container-high": "#e0e9f2",
+                      "surface-variant": "#dbe4ed",
+                      "secondary-fixed": "#e1e3e4",
+                      "secondary-container": "#e1e3e4",
+                      "surface-container-highest": "#dbe4ed",
+                      "outline-variant": "#cac4d0",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-container": "#626566",
+                      "secondary-fixed-dim": "#c5c7c8",
+                      "primary-fixed": "#e9ddff",
+                      "on-tertiary-fixed-variant": "#4e4800",
+                      "on-surface": "#141d23",
+                      "primary-container": "#7c6ba8",
+                      "tertiary-container": "#b7ad58",
+                      "surface": "#f6faff",
+                      "surface-dim": "#d2dbe4",
+                      "surface-bright": "#f6faff",
+                      "on-tertiary": "#ffffff",
+                      "tertiary": "#676011"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "gutter": "24px",
+                      "base": "8px",
+                      "xl": "32px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "margin-desktop": "40px",
+                      "margin-mobile": "16px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Public Sans"],
+                      "headline-lg": ["Public Sans"],
+                      "body-lg": ["Public Sans"],
+                      "display-lg": ["Public Sans"],
+                      "body-md": ["Public Sans"],
+                      "label-md": ["Public Sans"],
+                      "label-lg": ["Public Sans"],
+                      "headline-sm": ["Public Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "label-lg": ["16px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-[100px] font-body-md">
+<!-- Top Navigation (Shell suppressed based on instructions, using a custom header for the page) -->
+<header class="px-margin-mobile pt-lg pb-sm sticky top-0 bg-background/90 backdrop-blur-md z-40">
+<div>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">User</h1>
+<p class="font-body-md text-body-md text-secondary mt-xs">12 total</p>
+</div>
+<div class="mt-lg flex items-center gap-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-secondary">search</span>
+<input class="w-full bg-surface-container-lowest border-none rounded-full py-3 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-primary font-body-md text-body-md text-on-surface placeholder:text-outline-variant outline-none" placeholder="Cari nama atau panggilan..." type="text"/>
+</div>
+<button class="font-label-lg text-label-lg text-primary px-sm whitespace-nowrap">Batal</button>
+</div>
+</header>
+<!-- Content List -->
+<main class="px-margin-mobile mt-md flex flex-col gap-lg">
+<!-- Group A -->
+<section>
+<h2 class="font-headline-sm text-headline-sm text-secondary mb-sm pl-xs">A</h2>
+<div class="flex flex-col gap-sm">
+<!-- Card 1: Andito -->
+<div class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md active:scale-[0.98] transition-transform cursor-pointer border border-outline-variant/30">
+<img alt="Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A portrait of a young Indonesian man smiling warmly in a bright, modern office setting with natural lighting and a clean corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD102q2NWsPkPaZQmCp82JBcux1osaOe5tp1FLa5DReJo6eWSADrAS76oYPXKd0klPWHQn6waY22lbkAacB0tGnWAoeaxlZS1qNcAb93ee6NhH1X-OJZSqHFKooaNZYoVwYbIku-YjR05-urFQSa0YckZ7VyZSJ27d124_U6ANMD9gVIyA0K1n7_hsgGOS5xdRfVMX50_s1oOlMFqJv5vY8U8mjnCsbT91aVWsNJQp-OMHWbRzFGe2MFmyinESRjWhZ5EK5wxM5oJw"/>
+<div class="flex-1 min-w-0">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface truncate">Andito Pratama <span class="font-normal text-secondary">(Dito)</span></h3>
+<p class="font-body-md text-body-md text-secondary truncate">0812-3456-7890</p>
+<div class="flex flex-wrap gap-xs mt-xs">
+<span class="bg-error-container text-on-error-container font-label-md text-label-md px-3 py-1 rounded-full whitespace-nowrap">Hutang Rp 150.000</span>
+<span class="bg-[#FEF7E0] text-[#B06000] font-label-md text-label-md px-3 py-1 rounded-full whitespace-nowrap">Sewa Aktif (2)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<!-- Card 2: Andini -->
+<div class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md active:scale-[0.98] transition-transform cursor-pointer border border-outline-variant/30">
+<div class="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-headline-md text-headline-md">
+                        AS
+                    </div>
+<div class="flex-1 min-w-0">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface truncate">Andini Sari <span class="font-normal text-secondary">(Andin)</span></h3>
+<p class="font-body-md text-body-md text-secondary truncate">0856-7890-1234</p>
+<div class="flex flex-wrap gap-xs mt-xs">
+<span class="bg-[#FEF7E0] text-[#B06000] font-label-md text-label-md px-3 py-1 rounded-full whitespace-nowrap">Sewa Aktif (1)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<!-- Card 3: Andre -->
+<div class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md active:scale-[0.98] transition-transform cursor-pointer border border-outline-variant/30">
+<img alt="Avatar" class="w-12 h-12 rounded-full object-cover" data-alt="A portrait of a middle-aged Asian man with glasses looking directly at the camera in a modern minimalist setting with soft, high-key lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwQzeRVWtfJY25auzC9oJIRonVDuc8lWx72ylBRWo59l11Mu20RbJIAEEAcQfT9BeMhGEYgm_4GVztjWbmN37csFjizwjFDIkEsanPFAQ4p3xkJXK3whgQK9YoFGyTsgiFKhsPuq3jaJERIjSgQ_3JM2CC9JZiWZciEMRvR2bWs2jgfkiQ4AFAS9Tll8HaL7-HWzPNua_QasOgmOGRgLpZmuYn9myuR1DkemhevQKxHuxAy0_k001w2iSBzcVvhEg6BxLor8F6-e4"/>
+<div class="flex-1 min-w-0">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface truncate">Andre Wijaya <span class="font-normal text-secondary">(Andre)</span></h3>
+<p class="font-body-md text-body-md text-secondary truncate">0899-1234-5678</p>
+<div class="flex flex-wrap gap-xs mt-xs">
+<span class="bg-error-container text-on-error-container font-label-md text-label-md px-3 py-1 rounded-full whitespace-nowrap">Hutang Rp 50.000</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Group B -->
+<section>
+<h2 class="font-headline-sm text-headline-sm text-secondary mb-sm pl-xs">B</h2>
+<div class="flex flex-col gap-sm">
+<!-- Card 4: Budi -->
+<div class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex items-center gap-md active:scale-[0.98] transition-transform cursor-pointer border border-outline-variant/30">
+<div class="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-headline-md text-headline-md">
+                        BS
+                    </div>
+<div class="flex-1 min-w-0">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface truncate">Budi Santoso <span class="font-normal text-secondary">(Budi)</span></h3>
+<p class="font-body-md text-body-md text-secondary truncate">0877-5555-1111</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-[88px] right-margin-mobile bg-primary text-on-primary rounded-full px-6 py-4 shadow-[0px_12px_32px_rgba(0,0,0,0.15)] flex items-center gap-2 active:scale-95 transition-transform z-50">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<span class="font-label-lg text-label-lg">User Baru</span>
+</button>
+<!-- BottomNavBar Container (using JSON structural commands) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-6 bg-surface-container-lowest dark:bg-inverse-surface shadow-[0px_-4px_12px_rgba(0,0,0,0.05)] rounded-t-xl md:hidden">
+<!-- Fleet Item -->
+<div class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-secondary-container/30 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">directions_car</span>
+<span class="font-label-md text-label-md mt-1">Fleet</span>
+</div>
+<!-- Rentals Item -->
+<div class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-secondary-container/30 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">key</span>
+<span class="font-label-md text-label-md mt-1">Rentals</span>
+</div>
+<!-- Users Item (Active) -->
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-6 py-2 hover:bg-secondary-container/30 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-md text-label-md mt-1 font-semibold">Users</span>
+</div>
+<!-- Support Item -->
+<div class="flex flex-col items-center justify-center text-secondary p-2 hover:bg-secondary-container/30 transition-all active:scale-90 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-label-md text-label-md mt-1">Support</span>
+</div>
+</nav>
+</body></html>
