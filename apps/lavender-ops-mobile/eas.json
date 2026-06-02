@@ -6,6 +6,9 @@
     "development": {
       "extends": "production",
       "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "development"
+      },
       "android": {
         "gradleCommand": ":app:assembleDebug"
       },
@@ -22,7 +25,7 @@
         "buildConfiguration": "Debug",
         "simulator": false
       },
-      "channel": "development:device"
+      "channel": "development-device"
     },
     "preview": {
       "extends": "production",

@@ -8,6 +8,11 @@ import { ExpoConfig, ConfigContext } from "@expo/config"
  */
 import "tsx/cjs"
 
+// Build-variant identity: the dev build installs as "Lavender Ops Dev" with a
+// distinct package id so it can coexist with mom's real "Lavender Ops" build.
+// APP_VARIANT is set per build profile in eas.json (development profile only).
+const IS_DEV = process.env.APP_VARIANT === "development"
+
 /**
  * @param config ExpoConfig coming from the static config app.json if it exists
  *
@@ -19,8 +24,14 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
 
   return {
     ...config,
+    name: IS_DEV ? "Lavender Ops Dev" : "Lavender Ops",
+    android: {
+      ...config.android,
+      package: IS_DEV ? "com.lavender.ops.dev" : "com.lavender.ops",
+    },
     ios: {
       ...config.ios,
+      bundleIdentifier: IS_DEV ? "com.lavender.ops.dev" : "com.lavender.ops",
       // This privacyManifests is to get you started.
       // See Expo's guide on apple privacy manifests here:
       // https://docs.expo.dev/guides/apple-privacy/
