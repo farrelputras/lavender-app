@@ -1,3 +1,4 @@
+import "react-native-get-random-values"
 import "react-native-url-polyfill/auto"
 import "@expo/metro-runtime" // this is for fast refresh on web w/o expo-router
 import { registerRootComponent } from "expo"

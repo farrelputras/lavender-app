@@ -4,6 +4,16 @@ import * as ReactNative from "react-native"
 
 import mockFile from "./mockFile"
 
+// Polyfill Web Crypto so `uuid` works under jest. In the app, `react-native-get-random-values`
+// provides global.crypto.getRandomValues; jest-expo's sandbox may not expose it, so fall back
+// to node's webcrypto (node >= 20). Guarded — won't clobber an existing global.crypto.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { webcrypto } = require("node:crypto")
+if (typeof globalThis.crypto === "undefined" || typeof globalThis.crypto.getRandomValues === "undefined") {
+  // @ts-expect-error assign node's webcrypto to the global that `uuid` reads
+  globalThis.crypto = webcrypto
+}
+
 // libraries to mock
 // Attach static method stubs directly onto the Image class so it remains a valid React component
 // (spreading Image into a plain object loses its function/class nature and breaks <Image> rendering).
