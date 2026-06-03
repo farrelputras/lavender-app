@@ -7,18 +7,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Linking,
 } from "react-native"
-import { MaterialIcons } from "@expo/vector-icons"
+import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import { SectionLabel } from "@/components/form/SectionLabel"
 import { PhotoSlot } from "@/components/form/PhotoSlot"
+import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getUser, getUserSummary, softDeleteUser } from "@/services/rentals"
 import type { User, UserSummary } from "@/services/rentals/types"
-import { colors, textStyles, spacing, borderRadius } from "@/theme/tokens"
-import { formatRupiah } from "@/utils/format"
+import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
+import { formatRupiah, toWaNumber } from "@/utils/format"
 
 export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"UserDetail">) {
   const { userId } = route.params
@@ -55,6 +56,13 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
     )
   }
 
+  const handleWhatsApp = () => {
+    if (!user) return
+    Linking.openURL("https://wa.me/" + toWaNumber(user.phone)).catch(() =>
+      Alert.alert("Error", "Tidak dapat membuka WhatsApp"),
+    )
+  }
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -62,13 +70,16 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
       </View>
     )
   }
+
   if (!user || !summary) {
     return (
       <SafeAreaView edges={["top"]} style={styles.safe}>
         <View style={styles.appBar}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.appBarBtn} onPress={() => navigation.goBack()}>
             <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
+          <Text style={styles.appBarTitle}>Detail User</Text>
+          <View style={styles.appBarSide} />
         </View>
         <Text style={[textStyles.bodyLg, { color: colors.onSurfaceVariant, padding: spacing.lg }]}>
           User tidak ditemukan.
@@ -77,113 +88,136 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
     )
   }
 
+  const isVerified = user.verificationStatus === "TERVERIFIKASI_PDDIKTI"
+  const displayName = user.nickname ? `${user.name} (${user.nickname})` : user.name
+
   return (
     <SafeAreaView edges={["top"]} style={styles.safe}>
+      {/* App Bar */}
       <View style={styles.appBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          style={styles.appBarBtn}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={[textStyles.headlineSm, { color: colors.onSurface, flex: 1, marginLeft: spacing.sm }]}>
-          Detail User
-        </Text>
-        <TouchableOpacity onPress={() => navigation.navigate("UserForm", { mode: "edit", userId: user.id })}>
-          <MaterialIcons name="edit" size={22} color={colors.primary} />
-        </TouchableOpacity>
+        <Text style={styles.appBarTitle}>Detail User</Text>
+        <View style={styles.appBarSide}>
+          <TouchableOpacity
+            style={styles.editBtn}
+            onPress={() => navigation.navigate("UserForm", { mode: "edit", userId: user.id })}
+          >
+            <MaterialIcons name="edit" size={20} color={colors.onPrimaryContainer} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.identityBlock}>
-          <Text style={[textStyles.headlineLg, { color: colors.onSurface }]}>
-            {user.nickname ? `${user.name} (${user.nickname})` : user.name}
-          </Text>
-          <Text style={[textStyles.bodyLg, { color: colors.onSurfaceVariant }]}>{user.phone}</Text>
+        {/* Profile Hero */}
+        <View style={styles.hero}>
+          <Text style={styles.heroName}>{displayName}</Text>
+          <Text style={styles.heroPhone}>{user.phone}</Text>
           {user.isMahasiswa && (
-            <View style={[styles.chip, { backgroundColor: colors.surfaceVariant, marginTop: spacing.xs }]}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                {user.verificationStatus === "TERVERIFIKASI_PDDIKTI"
-                  ? "Terverifikasi PDDikti"
-                  : "Belum Diverifikasi PDDikti"}
-              </Text>
-            </View>
+            <StatusPill
+              label="Mahasiswa"
+              bg={isVerified ? colors.successContainer : colors.surfaceVariant}
+              color={isVerified ? colors.onSuccessContainer : colors.onSurfaceVariant}
+              icon={isVerified ? "check" : undefined}
+            />
           )}
         </View>
 
+        {/* Stats Row */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Sewa Aktif</Text>
-            <Text style={[textStyles.headlineMd, { color: colors.onSurface }]}>
+            <Text style={styles.statLabel}>Sewa Aktif</Text>
+            <Text style={[styles.statValue, { color: colors.primary }]}>
               {summary.activeRentalsCount}
             </Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Hutang</Text>
-            <Text style={[textStyles.headlineMd, { color: colors.onSurface }]}>
+            <Text style={styles.statLabel}>Hutang</Text>
+            <Text style={[styles.statValue, { color: summary.debtAmount > 0 ? colors.error : colors.success }]}>
               {formatRupiah(summary.debtAmount)}
             </Text>
           </View>
         </View>
 
-        <SectionLabel>Foto</SectionLabel>
-        <View style={styles.photoRow}>
-          <PhotoSlot
-            label="Foto Profil"
-            photo={user.profilPhoto ? { id: user.profilPhoto.id, uri: user.profilPhoto.uri } : null}
-            readonly
-            onCapture={() => {}}
-            onRemove={() => {}}
-          />
-          <PhotoSlot
-            label="KTP"
-            photo={user.ktpPhoto ? { id: user.ktpPhoto.id, uri: user.ktpPhoto.uri } : null}
-            readonly
-            onCapture={() => {}}
-            onRemove={() => {}}
-          />
-          <PhotoSlot
-            label="KTM"
-            photo={user.ktmPhoto ? { id: user.ktmPhoto.id, uri: user.ktmPhoto.uri } : null}
-            readonly
-            onCapture={() => {}}
-            onRemove={() => {}}
-          />
+        {/* Dokumen & Foto */}
+        <View style={styles.card}>
+          <Text style={styles.cardSectionTitle}>Dokumen &amp; Foto</Text>
+          <View style={styles.photoRow}>
+            <PhotoSlot
+              label="Foto Profil"
+              photo={user.profilPhoto ? { id: user.profilPhoto.id, uri: user.profilPhoto.uri } : null}
+              readonly
+              onCapture={() => {}}
+              onRemove={() => {}}
+            />
+            <PhotoSlot
+              label="KTP"
+              photo={user.ktpPhoto ? { id: user.ktpPhoto.id, uri: user.ktpPhoto.uri } : null}
+              readonly
+              onCapture={() => {}}
+              onRemove={() => {}}
+            />
+            <PhotoSlot
+              label="KTM"
+              photo={user.ktmPhoto ? { id: user.ktmPhoto.id, uri: user.ktmPhoto.uri } : null}
+              readonly
+              onCapture={() => {}}
+              onRemove={() => {}}
+            />
+          </View>
         </View>
 
-        <SectionLabel>Kontak & Catatan</SectionLabel>
-        <View style={styles.field}>
-          <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Alamat</Text>
-          <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{user.alamat ?? "—"}</Text>
-        </View>
-        <View style={styles.field}>
-          <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kontak Darurat</Text>
-          <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{user.kontakDarurat ?? "—"}</Text>
-        </View>
-        <View style={styles.field}>
-          <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Catatan</Text>
-          <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{user.notes ?? "—"}</Text>
+        {/* Kontak & Catatan */}
+        <View style={styles.card}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Alamat</Text>
+            <Text style={styles.infoValue}>{user.alamat ?? "—"}</Text>
+          </View>
+          <View style={styles.infoDivider} />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Kontak Darurat</Text>
+            <Text style={styles.infoValue}>{user.kontakDarurat ?? "—"}</Text>
+          </View>
+          <View style={styles.infoDivider} />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Catatan</Text>
+            <Text style={styles.infoValue}>{user.notes ?? "—"}</Text>
+          </View>
         </View>
 
+        {/* PDDikti (conditional) */}
         {user.isMahasiswa && (user.namaPddikti || user.universitas) && (
-          <>
-            <SectionLabel>PDDikti</SectionLabel>
-            <View style={styles.field}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Nama Resmi</Text>
-              <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>
-                {user.namaPddikti ?? "—"}
+          <View style={styles.card}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Nama Resmi</Text>
+              <Text style={styles.infoValue}>{user.namaPddikti ?? "—"}</Text>
+            </View>
+            <View style={styles.infoDivider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Universitas</Text>
+              <Text style={styles.infoValue}>
+                {user.universitas ?? "—"}{user.prodi ? ` · ${user.prodi}` : ""}
               </Text>
             </View>
-            <View style={styles.field}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Universitas</Text>
-              <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>
-                {user.universitas ?? "—"} {user.prodi ? `· ${user.prodi}` : ""}
-              </Text>
-            </View>
-          </>
+          </View>
         )}
 
-        <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.85}>
-          <MaterialIcons name="delete" size={20} color={colors.error} />
-          <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus User</Text>
-        </TouchableOpacity>
+        {/* Action Buttons */}
+        <View style={styles.actionSection}>
+          <TouchableOpacity style={styles.whatsappBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
+            <FontAwesome name="whatsapp" size={22} color="#FFFFFF" />
+            <Text style={[textStyles.labelLg, { color: "#FFFFFF" }]}>WhatsApp</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.85}>
+            <MaterialIcons name="delete" size={20} color={colors.error} />
+            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus User</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   )
@@ -191,43 +225,135 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+
+  // App Bar
   appBar: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
+  appBarBtn: {
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  appBarTitle: {
+    ...textStyles.headlineMd,
+    color: colors.onSurface,
+    flex: 1,
+    textAlign: "center",
+  },
+  appBarSide: {
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primaryContainer,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Scroll
   scroll: { paddingBottom: spacing.xxl },
-  identityBlock: { paddingHorizontal: spacing.base, paddingVertical: spacing.md, gap: spacing.xs },
-  chip: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
-  statsRow: { flexDirection: "row", gap: spacing.sm, paddingHorizontal: spacing.base, marginTop: spacing.md },
+
+  // Profile Hero
+  hero: {
+    alignItems: "center",
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.lg,
+    gap: spacing.xs,
+  },
+  heroName: { ...textStyles.headlineLg, color: colors.onSurface, textAlign: "center" },
+  heroPhone: { ...textStyles.bodyLg, color: colors.onSurfaceVariant, textAlign: "center" },
+
+  // Stats
+  statsRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    marginBottom: spacing.lg,
+  },
   statCard: {
     flex: 1,
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 16,
+    padding: spacing.md,
+    minHeight: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    ...cardShadow,
+  },
+  statLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginBottom: spacing.xs },
+  statValue: { ...textStyles.headlineMd },
+
+  // Card (photo + info + PDDikti)
+  card: {
     backgroundColor: colors.surfaceContainerLowest,
-    padding: spacing.base,
-    borderRadius: borderRadius.card,
-    elevation: 2,
+    borderRadius: 16,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    ...cardShadow,
+  },
+  cardSectionTitle: {
+    ...textStyles.labelLg,
+    color: colors.onSurface,
+    marginBottom: spacing.md,
   },
   photoRow: {
     flexDirection: "row",
     gap: spacing.md,
-    paddingHorizontal: spacing.base,
-    paddingBottom: spacing.sm,
     flexWrap: "wrap",
   },
-  field: { paddingHorizontal: spacing.base, paddingVertical: spacing.sm, gap: 2 },
+
+  // Info fields inside card
+  infoRow: { gap: 2 },
+  infoLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant },
+  infoValue: { ...textStyles.bodyMd, color: colors.onSurface },
+  infoDivider: {
+    height: 1,
+    backgroundColor: colors.surfaceVariant,
+    marginVertical: spacing.sm,
+  },
+
+  // Action buttons
+  actionSection: {
+    paddingHorizontal: spacing.base,
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  whatsappBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
+    height: 52,
+    borderRadius: 999,
+    backgroundColor: "#25D366",
+  },
   deleteBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: spacing.xs,
-    marginHorizontal: spacing.base,
-    marginTop: spacing.xl,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.button,
-    borderWidth: 1,
+    gap: spacing.sm,
+    height: 52,
+    borderRadius: 999,
+    borderWidth: 2,
     borderColor: colors.error,
   },
 })

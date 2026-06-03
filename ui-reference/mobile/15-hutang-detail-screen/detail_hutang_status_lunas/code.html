@@ -1,0 +1,209 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Detail Hutang</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Public Sans -->
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface": "#141d23",
+                    "on-tertiary-fixed": "#1f1c00",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#e1e3e4",
+                    "surface-container": "#e6eff8",
+                    "on-secondary-fixed-variant": "#454748",
+                    "secondary-fixed": "#e1e3e4",
+                    "primary": "#62528d",
+                    "outline": "#7a7580",
+                    "inverse-on-surface": "#e9f2fb",
+                    "surface-tint": "#655590",
+                    "inverse-surface": "#293138",
+                    "primary-fixed": "#e9ddff",
+                    "outline-variant": "#cac4d0",
+                    "surface-container-low": "#ecf5fe",
+                    "surface-bright": "#f6faff",
+                    "on-primary-container": "#fffbff",
+                    "error-container": "#ffdad6",
+                    "surface": "#f6faff",
+                    "surface-container-high": "#e0e9f2",
+                    "secondary": "#5c5f60",
+                    "tertiary-fixed": "#f0e589",
+                    "on-surface-variant": "#49454f",
+                    "surface-dim": "#d2dbe4",
+                    "primary-container": "#7c6ba8",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#b7ad58",
+                    "tertiary-fixed-dim": "#d3c970",
+                    "on-tertiary-fixed-variant": "#4e4800",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#dbe4ed",
+                    "on-primary-fixed": "#200f48",
+                    "on-tertiary-container": "#464000",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#cfbcff",
+                    "on-background": "#141d23",
+                    "on-secondary-fixed": "#191c1d",
+                    "tertiary": "#676011",
+                    "surface-container-lowest": "#ffffff",
+                    "background": "#f6faff",
+                    "on-secondary-container": "#626566",
+                    "inverse-primary": "#cfbcff",
+                    "on-primary": "#ffffff",
+                    "surface-container-highest": "#dbe4ed",
+                    "on-primary-fixed-variant": "#4d3d76",
+                    "secondary-fixed-dim": "#c5c7c8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "gutter": "24px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "md": "16px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "label-md": ["Public Sans"],
+                    "headline-md": ["Public Sans"],
+                    "body-md": ["Public Sans"],
+                    "label-lg": ["Public Sans"],
+                    "display-lg": ["Public Sans"],
+                    "body-lg": ["Public Sans"],
+                    "headline-sm": ["Public Sans"],
+                    "headline-lg": ["Public Sans"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                    "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                    "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                    "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom border radius to match 16px request specifically for cards */
+        .rounded-card {
+            border-radius: 16px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-xl antialiased">
+<!-- TopAppBar (Destination Detail - No Nav Shell) -->
+<header class="bg-surface dark:bg-on-background w-full top-0 sticky flex items-center px-margin-mobile h-14 z-40 transition-all active:scale-95 shadow-sm shadow-black/5">
+<button aria-label="Back" class="flex items-center justify-center p-sm rounded-full hover:opacity-80 hover:bg-surface-container-low transition-colors text-primary mr-md">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface flex-1">Detail Hutang</h1>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-margin-mobile pt-md flex flex-col gap-md max-w-md mx-auto">
+<!-- Hero Summary Card -->
+<section class="bg-surface-container-lowest rounded-card shadow-sm p-lg border border-outline-variant/30 flex flex-col relative overflow-hidden">
+<!-- Decorative background glow -->
+<div class="absolute -top-10 -right-10 w-32 h-32 bg-primary-fixed rounded-full blur-3xl opacity-40 pointer-events-none"></div>
+<div class="flex flex-col gap-xs mb-sm relative z-10">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-[12px]">Pelanggan</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Andito Pratama (Dito)</h2>
+</div>
+<hr class="border-outline-variant/50 my-sm relative z-10">
+<div class="flex flex-col gap-xs mt-sm relative z-10">
+<div class="flex justify-between items-end mb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Sisa Hutang</span>
+<!-- LUNAS Badge (Using primary container per brand tokens for highlighted success state) -->
+<div class="bg-primary-container text-on-primary-container px-sm py-1 rounded-full flex items-center gap-xs shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="check_circle" data-weight="fill">check_circle</span>
+<span class="font-label-md text-label-md tracking-wide">LUNAS</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-display-lg text-display-lg text-primary">Rp 0</span>
+<span class="font-label-md text-label-md text-on-surface-variant mt-xs">dari Rp 200.000 · Lunas 3 Jun 2026</span>
+</div>
+</div>
+</section>
+<!-- Rental Source Link -->
+<a class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex items-center justify-between border border-outline-variant/30 hover:bg-surface-container-low transition-colors active:scale-[0.98]" href="#">
+<div class="flex items-center gap-md">
+<div class="bg-primary-fixed-dim/20 p-sm rounded-lg text-primary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface font-medium">Lihat rental sumber</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="chevron_right">chevron_right</span>
+</a>
+<!-- Payment History Section -->
+<section class="mt-md">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-sm px-xs">Pembayaran</h3>
+<div class="flex flex-col gap-sm"><!-- Record 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex items-center justify-between border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col gap-xs">
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px]">3 Jun 2026, 14:30</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Rp 50.000</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<!-- Record 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex items-center justify-between border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col gap-xs">
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px]">1 Jun 2026, 09:15</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Rp 50.000</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<!-- Record 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex items-center justify-between border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col gap-xs">
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px]">28 Mei 2026, 16:45</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Rp 50.000</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<!-- Record 4 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex items-center justify-between border border-outline-variant/30 hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col gap-xs">
+<span class="font-body-md text-body-md text-on-surface-variant text-[13px]">25 Mei 2026, 10:00</span>
+</div>
+<div class="flex items-center gap-xs">
+<span class="font-label-lg text-label-lg text-on-surface">Rp 50.000</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="check_circle">check_circle</span>
+</div>
+</div></div>
+</section>
+</main>
+
+
+</body></html>

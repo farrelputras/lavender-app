@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
 import { View, StyleSheet, ViewStyle, StyleProp } from "react-native"
 
-import { colors, spacing } from "@/theme/tokens"
+import { cardShadow, colors, spacing } from "@/theme/tokens"
 
 export interface FieldCardProps {
   children: ReactNode
@@ -15,14 +15,10 @@ export function FieldCard({ children, style }: FieldCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
     borderRadius: 16,
-    borderWidth: 1,
-    elevation: 2,
-    padding: spacing.base,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+    ...cardShadow,
   },
 })

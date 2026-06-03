@@ -8,7 +8,17 @@ export interface SectionLabelProps {
 
 export function SectionLabel({ children }: SectionLabelProps) {
   return (
-    <Text style={[textStyles.headlineSm, { color: colors.onSurface, marginBottom: spacing.sm }]}>
+    <Text
+      style={[
+        textStyles.headlineSm,
+        {
+          color: colors.onSurface,
+          paddingHorizontal: spacing.base,
+          marginTop: spacing.md,
+          marginBottom: spacing.sm,
+        },
+      ]}
+    >
       {children}
     </Text>
   )

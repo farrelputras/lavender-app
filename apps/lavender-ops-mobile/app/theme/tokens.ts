@@ -49,6 +49,14 @@ export const colors = {
   onPrimaryFixedVariant: "#4d3d76",
 } as const
 
+export const cardShadow = {
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.05,
+  shadowRadius: 12,
+  elevation: 2,
+} as const
+
 // 4, 8, 12, 16, 20, 24, 32, 48
 export const spacing = {
   xs: 4,

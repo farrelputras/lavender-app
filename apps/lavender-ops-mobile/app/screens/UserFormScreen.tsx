@@ -158,11 +158,15 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safe}>
+      {/* App Bar */}
       <View style={styles.appBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={[textStyles.headlineSm, { color: colors.onSurface, flex: 1, marginLeft: spacing.sm }]}>
+        <Text style={styles.appBarTitle}>
           {mode === "create" ? "User Baru" : "Edit User"}
         </Text>
       </View>
@@ -171,18 +175,30 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         <SectionLabel>Identitas</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Nama Lengkap *</Text>
-          <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Nama" placeholderTextColor={colors.onSurfaceVariant} />
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Masukkan nama lengkap"
+            placeholderTextColor={colors.outlineVariant}
+          />
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>Panggilan</Text>
-          <TextInput style={styles.input} value={nickname} onChangeText={setNickname} placeholder="(opsional)" placeholderTextColor={colors.onSurfaceVariant} />
+          <TextInput
+            style={styles.input}
+            value={nickname}
+            onChangeText={setNickname}
+            placeholder="Masukkan nama panggilan"
+            placeholderTextColor={colors.outlineVariant}
+          />
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>No. HP *</Text>
           <TextInput
             style={styles.input}
             value={phone}
             onChangeText={setPhone}
-            placeholder="0812..."
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholder="Contoh: 08123456789"
+            placeholderTextColor={colors.outlineVariant}
             keyboardType="phone-pad"
           />
         </FieldCard>
@@ -199,15 +215,15 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
           </View>
         </FieldCard>
 
-        <SectionLabel>Kontak & Catatan</SectionLabel>
+        <SectionLabel>Kontak &amp; Catatan</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Alamat</Text>
           <TextInput
             style={[styles.input, styles.multiline]}
             value={alamat}
             onChangeText={setAlamat}
-            placeholder="(opsional)"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholder="Masukkan alamat lengkap"
+            placeholderTextColor={colors.outlineVariant}
             multiline
           />
           <View style={styles.divider} />
@@ -216,8 +232,8 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
             style={styles.input}
             value={kontakDarurat}
             onChangeText={setKontakDarurat}
-            placeholder="(opsional)"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholder="Nama / No. HP"
+            placeholderTextColor={colors.outlineVariant}
           />
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>Catatan</Text>
@@ -225,8 +241,8 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
             style={[styles.input, styles.multiline]}
             value={notes}
             onChangeText={setNotes}
-            placeholder="(opsional)"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholder="Tambahkan catatan jika ada"
+            placeholderTextColor={colors.outlineVariant}
             multiline
           />
         </FieldCard>
@@ -269,7 +285,14 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+
+  // App Bar
   appBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -277,12 +300,30 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     gap: spacing.sm,
   },
-  scroll: { paddingBottom: 160 },
-  fieldLabel: { color: colors.onSurfaceVariant, fontSize: 12, marginBottom: 4 },
-  divider: { height: 1, backgroundColor: colors.outlineVariant, marginVertical: spacing.sm },
-  input: {
+  appBarTitle: {
+    ...textStyles.headlineSm,
     color: colors.onSurface,
-    fontSize: 16,
+    flex: 1,
+    marginLeft: spacing.xs,
+  },
+
+  // Scroll
+  scroll: { paddingBottom: 160 },
+
+  // Field inside FieldCard
+  fieldLabel: {
+    ...textStyles.labelMd,
+    color: colors.onSurfaceVariant,
+    marginBottom: spacing.xs,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.outlineVariant,
+    marginVertical: spacing.sm,
+  },
+  input: {
+    ...textStyles.bodyMd,
+    color: colors.onSurface,
     padding: 0,
   },
   multiline: { minHeight: 60, textAlignVertical: "top" },
@@ -290,6 +331,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+
+  // Photo row (outside FieldCard, matches FieldCard marginHorizontal)
   photoRow: {
     flexDirection: "row",
     gap: spacing.md,

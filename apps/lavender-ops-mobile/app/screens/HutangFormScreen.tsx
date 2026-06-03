@@ -1,4 +1,3 @@
-// app/screens/HutangFormScreen.tsx
 import { useState, useEffect } from "react"
 import {
   View,
@@ -17,10 +16,11 @@ import { SectionLabel } from "@/components/form/SectionLabel"
 import { FieldCard } from "@/components/form/FieldCard"
 import { RupiahInput } from "@/components/form/RupiahInput"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
+import { SearchField } from "@/components/form/SearchField"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { createManualHutang, getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
-import { colors, textStyles, spacing, borderRadius } from "@/theme/tokens"
+import { colors, textStyles, spacing } from "@/theme/tokens"
 import { parseRupiahInput } from "@/utils/format"
 
 export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm">) {
@@ -61,47 +61,59 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safe}>
+      {/* App Bar */}
       <View style={styles.appBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={[textStyles.headlineSm, { color: colors.onSurface, flex: 1, marginLeft: spacing.sm }]}>
-          Hutang Baru
-        </Text>
+        <Text style={styles.appBarTitle}>Hutang Baru</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <SectionLabel>Pelanggan</SectionLabel>
-        <FieldCard>
-          <Text style={styles.fieldLabel}>Cari user</Text>
-          <TextInput
-            style={styles.input}
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Nama atau panggilan"
-            placeholderTextColor={colors.onSurfaceVariant}
-          />
-        </FieldCard>
 
-        {usersLoading ? (
-          <ActivityIndicator color={colors.primary} style={{ margin: spacing.lg }} />
-        ) : (
-          filtered.slice(0, 20).map((u) => {
-            const selected = u.id === selectedUserId
-            return (
-              <TouchableOpacity
-                key={u.id}
-                style={[styles.userOption, selected && styles.userOptionSelected]}
-                onPress={() => setSelectedUserId(u.id)}
-              >
-                <Text style={[textStyles.bodyLg, { color: colors.onSurface, flex: 1 }]} numberOfLines={1}>
-                  {u.nickname ? `${u.name} (${u.nickname})` : u.name}
-                </Text>
-                {selected && <MaterialIcons name="check" size={20} color={colors.primary} />}
-              </TouchableOpacity>
-            )
-          })
-        )}
+        {/* Pelanggan card: search + user rows combined */}
+        <View style={styles.pelangganCard}>
+          {/* Search row inside card */}
+          <View style={styles.pelangganSearch}>
+            <SearchField value={query} onChangeText={setQuery} placeholder="Cari nama user..." />
+          </View>
+
+          {usersLoading ? (
+            <ActivityIndicator color={colors.primary} style={{ margin: spacing.lg }} />
+          ) : (
+            <View>
+              {filtered.slice(0, 20).map((u, index) => {
+                const selected = u.id === selectedUserId
+                return (
+                  <TouchableOpacity
+                    key={u.id}
+                    style={[
+                      styles.userRow,
+                      index > 0 && styles.userRowBorder,
+                      selected && styles.userRowSelected,
+                    ]}
+                    onPress={() => setSelectedUserId(u.id)}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[textStyles.bodyMd, styles.userRowName, selected && styles.userRowNameSelected]}
+                      numberOfLines={1}
+                    >
+                      {u.nickname ? `${u.name} (${u.nickname})` : u.name}
+                    </Text>
+                    {selected && (
+                      <MaterialIcons name="check-circle" size={20} color={colors.primary} />
+                    )}
+                  </TouchableOpacity>
+                )
+              })}
+            </View>
+          )}
+        </View>
 
         <SectionLabel>Jumlah</SectionLabel>
         <FieldCard>
@@ -117,7 +129,7 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
             value={notes}
             onChangeText={setNotes}
             placeholder="(opsional)"
-            placeholderTextColor={colors.onSurfaceVariant}
+            placeholderTextColor={colors.outlineVariant}
             multiline
           />
         </FieldCard>
@@ -138,20 +150,74 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  appBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: spacing.base, paddingVertical: spacing.sm },
-  scroll: { paddingBottom: 160 },
-  fieldLabel: { color: colors.onSurfaceVariant, fontSize: 12, marginBottom: 4 },
-  input: { color: colors.onSurface, fontSize: 16, padding: 0 },
-  multiline: { minHeight: 60, textAlignVertical: "top" },
-  userOption: {
+
+  // App Bar
+  appBar: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.xs,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.card,
+    gap: spacing.sm,
+  },
+  appBarTitle: {
+    ...textStyles.headlineSm,
+    color: colors.onSurface,
+    flex: 1,
+    marginLeft: spacing.xs,
+  },
+
+  // Scroll
+  scroll: { paddingBottom: 160 },
+
+  // Pelanggan section (custom card: search + list rows)
+  pelangganCard: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    marginHorizontal: spacing.base,
+    marginBottom: spacing.sm,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+  pelangganSearch: {
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surfaceVariant,
+  },
+  userRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    minHeight: 48,
     backgroundColor: colors.surfaceContainerLowest,
   },
-  userOptionSelected: { borderColor: colors.primary, borderWidth: 2 },
+  userRowBorder: {
+    borderTopWidth: 1,
+    borderTopColor: colors.surfaceVariant,
+  },
+  userRowSelected: {
+    backgroundColor: colors.primaryFixed,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.primary,
+  },
+  userRowName: { flex: 1, color: colors.onSurface, marginRight: spacing.sm },
+  userRowNameSelected: { fontFamily: "publicSansSemiBold", color: colors.onSurface },
+
+  // Field inside FieldCard
+  fieldLabel: {
+    ...textStyles.labelMd,
+    color: colors.onSurfaceVariant,
+    marginBottom: spacing.xs,
+  },
+  input: {
+    ...textStyles.bodyMd,
+    color: colors.onSurface,
+    padding: 0,
+  },
+  multiline: { minHeight: 60, textAlignVertical: "top" },
 })

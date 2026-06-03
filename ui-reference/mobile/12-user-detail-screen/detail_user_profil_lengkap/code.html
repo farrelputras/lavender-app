@@ -1,0 +1,190 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>LAVENDER - User Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#dbe4ed",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-container": "#464000",
+                      "on-secondary-container": "#626566",
+                      "on-primary-container": "#fffbff",
+                      "surface": "#f6faff",
+                      "surface-dim": "#d2dbe4",
+                      "primary": "#62528d",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#dbe4ed",
+                      "on-tertiary-fixed-variant": "#4e4800",
+                      "on-secondary-fixed-variant": "#454748",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container": "#e6eff8",
+                      "surface-bright": "#f6faff",
+                      "on-primary-fixed": "#200f48",
+                      "inverse-primary": "#cfbcff",
+                      "primary-fixed": "#e9ddff",
+                      "background": "#f6faff",
+                      "primary-container": "#7c6ba8",
+                      "tertiary-container": "#b7ad58",
+                      "primary-fixed-dim": "#cfbcff",
+                      "on-error": "#ffffff",
+                      "on-primary-fixed-variant": "#4d3d76",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#d3c970",
+                      "surface-container-low": "#ecf5fe",
+                      "secondary": "#5c5f60",
+                      "on-surface": "#141d23",
+                      "on-primary": "#ffffff",
+                      "on-background": "#141d23",
+                      "secondary-fixed-dim": "#c5c7c8",
+                      "secondary-fixed": "#e1e3e4",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#49454f",
+                      "inverse-surface": "#293138",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#e0e9f2",
+                      "outline": "#7a7580",
+                      "inverse-on-surface": "#e9f2fb",
+                      "outline-variant": "#cac4d0",
+                      "tertiary-fixed": "#f0e589",
+                      "surface-tint": "#655590",
+                      "secondary-container": "#e1e3e4",
+                      "on-secondary-fixed": "#191c1d",
+                      "on-tertiary-fixed": "#1f1c00",
+                      "tertiary": "#676011"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "lg": "24px",
+                      "xl": "32px",
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Public Sans"],
+                      "headline-lg": ["Public Sans"],
+                      "body-md": ["Public Sans"],
+                      "label-lg": ["Public Sans"],
+                      "headline-sm": ["Public Sans"],
+                      "display-lg": ["Public Sans"],
+                      "label-md": ["Public Sans"],
+                      "body-lg": ["Public Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-lg": ["16px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md selection:bg-primary selection:text-on-primary">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-margin-mobile pt-lg pb-md w-full sticky top-0 z-50 bg-background transition-opacity duration-200">
+<button aria-label="Go back" class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface">Detail User</h1>
+<button aria-label="Edit user" class="w-12 h-12 flex items-center justify-center rounded-full bg-primary-container text-on-primary-container hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined">edit</span>
+</button>
+</header>
+<main class="px-margin-mobile pb-xl flex flex-col gap-lg max-w-lg mx-auto">
+<!-- Profile Hero -->
+<section class="flex flex-col items-center text-center mt-md">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Andito Pratama (Dito)</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-md">0812-3456-7890</p>
+<div class="bg-surface-variant text-on-surface-variant px-md py-sm rounded-full font-label-lg text-label-lg inline-flex items-center">
+                Mahasiswa
+            </div>
+</section>
+<!-- Stats Row -->
+<section class="flex gap-md w-full">
+<div class="flex-1 bg-surface-container rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center text-center min-h-[100px]">
+<span class="font-label-md text-label-md text-on-surface-variant mb-xs">Total Sewa</span>
+<span class="font-headline-md text-headline-md text-primary">2</span>
+</div>
+<div class="flex-1 bg-surface-container rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center text-center min-h-[100px]">
+<span class="font-label-md text-label-md text-on-surface-variant mb-xs">Hutang</span>
+<span class="font-headline-md text-headline-md text-error">Rp 150.000</span>
+</div>
+</section>
+<!-- Photo Section -->
+<section class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30">
+<h3 class="font-label-lg text-label-lg text-on-surface mb-md">Dokumen &amp; Foto</h3>
+<div class="flex gap-md overflow-x-auto pb-sm snap-x">
+<div class="flex flex-col items-center gap-xs snap-start flex-shrink-0 w-24">
+<div class="w-24 h-24 bg-surface-container-high rounded-[16px] flex items-center justify-center">
+<span class="material-symbols-outlined text-outline text-[40px] opacity-50" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-center w-full truncate">Foto Profil</span>
+</div>
+<div class="flex flex-col items-center gap-xs snap-start flex-shrink-0 w-24">
+<img alt="ID Card Thumbnail" class="w-24 h-24 object-cover rounded-[16px] border border-outline-variant/50 shadow-sm" data-alt="A close-up studio shot of a realistic Indonesian identity card (KTP) lying flat on a pristine white surface, lit with bright, even light to match a modern corporate light-mode app aesthetic. The card features a blue background for the photo, standard layout elements, and crisp typography. The overall mood is official and hyper-legible." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyFk0d3BnYQ8Ywqt-El99KpwIUcI_BxxrDo8SVSG9wRd8CL0bxP07fGF8ZkhUJV9StkdWtlARXGiONbqceQKl5GSJ_nQJbWjOmkshKPKP0BA8-3rjlDuIQ6YJCeGTIDL_QjcOoAIjU66zq135GHsoItZTlCO0r8Zbl5UGkXvrPIdfNDYHNRfumncBfG6Ju72PGtLYxHuothqTCq7FdpjTcyxhqAU7XJMIvfikVw3YQ-bLOWXHzcE7-jnSzI1X5TEbUDCeWlGiXXOk">
+<span class="font-label-md text-label-md text-on-surface-variant text-center w-full truncate">KTP</span>
+</div>
+<div class="flex flex-col items-center gap-xs snap-start flex-shrink-0 w-24">
+<div class="w-24 h-24 bg-surface-container-high rounded-[16px] flex items-center justify-center">
+<span class="material-symbols-outlined text-outline text-[40px] opacity-50">badge</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant text-center w-full truncate">KTM</span>
+</div>
+</div>
+</section>
+<!-- Info Section -->
+<section class="bg-surface-container-lowest rounded-[16px] p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/30 flex flex-col gap-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant mb-xs">Alamat</span>
+<span class="font-body-md text-body-md text-on-surface">Jl. Margonda Raya No. 12, Pondok Cina, Depok</span>
+</div>
+<hr class="border-t border-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant mb-xs">Kontak Darurat</span>
+<span class="font-body-md text-body-md text-on-surface">Bpk. Bambang (0811-2233-4455)</span>
+</div>
+<hr class="border-t border-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface-variant mb-xs">Catatan</span>
+<span class="font-body-md text-body-md text-on-surface">Peminjam teladan, selalu mengembalikan bensin full. Sering sewa Vario.</span>
+</div>
+</section>
+<!-- Bottom Action -->
+<section class="mt-lg flex justify-center pb-xl">
+<button class="flex items-center justify-center gap-sm px-xl py-sm min-h-[48px] rounded-full bg-[#25D366] text-white font-label-lg text-label-lg hover:opacity-90 transition-opacity w-full sm:w-auto mb-md">
+    <svg class="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.438 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
+    </svg>
+    WhatsApp
+</button><button class="flex items-center justify-center gap-sm px-xl py-sm min-h-[48px] rounded-full border-2 border-error text-error font-label-lg text-label-lg hover:bg-error-container hover:text-on-error-container transition-colors w-full sm:w-auto">
+<span class="material-symbols-outlined">delete</span>
+                Hapus User
+            </button>
+</section>
+</main>
+
+
+</body></html>
