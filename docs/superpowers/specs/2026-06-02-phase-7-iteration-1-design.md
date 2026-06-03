@@ -41,23 +41,32 @@
 | Item 7 classification | **Feature** (adds a `tujuan`/destination field to rentals), not copy-polish | Has a data layer + UI surface; behaves like item 3. |
 | Build-variant identity *(session-added, not from the feedback backlog)* | Dev build = **"Lavender Ops Dev"** / `com.lavender.ops.dev`; preview build = **"Lavender Ops"** / `com.lavender.ops`. **Both installable side-by-side.** | Lets Farrel keep the dev and real builds on one phone without confusing them. Distinct `name` *and* `android.package`/`ios.bundleIdentifier` are required for coexistence. |
 
-## Iteration 1 — Sequencing Map (Stages A → B → C)
+## Iteration 1 — Sequencing Map (Stages A → B → B2 → C)
 
-| Stage | Items | Ships via | Summary |
-|---|---|---|---|
-| **A — Infra** | 0 (UUID), 1 (OTA) | **APK** → mom | One native rebuild. The *only* APK trip; turns on OTA for everything after. **Zero visible change** to mom. |
-| **B — Stitch redesign** | 2, **absorbing** 4 (Paket→Durasi), 5 (Waktu Sewa 3-row), 6 (edit-icon consistency), 8 (Penyewaan→Rental) | OTA | Full UI redesign via Google Stitch. Must stay within baked native deps. Resolves item 5's deferred Durasi-affordance decision. Should design *the surfaces* features 3 & 7 will need. |
-| **C — Features** | 3 (edit/delete pembayaran), 7 (Tujuan field) | OTA | Real new capability. Data/connector layer is visual-independent; UI lands on the redesigned screens. |
+> **Status update (2026-06-03):** Stage B's original "redesign *all* screens" scope was
+> re-scoped after execution. The Stitch redesign of the **core screens (09–15)** shipped and
+> is marked done; the **rental-flow screens** (Beranda, DetailSewa, PenyewaanDetail,
+> Pengembalian, PilihKendaraan) plus the cross-cutting copy items 4/5/6/8 that live in them
+> are carved out into a new **Stage B2**, which now sits between B and C (C's feature UI
+> lands on the rental-flow screens, so those must be redesigned first).
+
+| Stage | Items | Ships via | Status | Summary |
+|---|---|---|---|---|
+| **A — Infra** | 0 (UUID), 1 (OTA) | **APK** → mom | ✅ done (2026-06-02) | One native rebuild. The *only* APK trip; turns on OTA for everything after. **Zero visible change** to mom. |
+| **B — Stitch redesign (core screens)** | 2 (screens 09–15) | OTA | ✅ done (2026-06-03) | UserScreen, Rental/Hutang lists, User/Hutang detail+form redesigned from Stitch. New `StatusPill`/`SearchField`, shadow-only `FieldCard`, tokens extended. 63/63 tests. |
+| **B2 — Stitch redesign (rental-flow) + copy** | rest of 2, **absorbing** 4 (Paket→Durasi), 5 (Waktu Sewa 3-row), 6 (edit-icon consistency — finish), 8 (Penyewaan→Rental — finish) | OTA | ⏳ pending | Redesign Beranda, DetailSewa, PenyewaanDetail (aktif/selesai), Pengembalian, PilihKendaraan. Resolves item 5's deferred Durasi-affordance decision. Should design *the surfaces* features 3 & 7 will need. Must stay within baked native deps. |
+| **C — Features** | 3 (edit/delete pembayaran), 7 (Tujuan field) | OTA | ⏳ pending | Real new capability. Data/connector layer is visual-independent; UI lands on the redesigned screens. |
 
 ### Sequential vs parallel
 
 - **Items 0 + 1 (within Stage A):** batched — one native rebuild, one QA pass.
   Code-independent but no value in splitting two tiny config tasks.
-- **Stage A → B → C:** sequential by necessity — A is the delivery mechanism; B absorbs
-  the polish; C's UI wants the new design language.
+- **Stage A → B → B2 → C:** sequential by necessity — A is the delivery mechanism; B/B2
+  redesign + absorb the polish; C's UI wants the new design language. (B redesigned the
+  core screens; B2 finishes the rental-flow screens where items 4/5/6/8 live.)
 - **Only genuine parallelism:** Stage C's *data/connector/migration layer* (edit/delete
   payment logic; `rentals.tujuan` column + connector) is visual-independent and can be
-  built alongside Stage B's Stitch design activity. The feature *UI* still waits for B.
+  built alongside Stage B2's Stitch design activity. The feature *UI* still waits for B2.
 
 ---
 
@@ -162,15 +171,33 @@ Goal: dev and real builds coexist on one phone, clearly labeled — no confusion
 
 ---
 
-## Stage B — Stitch UI redesign (planning altitude — own spec/plan later)
+## Stage B — Stitch UI redesign (core screens) — ✅ done (2026-06-03)
 
-Not execution-ready this session; gets its own brainstorm → spec → plan when its turn comes.
+Executed directly from Stitch references (no dedicated brainstorm→spec→plan cycle was
+written for it — the redesign translated screen-by-screen from the `ui-reference` artifacts).
 
-- **Scope:** redesign all screens via Google Stitch, OTA-delivered.
+- **Delivered:** Stitch references `ui-reference/mobile/09–15` generated and translated to
+  RN — `UserScreen`, `RentalScreen` (list), `HutangScreen` (list), `UserDetailScreen`,
+  `UserFormScreen`, `HutangFormScreen`, `HutangDetailScreen`.
+- **New shared primitives:** `StatusPill`, `SearchField`; `FieldCard` moved to a
+  shadow-only (borderless) card pattern; `theme/tokens.ts` extended.
+- **Verification:** `pnpm run compile` clean, 63/63 tests green; shipped via OTA on the
+  `preview` channel.
+- **Stayed within baked native deps** — no new native UI lib, OTA-only promise intact.
+
+## Stage B2 — Stitch UI redesign (rental-flow) + copy items — ⏳ pending
+
+The remainder of the original Stage B scope. Gets its own brainstorm → spec → plan when its
+turn comes (it carries unresolved sub-decisions). Sits **before Stage C** because C's feature
+UI (items 3 & 7) lands on these screens.
+
+- **Scope:** redesign the demo-era rental-flow screens via Google Stitch, OTA-delivered —
+  Beranda (01), DetailSewa (04), PenyewaanDetail aktif/selesai (06/08), Pengembalian (07),
+  PilihKendaraan.
 - **Absorbs:** 4 (Paket→Durasi app-wide copy), 5 (Waktu Sewa → Mulai/Kembali/Durasi
-  3-row), 6 (edit-affordance consistency → "✏️ Edit" everywhere), 8 (finish
-  Penyewaan→Rental — tab is already `"Rental"`; the `PenyewaanDetail` screen + route still
-  need renaming).
+  3-row), 6 (finish edit-affordance consistency → "✏️ Edit" everywhere on the legacy
+  screens), 8 (finish Penyewaan→Rental — tab/list already `"Rental"`; the `PenyewaanDetail`
+  screen + route still need renaming).
 - **Hard constraint:** must stay within already-baked native deps. Pulling in a new native
   UI lib forces another APK trip and breaks the OTA-only promise.
 - **Open sub-decisions this stage must resolve (do not let them silently vanish):**
@@ -204,6 +231,8 @@ Not execution-ready this session; gets its own brainstorm → spec → plan when
 
 ## Next step
 
-Invoke `superpowers:writing-plans` to produce the **Stage A** implementation plan
-(`docs/superpowers/plans/2026-06-02-phase-7-stage-a-infra.md`), the artifact executed in a
-separate session.
+Stage A (plan `docs/superpowers/plans/2026-06-02-phase-7-stage-a-infra.md`) and Stage B
+(core-screen Stitch redesign) are both shipped. The next step is **Stage B2** — brainstorm →
+spec → plan the rental-flow redesign (resolving item 5's Durasi-affordance decision and
+designing the surfaces Stage C needs), then execute. Stage C (features 3 & 7) follows; its
+visual-independent data/connector layer may be built in parallel with Stage B2's design phase.

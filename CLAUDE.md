@@ -17,7 +17,7 @@ Demo is complete and validated. Now executing the v1.0.0 roadmap:
 | 4 | Supabase build + connector swap | ✅ Done |
 | 5a–5e | Auth, User CRUD, Hutang, Penyewaan tabs | ✅ Done |
 | 6 | Photo upload | ✅ Done |
-| 7 | Feedback polish + QA + APK ship | 🚧 Stage A (UUID, OTA, APK) ✅ — Stages B (Stitch redesign) + C (features) pending |
+| 7 | Feedback polish + QA + APK ship | 🚧 Stage A (UUID, OTA, APK) ✅ · Stage B (Stitch redesign, core screens 09–15) ✅ — Stage B2 (rental-flow redesign + copy items 4/5/6/8) + Stage C (features 3, 7) pending |
 
 **Goal:** Single APK to mom that is the real day-to-day app. Everything post-APK via OTA.
 

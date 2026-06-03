@@ -1,6 +1,10 @@
 # LAVENDER v1.0.0 Roadmap — Demo → Day-to-Day App
 
-**Status:** Phase 2 complete (branding assets wired; monochrome icon, light splash `#f6faff`, notification icon configured; APK smoke test deferred to Farrel). Phase 3 in progress.
+**Status:** Phases 0–6 complete. **Phase 7 in progress** — Stage A (UUID + OTA infra)
+shipped in the v1.0.0 `preview` APK (2026-06-02); Stage B (core-screen Stitch redesign,
+screens 09–15) shipped via OTA (2026-06-03). Remaining: Stage B2 (rental-flow redesign +
+copy items 4/5/6/8) and Stage C (features 3 & 7). See
+`docs/superpowers/specs/2026-06-02-phase-7-iteration-1-design.md` for the stage breakdown.
 **Author:** Brainstorming session, 2026-05-26
 **Owner:** Farrel
 **Target ship:** Single APK to mom; everything post-APK delivered via OTA

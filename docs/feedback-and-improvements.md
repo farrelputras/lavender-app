@@ -44,8 +44,18 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 - **Status:** done (Phase 7 Stage A — shipped in v1.0.0 preview APK, 2026-06-02)
 
 ### 2. Make UI screen designs through Google Stitch and update all screens accordingly
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** Redesign every screen from Google Stitch references, OTA-delivered. Absorbs
+  items 4, 5, 6, 8 (see those entries).
+- **Resolution (Stage B — done, 2026-06-03):** Stitch references `ui-reference/mobile/09–15`
+  generated and translated to RN: `UserScreen`, `RentalScreen` (list), `HutangScreen`
+  (list), `UserDetailScreen`, `UserFormScreen`, `HutangFormScreen`, `HutangDetailScreen`.
+  New shared components `StatusPill` + `SearchField`; `FieldCard` moved to a shadow-only
+  (borderless) card pattern; `theme/tokens.ts` extended. Tests 63/63 green; shipped via OTA.
+- **Remaining (→ Stage B2):** the demo-era rental-flow screens still use the old design and
+  copy — Beranda (01), DetailSewa (04), PenyewaanDetail aktif/selesai (06/08), Pengembalian
+  (07), plus PilihKendaraan. Items 4, 5, 8 and the rest of item 6 live in those screens.
+- **Status:** in-progress (Stage B shipped screens 09–15 via OTA; rental-flow redesign
+  deferred to Stage B2 — see `docs/superpowers/specs/2026-06-02-phase-7-iteration-1-design.md`)
 
 ### 3. Edit / delete pembayaran
 - **Detail:** Allow editing or deleting a recorded payment, to recover from a typo
@@ -55,7 +65,9 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 ### 4. "Paket" → "Durasi" rename
 - **Detail:** Replace all "Paket" wording with "Durasi" across the app — in
   business terms there is no "package", only a rental duration. App-wide copy change.
-- **Status:** open
+- **Status:** open — slotted to **Stage B2** (rental-flow redesign). "Paket Sewa" still
+  appears in `DetailSewaScreen` / `PenyewaanDetailScreen`; renamed when those screens are
+  redesigned.
 
 ### 5. Waktu Sewa → 3-row layout
 - **Detail:** Restructure the Waktu Sewa block into three stacked rows —
@@ -73,21 +85,28 @@ bundled into **Phase 7 (Feedback polish + QA)**.
     stepper; (C) keep the editable stepper section separate and make the 3-row block
     a read-only summary. On Pengembalian, Kembali is the actual return time, so
     Durasi is naturally derived (read-only).
-- **Status:** open
+- **Status:** open — slotted to **Stage B2** (lands when DetailSewa / PenyewaanDetail /
+  Pengembalian are redesigned). The deferred Durasi-affordance decision (A/B/C above) is
+  resolved as part of that stage.
 
 ### 6. Edit-action consistency
 - **Detail:** Standardize every edit affordance to "(pencil icon) Edit" — replace
   the scattered "edit" / "ubah" / bare-pencil variants so label and icon are
   consistent across all screens. Per-screen occurrence inventory: TBD.
-- **Status:** open
+- **Status:** in-progress — the Stage B redesign (screens 09–15) establishes a consistent
+  edit affordance on the new screens; legacy rental-flow screens (`DetailSewaScreen`,
+  `PenyewaanDetailScreen`, `PilihKendaraanScreen`) still vary → finished in **Stage B2**.
 
 ### 7. Tujuan field adjustment
 - **Detail:** TBD
 - **Status:** open
 
 ### 8. Change all "Penyewaan" into "Rental"
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** Rename "Penyewaan" → "Rental" app-wide. The bottom-tab and list screen
+  (`RentalScreen`) are already "Rental"; the `PenyewaanDetail` screen + its route name and
+  the remaining "Penyewaan" copy (Beranda, navigators) still need renaming.
+- **Status:** in-progress — tab/list label done in Stage B; `PenyewaanDetail` screen +
+  route rename deferred to **Stage B2**.
 
 ## v1.0.1
 - **Status:** open
