@@ -16,22 +16,22 @@ import { MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import PembayaranSheet from "@/components/PembayaranSheet"
 import { PhotoRow } from "@/components/form/PhotoRow"
+import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { choosePhotoSource } from "@/services/photos/capture"
 import { getRental, getUserSummary, getVehicle, closeRental } from "@/services/rentals"
 import type { CloseRentalInput } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
-import { colors, textStyles, spacing } from "@/theme/tokens"
+import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime } from "@/utils/format"
-import { choosePhotoSource } from "@/services/photos/capture"
-import { uuidv4 } from "@/utils/uuid"
 import {
   sumPayments,
   hoursLate,
   computeFuelAdjustment,
   computeReturnTotal,
 } from "@/utils/rentalMath"
+import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -55,6 +55,16 @@ function displayRupiah(digits: string): string {
   if (n === 0 && digits === "") return ""
   const sign = n < 0 ? "−" : ""
   return sign + new Intl.NumberFormat("id-ID").format(Math.abs(n))
+}
+
+function formatActualDuration(start: Date, end: Date): string {
+  const diffMs = Math.max(0, end.getTime() - start.getTime())
+  const totalHours = Math.floor(diffMs / (1000 * 60 * 60))
+  const days = Math.floor(totalHours / 24)
+  const hours = totalHours % 24
+  if (days === 0) return `${hours} Jam`
+  if (hours === 0) return `${days} Hari`
+  return `${days} Hari ${hours} Jam`
 }
 
 type ExtraFee = { id: string; description: string; rawAmount: string }
@@ -178,7 +188,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
   const [showPaySheet, setShowPaySheet] = useState(false)
 
   // ── Kondisi Kembali Photos ────────────────────────────────────────────────
-  const [kembaliPhotos, setKembaliPhotos] = useState<{ id: string; uri: string | null; mimeType?: string }[]>([])
+  const [kembaliPhotos, setKembaliPhotos] = useState<
+    { id: string; uri: string | null; mimeType?: string }[]
+  >([])
 
   // ── Catatan ───────────────────────────────────────────────────────────────
   const [notes, setNotes] = useState("")
@@ -382,12 +394,6 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
             <FieldCard>
               {/* Mulai (read-only) */}
               <View style={styles.timeRow}>
-                <MaterialIcons
-                  name="schedule"
-                  size={20}
-                  color={colors.onSurfaceVariant}
-                  style={{ marginTop: 2 }}
-                />
                 <View style={{ flex: 1 }}>
                   <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
                     Mulai
@@ -400,14 +406,8 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
               <View style={styles.rowDivider} />
 
-              {/* Kembali (editable) */}
+              {/* Kembali (editable — tap to open picker) */}
               <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
-                <MaterialIcons
-                  name="event"
-                  size={20}
-                  color={colors.primary}
-                  style={{ marginTop: 2 }}
-                />
                 <View style={{ flex: 1 }}>
                   <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
                     Kembali
@@ -416,17 +416,25 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                     {formatHeaderDate(returnedAt)} · {formatTime(returnedAt)}
                   </Text>
                 </View>
-                <MaterialIcons name="edit" size={18} color={colors.primary} />
+                <View style={styles.inlineEditBtn}>
+                  <MaterialIcons name="edit" size={16} color={colors.primary} />
+                  <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
+                </View>
               </TouchableOpacity>
 
-              {isLate && (
-                <View style={styles.lateCaption}>
-                  <MaterialIcons name="schedule" size={16} color={colors.onWarningContainer} />
-                  <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
-                    Terlambat {jamLambat} jam dari estimasi
+              <View style={styles.rowDivider} />
+
+              {/* Durasi (read-only, derived from Mulai → Kembali) */}
+              <View style={styles.timeRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                    Durasi
+                  </Text>
+                  <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
+                    {formatActualDuration(rental.startAt, returnedAt)}
                   </Text>
                 </View>
-              )}
+              </View>
 
               {/* iOS: inline picker with Done button */}
               {pickerActive && Platform.OS === "ios" && (
@@ -465,6 +473,16 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 display="default"
                 onChange={handlePickerChange}
               />
+            )}
+
+            {/* Terlambat warning — below the card */}
+            {isLate && (
+              <View style={styles.terlambatWarning}>
+                <MaterialIcons name="warning-amber" size={16} color={colors.onWarningContainer} />
+                <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
+                  Terlambat {jamLambat} jam dari estimasi
+                </Text>
+              </View>
             )}
           </View>
 
@@ -960,14 +978,6 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const CARD_SHADOW = {
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.05,
-  shadowRadius: 12,
-  elevation: 2,
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: colors.background,
@@ -1009,12 +1019,24 @@ const styles = StyleSheet.create({
   // Card
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
     borderRadius: 16,
-    borderWidth: 1,
     gap: spacing.md,
     padding: spacing.base,
-    ...CARD_SHADOW,
+    ...cardShadow,
+  },
+  inlineEditBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+  },
+  terlambatWarning: {
+    alignItems: "center",
+    backgroundColor: colors.warningContainer,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    padding: spacing.md,
   },
 
   // Divider

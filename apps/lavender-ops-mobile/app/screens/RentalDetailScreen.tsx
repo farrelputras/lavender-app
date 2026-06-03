@@ -15,12 +15,12 @@ import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import PembayaranSheet from "@/components/PembayaranSheet"
 import { PhotoRow } from "@/components/form/PhotoRow"
+import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getRental, getUserSummary, getVehicle, addPayment } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
-import { colors, textStyles, spacing } from "@/theme/tokens"
+import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import {
   formatRupiah,
   formatHeaderDate,
@@ -74,10 +74,7 @@ function BensinGauge({ value }: { value: number }) {
   )
 }
 
-export function RentalDetailScreen({
-  navigation,
-  route,
-}: AppStackScreenProps<"RentalDetail">) {
+export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"RentalDetail">) {
   const { rentalId, justCreated, justClosed } = route.params
 
   const [rental, setRental] = useState<Rental | null>(null)
@@ -253,58 +250,48 @@ export function RentalDetailScreen({
 
         {/* ── 2. Waktu Sewa ─────────────────────────────── */}
         <View>
-          <View style={styles.sectionHeader}>
-            <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Waktu Sewa</Text>
-            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
-              <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.card}>
-            <View style={styles.timeRow}>
-              <MaterialIcons
-                name="schedule"
-                size={20}
-                color={colors.onSurfaceVariant}
-                style={{ marginTop: 2 }}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Mulai</Text>
-                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                  {formatHeaderDate(rental.startAt)} · {formatTime(rental.startAt)}
-                </Text>
-              </View>
+          <SectionLabel>Waktu Sewa</SectionLabel>
+          <View style={[styles.card, { padding: 0, overflow: "hidden", gap: 0 }]}>
+            {/* Mulai */}
+            <View style={styles.waktuRow}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Mulai</Text>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                {formatHeaderDate(rental.startAt)} · {formatTime(rental.startAt)}
+              </Text>
             </View>
-
-            <View style={styles.rowDivider} />
-
-            <View style={styles.timeRow}>
-              <MaterialIcons
-                name="event"
-                size={20}
-                color={overdue ? colors.onWarningContainer : colors.primary}
-                style={{ marginTop: 2 }}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                  Estimasi Kembali
-                </Text>
-                <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
-                  {formatHeaderDate(rental.dueAt)} · {formatTime(rental.dueAt)}
-                </Text>
-                {overdue && (
-                  <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
-                    Terlambat {hoursLate(rental.dueAt)} Jam
-                  </Text>
-                )}
-              </View>
+            <View style={styles.waktuDivider} />
+            {/* Kembali */}
+            <View style={styles.waktuRow}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kembali</Text>
+              <Text
+                style={[
+                  textStyles.bodyMd,
+                  {
+                    color: overdue && rental.status === "ACTIVE" ? colors.error : colors.onSurface,
+                  },
+                ]}
+              >
+                {formatHeaderDate(rental.dueAt)} · {formatTime(rental.dueAt)}
+              </Text>
             </View>
-
-            <View style={styles.paketChip}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                Durasi: {formatPaket(rental.paketHari, rental.paketJam)}
+            <View style={styles.waktuDivider} />
+            {/* Durasi */}
+            <View style={styles.waktuRow}>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Durasi</Text>
+              <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
+                {formatPaket(rental.paketHari, rental.paketJam)}
               </Text>
             </View>
           </View>
+          {/* Terlambat warning — aktif only, below card */}
+          {overdue && rental.status === "ACTIVE" && (
+            <View style={styles.terlambatWarning}>
+              <MaterialIcons name="warning-amber" size={16} color={colors.onWarningContainer} />
+              <Text style={[textStyles.labelMd, { color: colors.onWarningContainer }]}>
+                Terlambat {hoursLate(rental.dueAt)} jam
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* ── 3. Jaminan ───────────────────────────────── */}
@@ -338,8 +325,12 @@ export function RentalDetailScreen({
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Kondisi Keluar</Text>
-            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
-              <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
+            <TouchableOpacity
+              onPress={() => showToast("Akan segera tersedia")}
+              style={styles.inlineEditBtn}
+            >
+              <MaterialIcons name="edit" size={16} color={colors.primary} />
+              <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.card}>
@@ -565,7 +556,11 @@ export function RentalDetailScreen({
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
-            <TouchableOpacity onPress={() => showToast("Akan segera tersedia")}>
+            <TouchableOpacity
+              onPress={() => showToast("Akan segera tersedia")}
+              style={styles.inlineEditBtn}
+            >
+              <MaterialIcons name="edit" size={16} color={colors.primary} />
               <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
             </TouchableOpacity>
           </View>
@@ -679,11 +674,10 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
     borderRadius: 16,
-    borderWidth: 1,
     gap: spacing.sm,
     padding: spacing.base,
+    ...cardShadow,
   },
   centered: {
     alignItems: "center",
@@ -708,6 +702,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     paddingVertical: spacing.xs,
+  },
+  inlineEditBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
   insetBlock: {
     backgroundColor: colors.surfaceContainerLow,
@@ -800,9 +799,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
+  terlambatWarning: {
+    alignItems: "center",
+    backgroundColor: colors.warningContainer,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+  },
   timeRow: {
     alignItems: "flex-start",
     flexDirection: "row",
     gap: spacing.sm,
+  },
+  waktuDivider: {
+    backgroundColor: colors.outlineVariant,
+    height: 1,
+  },
+  waktuRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: spacing.base,
   },
 })
