@@ -35,10 +35,10 @@ import { uuidv4 } from "@/utils/uuid"
 import {
   composeTarif,
   addDuration,
-  durationToPaket,
   sumPayments,
   isPaketValid,
   computeTotalBill,
+  formatPaket,
 } from "@/utils/rentalMath"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -172,11 +172,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   const [jam, setJam] = useState<0 | 6 | 12>(0)
   const [paketError, setPaketError] = useState(false)
 
-  // ─── Waktu Sewa
+  // ─── Waktu Sewa (Mulai editable; Kembali + Durasi derived from stepper + Mulai)
   const [mulai, setMulai] = useState<Date>(new Date())
   const [estimasi, setEstimasi] = useState<Date>(() => addDuration(new Date(), 1, 0))
-  const [estimasiManual, setEstimasiManual] = useState(false)
-  const [pickerTarget, setPickerTarget] = useState<"mulai" | "estimasi" | null>(null)
+  const [pickerTarget, setPickerTarget] = useState<"mulai" | null>(null)
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date")
   const [pickerTempDate, setPickerTempDate] = useState<Date>(new Date())
 
@@ -214,32 +213,27 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
     }
   }, [vehicle])
 
-  // Recompute estimasi whenever paket changes (unless manually overridden)
+  // Kembali is always derived from Mulai + Durasi stepper (never manually edited)
   useEffect(() => {
-    if (!estimasiManual) {
-      setEstimasi(addDuration(mulai, hari, jam))
-    }
-  }, [hari, jam, mulai, estimasiManual])
+    setEstimasi(addDuration(mulai, hari, jam))
+  }, [hari, jam, mulai])
 
-  // ─── Paket change handlers
+  // ─── Durasi change handlers (stepper drives Kembali via useEffect)
   function handleHariChange(newHari: number) {
     setHari(newHari)
     setPaketError(false)
-    setEstimasiManual(false)
   }
 
   function handleJamChange(newJam: 0 | 6 | 12) {
     setJam(newJam)
     setPaketError(false)
-    setEstimasiManual(false)
   }
 
-  // ─── Datetime picker flow (two-step: date then time on Android)
-  function openPicker(target: "mulai" | "estimasi") {
-    const base = target === "mulai" ? mulai : estimasi
+  // ─── Datetime picker for Mulai (two-step: date then time on Android)
+  function openPicker(target: "mulai") {
     setPickerTarget(target)
     setPickerMode("date")
-    setPickerTempDate(base)
+    setPickerTempDate(mulai)
   }
 
   function handlePickerChange(_event: unknown, date?: Date) {
@@ -272,15 +266,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   function applyPickerResult(date: Date) {
     if (pickerTarget === "mulai") {
       setMulai(date)
-      if (!estimasiManual) {
-        setEstimasi(addDuration(date, hari, jam))
-      }
-    } else if (pickerTarget === "estimasi") {
-      setEstimasi(date)
-      setEstimasiManual(true)
-      const { hari: h, jam: j } = durationToPaket(mulai, date)
-      setHari(Math.max(0, h))
-      setJam(j)
+      // Kembali recomputed automatically via useEffect
     }
   }
 
@@ -377,6 +363,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
 
   const mulaiLabel = `${formatHeaderDate(mulai)} · ${formatTime(mulai)}`
   const estimasiLabel = `${formatHeaderDate(estimasi)} · ${formatTime(estimasi)}`
+  const durasLabel = formatPaket(hari, jam)
 
   const tarifHint = formatRupiah(defaultTarif)
   const tarifChanged = tarifRaw !== "" && tarifValue !== defaultTarif
@@ -466,8 +453,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
               <TouchableOpacity
                 onPress={() => navigation.navigate("PilihUser")}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.inlineEditBtn}
               >
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
+                <MaterialIcons name="edit" size={16} color={colors.primary} />
+                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.contextDivider} />
@@ -507,8 +496,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.inlineEditBtn}
               >
-                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
+                <MaterialIcons name="edit" size={16} color={colors.primary} />
+                <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
               </TouchableOpacity>
             </View>
           </FieldCard>
@@ -699,12 +690,13 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
           <View>
             <SectionLabel>Waktu Sewa</SectionLabel>
             <FieldCard style={{ padding: 0, overflow: "hidden" }}>
+              {/* Mulai — editable */}
               <TouchableOpacity
                 style={styles.waktuRow}
                 onPress={() => openPicker("mulai")}
                 activeOpacity={0.8}
               >
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text
                     style={[
                       textStyles.labelMd,
@@ -715,34 +707,45 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                   </Text>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{mulaiLabel}</Text>
                 </View>
-                <MaterialIcons name="calendar-month" size={22} color={colors.primary} />
+                <MaterialIcons name="edit" size={18} color={colors.primary} />
               </TouchableOpacity>
               <View style={styles.waktuDivider} />
-              <TouchableOpacity
-                style={styles.waktuRow}
-                onPress={() => openPicker("estimasi")}
-                activeOpacity={0.8}
-              >
-                <View>
+              {/* Kembali — read-only, derived from Mulai + Durasi stepper */}
+              <View style={styles.waktuRow}>
+                <View style={{ flex: 1 }}>
                   <Text
                     style={[
                       textStyles.labelMd,
                       { color: colors.onSurfaceVariant, marginBottom: 2 },
                     ]}
                   >
-                    Estimasi Kembali
+                    Kembali
                   </Text>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>
                     {estimasiLabel}
                   </Text>
                 </View>
-                <MaterialIcons name="edit-calendar" size={22} color={colors.primary} />
-              </TouchableOpacity>
+              </View>
+              <View style={styles.waktuDivider} />
+              {/* Durasi — read-only, mirrors the stepper above */}
+              <View style={styles.waktuRow}>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={[
+                      textStyles.labelMd,
+                      { color: colors.onSurfaceVariant, marginBottom: 2 },
+                    ]}
+                  >
+                    Durasi
+                  </Text>
+                  <Text style={[textStyles.bodyMd, { color: colors.onSurface }]}>{durasLabel}</Text>
+                </View>
+              </View>
             </FieldCard>
             <View style={styles.caption}>
               <MaterialIcons name="info-outline" size={14} color={colors.onSurfaceVariant} />
               <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                Estimasi Kembali otomatis dari Durasi, bisa diubah
+                Kembali dan Durasi otomatis dari Hari/Jam di atas
               </Text>
             </View>
 
@@ -775,13 +778,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                   </View>
                 ) : (
                   <DateTimePicker
-                    value={
-                      pickerMode === "date"
-                        ? pickerTarget === "mulai"
-                          ? mulai
-                          : estimasi
-                        : pickerTempDate
-                    }
+                    value={pickerMode === "date" ? mulai : pickerTempDate}
                     mode={pickerMode}
                     display="default"
                     onChange={handlePickerChange}
@@ -1240,6 +1237,13 @@ const styles = StyleSheet.create({
   },
   jamOptionActive: {
     backgroundColor: colors.primary,
+  },
+
+  // Inline edit button (icon + label)
+  inlineEditBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
 
   // Waktu Sewa
