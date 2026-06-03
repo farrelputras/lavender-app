@@ -60,7 +60,7 @@ export function MainNavigator() {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Kendaraan"
         component={KendaraanScreen}
         options={{
@@ -69,7 +69,7 @@ export function MainNavigator() {
             <MaterialIcons name="two-wheeler" size={size} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="User"
         component={UserScreen}
