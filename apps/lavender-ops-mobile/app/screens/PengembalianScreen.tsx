@@ -309,7 +309,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
         newPayments: pendingPayments,
       }
       await closeRental(rental.id, input)
-      navigation.replace("PenyewaanDetail", { rentalId: rental.id, justClosed: true })
+      navigation.replace("RentalDetail", { rentalId: rental.id, justClosed: true })
     } catch {
       showToast("Gagal menyimpan pengembalian")
       setSaving(false)

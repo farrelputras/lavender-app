@@ -74,10 +74,10 @@ function BensinGauge({ value }: { value: number }) {
   )
 }
 
-export function PenyewaanDetailScreen({
+export function RentalDetailScreen({
   navigation,
   route,
-}: AppStackScreenProps<"PenyewaanDetail">) {
+}: AppStackScreenProps<"RentalDetail">) {
   const { rentalId, justCreated, justClosed } = route.params
 
   const [rental, setRental] = useState<Rental | null>(null)
@@ -103,7 +103,7 @@ export function PenyewaanDetailScreen({
         setUser(u)
         setVehicle(v)
         setLoading(false)
-        if (justCreated) showToast("Penyewaan tersimpan")
+        if (justCreated) showToast("Rental tersimpan")
         if (justClosed) showToast("Pengembalian tersimpan")
       }
       load()
@@ -132,7 +132,7 @@ export function PenyewaanDetailScreen({
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.centered}>
           <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
-            Penyewaan tidak ditemukan.
+            Rental tidak ditemukan.
           </Text>
         </View>
       </SafeAreaView>
@@ -154,7 +154,7 @@ export function PenyewaanDetailScreen({
           <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
         </TouchableOpacity>
         <View style={styles.appBarTitle}>
-          <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>Detail Penyewaan</Text>
+          <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>Detail Rental</Text>
         </View>
         <View
           style={[
@@ -301,7 +301,7 @@ export function PenyewaanDetailScreen({
 
             <View style={styles.paketChip}>
               <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                Paket: {formatPaket(rental.paketHari, rental.paketJam)}
+                Durasi: {formatPaket(rental.paketHari, rental.paketJam)}
               </Text>
             </View>
           </View>

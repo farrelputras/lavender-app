@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import Config from "@/config"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
 import { PengembalianScreen } from "@/screens/PengembalianScreen"
-import { PenyewaanDetailScreen } from "@/screens/PenyewaanDetailScreen"
+import { RentalDetailScreen } from "@/screens/RentalDetailScreen"
 import { HutangDetailScreen } from "@/screens/HutangDetailScreen"
 import { HutangFormScreen } from "@/screens/HutangFormScreen"
 import { UserDetailScreen } from "@/screens/UserDetailScreen"
@@ -42,7 +42,7 @@ const AppStack = () => {
       initialRouteName="MainTabs"
     >
       <Stack.Screen name="MainTabs" component={MainNavigator} />
-      <Stack.Screen name="PenyewaanDetail" component={PenyewaanDetailScreen} />
+      <Stack.Screen name="RentalDetail" component={RentalDetailScreen} />
       <Stack.Screen name="Pengembalian" component={PengembalianScreen} />
       <Stack.Screen name="SewaBaru" component={SewaBaruNavigator} />
       <Stack.Screen name="UserDetail" component={UserDetailScreen} />

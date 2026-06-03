@@ -119,7 +119,7 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
         {h.rentalId && (
           <TouchableOpacity
             style={styles.rentalLink}
-            onPress={() => navigation.navigate("PenyewaanDetail", { rentalId: h.rentalId! })}
+            onPress={() => navigation.navigate("RentalDetail", { rentalId: h.rentalId! })}
             activeOpacity={0.85}
           >
             <View style={styles.rentalLinkLeft}>

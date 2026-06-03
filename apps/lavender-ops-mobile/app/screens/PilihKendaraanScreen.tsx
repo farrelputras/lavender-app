@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   FlatList,
   ActivityIndicator,
   Platform,
@@ -18,8 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
 import { getUserSummary, getVehicleSummaries } from "@/services/rentals"
 import type { UserSummary, VehicleSummary, VehicleCategory } from "@/services/rentals/types"
-import { colors, textStyles, spacing } from "@/theme/tokens"
+import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { initialsFromName } from "@/utils/format"
+import { SearchField } from "@/components/form/SearchField"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -192,37 +192,20 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.editBtn}
         >
-          <Text style={[textStyles.labelLg, { color: colors.primary }]}>Ubah</Text>
+          <MaterialIcons name="edit" size={16} color={colors.primary} />
+          <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
         </TouchableOpacity>
       </View>
 
       {/* Search */}
       <View style={styles.searchRow}>
-        <View style={styles.searchInputContainer}>
-          <MaterialIcons
-            name="search"
-            size={20}
-            color={colors.onSurfaceVariant}
-            style={{ marginRight: 8 }}
-          />
-          <TextInput
-            style={[textStyles.bodyMd, styles.searchInput]}
-            placeholder="Cari plat nomor..."
-            placeholderTextColor={colors.onSurfaceVariant}
-            value={query}
-            onChangeText={setQuery}
-            returnKeyType="search"
-          />
-          {query.length > 0 && (
-            <TouchableOpacity
-              onPress={() => setQuery("")}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
-            </TouchableOpacity>
-          )}
-        </View>
+        <SearchField
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Cari plat nomor..."
+        />
       </View>
 
       {/* Filter chips */}
@@ -332,19 +315,18 @@ const styles = StyleSheet.create({
   userStrip: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
     borderRadius: 16,
-    borderWidth: 1,
-    elevation: 2,
     flexDirection: "row",
     gap: spacing.md,
     marginHorizontal: spacing.base,
     marginTop: spacing.base,
     padding: spacing.base,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    ...cardShadow,
+  },
+  editBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
   },
   userAvatar: {
     alignItems: "center",
@@ -363,26 +345,9 @@ const styles = StyleSheet.create({
 
   // Search
   searchRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.sm,
     paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.base,
-  },
-  searchInputContainer: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 24,
-    flex: 1,
-    flexDirection: "row",
-    height: 48,
-    paddingHorizontal: spacing.md,
-  },
-  searchInput: {
-    color: colors.onSurface,
-    flex: 1,
-    padding: 0,
   },
 
   // Filter chips
@@ -437,15 +402,11 @@ const styles = StyleSheet.create({
   vehicleCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
-    elevation: 2,
     flexBasis: "48%",
     flexGrow: 0,
     flexShrink: 0,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    ...cardShadow,
   },
   vehicleCardUnavailable: {
     opacity: 0.5,

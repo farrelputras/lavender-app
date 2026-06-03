@@ -27,7 +27,7 @@ export type AuthStackParamList = {
 
 export type AppStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined
-  PenyewaanDetail: { rentalId: string; justCreated?: boolean; justClosed?: boolean }
+  RentalDetail: { rentalId: string; justCreated?: boolean; justClosed?: boolean }
   Pengembalian: { rentalId: string }
   SewaBaru: NavigatorScreenParams<SewaBaruParamList> | undefined
   UserDetail: { userId: string }

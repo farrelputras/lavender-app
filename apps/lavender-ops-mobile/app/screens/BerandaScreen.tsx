@@ -19,9 +19,10 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
 import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
-import { colors, textStyles, borderRadius, spacing } from "@/theme/tokens"
+import { colors, textStyles, borderRadius, spacing, cardShadow } from "@/theme/tokens"
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
 import { useAuth } from "@/context/AuthContext"
+import { StatusPill } from "@/components/form/StatusPill"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 
@@ -147,7 +148,7 @@ export function BerandaScreen() {
             <TouchableOpacity
               key={item.rentalId}
               activeOpacity={0.8}
-              onPress={() => navigation.navigate("PenyewaanDetail", { rentalId: item.rentalId })}
+              onPress={() => navigation.navigate("RentalDetail", { rentalId: item.rentalId })}
               style={[styles.rentalCard, item.status === "TERLAMBAT" && styles.rentalCardOverdue]}
             >
               {/* Row 1: customer name + status chip */}
@@ -158,24 +159,11 @@ export function BerandaScreen() {
                 >
                   {item.customerName}
                 </Text>
-                <View
-                  style={[
-                    styles.statusChip,
-                    item.status === "TERLAMBAT" ? styles.chipTerlambat : styles.chipBelumKembali,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      textStyles.labelMd,
-                      {
-                        color:
-                          item.status === "TERLAMBAT" ? colors.onError : colors.onTertiaryContainer,
-                      },
-                    ]}
-                  >
-                    {item.status === "TERLAMBAT" ? "Terlambat" : "Belum Kembali"}
-                  </Text>
-                </View>
+                <StatusPill
+                  label={item.status === "TERLAMBAT" ? "Terlambat" : "Belum Kembali"}
+                  bg={item.status === "TERLAMBAT" ? colors.error : colors.tertiaryContainer}
+                  color={item.status === "TERLAMBAT" ? colors.onError : colors.onTertiaryContainer}
+                />
               </View>
 
               {/* Row 2: vehicle info */}
@@ -218,10 +206,10 @@ export function BerandaScreen() {
         </View>
 
         <View style={styles.statsGrid}>
-          {/* Penyewaan Aktif */}
+          {/* Rental Aktif */}
           <View style={styles.statCard}>
             <View style={styles.statCardTop}>
-              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Penyewaan Aktif</Text>
+              <Text style={[textStyles.labelMd, { color: colors.secondary }]}>Rental Aktif</Text>
               <MaterialIcons name="two-wheeler" size={24} color={colors.primary} />
             </View>
             <Text style={[textStyles.displayLg, { color: colors.onSurface }]}>
@@ -372,15 +360,11 @@ const styles = StyleSheet.create({
   // Rental card
   rentalCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 12,
-    elevation: 2,
-    marginBottom: 10,
+    borderRadius: borderRadius.card,
+    marginBottom: spacing.sm,
     marginHorizontal: spacing.base,
     padding: spacing.base,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    ...cardShadow,
   },
   rentalCardOverdue: {
     backgroundColor: colors.errorContainer,
@@ -392,17 +376,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  statusChip: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  chipBelumKembali: {
-    backgroundColor: colors.tertiaryContainer,
-  },
-  chipTerlambat: {
-    backgroundColor: colors.error,
-  },
   timeRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -410,20 +383,16 @@ const styles = StyleSheet.create({
 
   // Stats grid (single-column stack)
   statsGrid: {
-    gap: 12,
+    gap: spacing.sm,
     marginHorizontal: spacing.base,
   },
   statCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 12,
-    elevation: 2,
+    borderRadius: borderRadius.card,
     justifyContent: "space-between",
     minHeight: 128,
     padding: spacing.lg,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    ...cardShadow,
   },
   statCardTop: {
     alignItems: "center",

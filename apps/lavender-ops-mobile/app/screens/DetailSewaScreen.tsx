@@ -353,12 +353,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
         payments,
         notes,
       })
-      showToast("Penyewaan berhasil disimpan")
+      showToast("Rental berhasil disimpan")
       navigation.getParent<NativeStackNavigationProp<AppStackParamList>>()?.reset({
         index: 1,
         routes: [
           { name: "MainTabs" },
-          { name: "PenyewaanDetail", params: { rentalId: rental.id, justCreated: true } },
+          { name: "RentalDetail", params: { rentalId: rental.id, justCreated: true } },
         ],
       })
     } finally {
@@ -624,9 +624,9 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
             </FieldCard>
           </View>
 
-          {/* ── Paket Sewa ───────────────────────────────────── */}
+          {/* ── Durasi ───────────────────────────────────────── */}
           <View>
-            <SectionLabel>Paket Sewa</SectionLabel>
+            <SectionLabel>Durasi</SectionLabel>
             <View style={styles.paketRow}>
               {/* Hari card */}
               <FieldCard style={styles.paketCard}>
@@ -742,7 +742,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
             <View style={styles.caption}>
               <MaterialIcons name="info-outline" size={14} color={colors.onSurfaceVariant} />
               <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                Otomatis dari Paket Sewa, bisa diubah
+                Estimasi Kembali otomatis dari Durasi, bisa diubah
               </Text>
             </View>
 
@@ -1013,7 +1013,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
           ) : (
             <MaterialIcons name="check-circle" size={20} color={colors.onPrimary} />
           )}
-          <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Simpan Penyewaan</Text>
+          <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Simpan Rental</Text>
         </TouchableOpacity>
       </View>
 

@@ -152,7 +152,7 @@ export function RentalScreen() {
         renderItem={({ item }) => (
           <RentalCard
             r={item}
-            onPress={() => nav.navigate("PenyewaanDetail", { rentalId: item.id })}
+            onPress={() => nav.navigate("RentalDetail", { rentalId: item.id })}
           />
         )}
         contentContainerStyle={styles.listContent}

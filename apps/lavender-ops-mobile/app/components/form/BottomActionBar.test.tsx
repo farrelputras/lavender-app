@@ -9,11 +9,11 @@ describe("BottomActionBar", () => {
   it("renders both labels", () => {
     const { getByText } = render(
       <ThemeProvider>
-        <BottomActionBar primaryLabel="Simpan Penyewaan" onPrimary={() => {}} onCancel={() => {}} />
+        <BottomActionBar primaryLabel="Simpan Rental" onPrimary={() => {}} onCancel={() => {}} />
       </ThemeProvider>,
     )
     expect(getByText("Batal")).toBeDefined()
-    expect(getByText("Simpan Penyewaan")).toBeDefined()
+    expect(getByText("Simpan Rental")).toBeDefined()
   })
 
   it("fires onPrimary and onCancel", () => {
