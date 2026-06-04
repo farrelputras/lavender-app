@@ -56,6 +56,14 @@ function parseRupiahInput(raw: string): number {
   return isNaN(n) ? 0 : n
 }
 
+// ─── Helpers (module-level) ──────────────────────────────────────────────────
+
+function paymentMethodLabel(p: Payment): string {
+  if (p.method === "LAINNYA") return p.methodDescription ?? "Lainnya"
+  const MAP: Record<string, string> = { CASH: "Cash", TRANSFER: "Transfer", QRIS: "QRIS" }
+  return MAP[p.method] ?? p.method
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: string }) {
@@ -188,10 +196,11 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   const totalBill = computeTotalBill(tarifValue, addOnAmount, discount)
 
   // ─── Payments
-  const [payments, setPayments] = useState<Omit<Payment, "id">[]>([])
+  const [payments, setPayments] = useState<Payment[]>([])
   const [showPaySheet, setShowPaySheet] = useState(false)
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
-  const paid = sumPayments(payments as Payment[])
+  const paid = sumPayments(payments)
   const remaining = Math.max(0, totalBill - paid)
 
   // ─── Tujuan
@@ -393,13 +402,6 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
     return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
   }
 
-  const methodLabel: Record<string, string> = {
-    cash: "Cash",
-    transfer: "Transfer",
-    qris: "QRIS",
-    lainnya: "Lainnya",
-  }
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -509,6 +511,28 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
               </TouchableOpacity>
             </View>
           </FieldCard>
+
+          {/* ── Tujuan ───────────────────────────────────────── */}
+          <View>
+            <SectionLabel>Tujuan</SectionLabel>
+            <FieldCard style={tujuanError ? styles.cardError : undefined}>
+              <TextInput
+                style={[textStyles.bodyMd, { color: colors.onSurface, minHeight: 40 }]}
+                placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
+                placeholderTextColor={colors.outline}
+                value={tujuan}
+                onChangeText={(v) => {
+                  setTujuan(v)
+                  if (tujuanError) setTujuanError(false)
+                }}
+              />
+            </FieldCard>
+            {tujuanError && (
+              <Text style={[textStyles.labelMd, { color: colors.error, marginTop: spacing.xs }]}>
+                Tujuan harus diisi
+              </Text>
+            )}
+          </View>
 
           {/* ── Jaminan ─────────────────────────────────────── */}
           <View>
@@ -898,22 +922,8 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                   </Text>
                 </View>
               ) : (
-                payments.map((p, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    style={styles.paymentRow}
-                    onLongPress={() => {
-                      Alert.alert("Hapus Pembayaran?", formatRupiah(p.amount), [
-                        { text: "Batal", style: "cancel" },
-                        {
-                          text: "Hapus",
-                          style: "destructive",
-                          onPress: () => setPayments((prev) => prev.filter((_, i) => i !== idx)),
-                        },
-                      ])
-                    }}
-                    activeOpacity={0.8}
-                  >
+                payments.map((p) => (
+                  <View key={p.id} style={styles.paymentRow}>
                     <View style={styles.paymentIcon}>
                       <MaterialIcons name="payments" size={20} color={colors.primary} />
                     </View>
@@ -927,10 +937,21 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                     </View>
                     <View style={styles.methodBadge}>
                       <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                        {p.methodDescription || methodLabel[p.method]}
+                        {paymentMethodLabel(p)}
                       </Text>
                     </View>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.editPayBtn}
+                      onPress={() => {
+                        setEditingPayment(p)
+                        setShowPaySheet(true)
+                      }}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <MaterialIcons name="edit" size={16} color={colors.primary} />
+                      <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+                    </TouchableOpacity>
+                  </View>
                 ))
               )}
               <TouchableOpacity
@@ -974,30 +995,6 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                 </Text>
               </View>
             </View>
-          </View>
-
-          {/* ── Tujuan ───────────────────────────────────────── */}
-          <View>
-            <SectionLabel>Tujuan</SectionLabel>
-            <TextInput
-              style={[
-                textStyles.bodyMd,
-                styles.textInput,
-                tujuanError ? { borderColor: colors.error } : undefined,
-              ]}
-              placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
-              placeholderTextColor={colors.outline}
-              value={tujuan}
-              onChangeText={(v) => {
-                setTujuan(v)
-                if (tujuanError) setTujuanError(false)
-              }}
-            />
-            {tujuanError && (
-              <Text style={[textStyles.labelMd, { color: colors.error, marginTop: spacing.xs }]}>
-                Tujuan harus diisi
-              </Text>
-            )}
           </View>
 
           {/* ── Catatan ──────────────────────────────────────── */}
@@ -1044,12 +1041,32 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
         </TouchableOpacity>
       </View>
 
-      {/* Pembayaran bottom sheet */}
+      {/* Pembayaran bottom sheet — local-only, no connector calls (rental not yet created) */}
       <PembayaranSheet
         visible={showPaySheet}
-        onClose={() => setShowPaySheet(false)}
-        onSubmit={(p) => setPayments((prev) => [...prev, p])}
-        defaultAmount={remaining > 0 ? remaining : undefined}
+        onClose={() => {
+          setShowPaySheet(false)
+          setEditingPayment(null)
+        }}
+        onSubmit={(p) => {
+          if (editingPayment) {
+            setPayments((prev) =>
+              prev.map((x) => (x.id === editingPayment.id ? { ...p, id: editingPayment.id } : x)),
+            )
+            setEditingPayment(null)
+          } else {
+            setPayments((prev) => [...prev, { ...p, id: uuidv4() }])
+          }
+        }}
+        defaultAmount={!editingPayment && remaining > 0 ? remaining : undefined}
+        editingPayment={editingPayment ?? undefined}
+        onDelete={
+          editingPayment
+            ? () => {
+                setPayments((prev) => prev.filter((x) => x.id !== editingPayment.id))
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   )
@@ -1274,6 +1291,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 4,
+  },
+  editPayBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 2,
+    marginLeft: spacing.xs,
   },
 
   // Waktu Sewa

@@ -40,6 +40,7 @@ export interface CloseRentalInput {
   subtotalSewa: number
   extraFees: { description: string; amount: number }[]
   discount: number
+  tujuan: string
   notes?: string
   newPayments: Omit<Payment, "id">[]
 }
@@ -362,6 +363,7 @@ export async function closeRental(rentalId: string, input: CloseRentalInput): Pr
       subtotalSewa: input.subtotalSewa,
       extraFees: input.extraFees,
       discount: input.discount,
+      tujuan: input.tujuan,
       notes: input.notes ?? "",
       newPayments: input.newPayments.map((p) => ({
         amount: p.amount,

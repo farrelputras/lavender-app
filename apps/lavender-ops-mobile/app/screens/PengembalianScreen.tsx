@@ -200,6 +200,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
     { id: string; uri: string | null; mimeType?: string }[]
   >([])
 
+  // ── Tujuan ────────────────────────────────────────────────────────────────
+  const [tujuan, setTujuan] = useState("")
+
   // ── Catatan ───────────────────────────────────────────────────────────────
   const [notes, setNotes] = useState("")
 
@@ -219,6 +222,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
       setVehicle(v)
       setBensinKembali(r.kondisiKeluar.bensinKotak)
       setRawSubtotal(String(r.tarif))
+      setTujuan(r.tujuan)
       setNotes(r.notes)
       setLoading(false)
     }
@@ -325,6 +329,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
         subtotalSewa,
         extraFees: extraFeesComputed,
         discount,
+        tujuan: tujuan.trim(),
         notes: notes.trim(),
         newPayments: pendingPayments,
       }
@@ -492,6 +497,20 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 </Text>
               </View>
             )}
+          </View>
+
+          {/* ── 1b. Tujuan (editable — can be corrected at return) ─── */}
+          <View>
+            <SectionLabel>Tujuan</SectionLabel>
+            <FieldCard>
+              <TextInput
+                style={[textStyles.bodyMd, { color: colors.onSurface, minHeight: 40 }]}
+                placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
+                placeholderTextColor={colors.outlineVariant}
+                value={tujuan}
+                onChangeText={setTujuan}
+              />
+            </FieldCard>
           </View>
 
           {/* ── 2. Kondisi Kembali ─────────────────────────────────── */}
