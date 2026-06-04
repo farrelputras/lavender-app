@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
+import type { PhotoItem } from "@/components/form/PhotoRow"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 import { PhotoThumb } from "./_PhotoThumb"
-import type { PhotoItem } from "@/components/form/PhotoRow"
 
 export interface PhotoSlotProps {
   label: string

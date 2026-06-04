@@ -1,15 +1,18 @@
+import { Alert } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import * as FileSystem from "expo-file-system/legacy"
-import { Alert } from "react-native"
-import { uuidv4 } from "@/utils/uuid"
+
 import { extFromMime } from "@/services/photos/paths"
+import { uuidv4 } from "@/utils/uuid"
 
 export interface CapturedPhoto {
   uri: string // points to documentDirectory copy (durable)
   mimeType: string // "image/jpeg", "image/png", etc.
 }
 
-async function copyAssetToDocumentDirectory(asset: ImagePicker.ImagePickerAsset): Promise<CapturedPhoto> {
+async function copyAssetToDocumentDirectory(
+  asset: ImagePicker.ImagePickerAsset,
+): Promise<CapturedPhoto> {
   const mimeType = asset.mimeType ?? "image/jpeg"
   const ext = extFromMime(mimeType)
   if (!FileSystem.documentDirectory) throw new Error("documentDirectory unavailable")
@@ -54,8 +57,20 @@ export async function choosePhotoSource(): Promise<CapturedPhoto | null> {
       "Tambah Foto",
       "Pilih sumber foto",
       [
-        { text: "Kamera", onPress: () => captureFromCamera().then(resolve).catch(() => resolve(null)) },
-        { text: "Galeri", onPress: () => captureFromGallery().then(resolve).catch(() => resolve(null)) },
+        {
+          text: "Kamera",
+          onPress: () =>
+            captureFromCamera()
+              .then(resolve)
+              .catch(() => resolve(null)),
+        },
+        {
+          text: "Galeri",
+          onPress: () =>
+            captureFromGallery()
+              .then(resolve)
+              .catch(() => resolve(null)),
+        },
         { text: "Batal", style: "cancel", onPress: () => resolve(null) },
       ],
       { cancelable: true, onDismiss: () => resolve(null) },

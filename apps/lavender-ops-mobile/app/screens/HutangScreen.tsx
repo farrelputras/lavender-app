@@ -1,24 +1,17 @@
 import { useState, useCallback, useMemo } from "react"
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native"
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { SearchField } from "@/components/form/SearchField"
+import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getHutangs } from "@/services/rentals"
 import type { HutangFull } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah } from "@/utils/format"
-import { StatusPill } from "@/components/form/StatusPill"
-import { SearchField } from "@/components/form/SearchField"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -42,11 +35,18 @@ function HutangCard({ h, onPress }: { h: HutangFull; onPress: () => void }) {
           <Text style={styles.sisaLabel}>Sisa</Text>
           {lunas ? (
             <View style={styles.lunasRow}>
-              <MaterialIcons name="check-circle" size={18} color={colors.success} style={{ marginRight: 4 }} />
+              <MaterialIcons
+                name="check-circle"
+                size={18}
+                color={colors.success}
+                style={{ marginRight: 4 }}
+              />
               <Text style={[textStyles.headlineSm, { color: colors.success }]}>Lunas</Text>
             </View>
           ) : (
-            <Text style={[textStyles.headlineSm, { color: colors.error }]}>{formatRupiah(h.sisa)}</Text>
+            <Text style={[textStyles.headlineSm, { color: colors.error }]}>
+              {formatRupiah(h.sisa)}
+            </Text>
           )}
         </View>
         <Text style={styles.awalText}>Awal {formatRupiah(h.jumlahAwal)}</Text>
@@ -112,7 +112,10 @@ export function HutangScreen() {
         data={displayed}
         keyExtractor={(i) => i.id}
         renderItem={({ item }) => (
-          <HutangCard h={item} onPress={() => nav.navigate("HutangDetail", { hutangId: item.id })} />
+          <HutangCard
+            h={item}
+            onPress={() => nav.navigate("HutangDetail", { hutangId: item.id })}
+          />
         )}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
@@ -139,25 +142,25 @@ export function HutangScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // Header
   header: {
+    paddingBottom: 0,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.lg,
-    paddingBottom: 0,
   },
   title: {
+    color: colors.primary,
     fontFamily: "publicSansBold",
     fontSize: 40,
     lineHeight: 48,
-    color: colors.primary,
   },
   subtitle: {
     ...textStyles.bodyMd,
@@ -167,9 +170,9 @@ const styles = StyleSheet.create({
 
   // Search
   searchRow: {
+    paddingBottom: spacing.md,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.md,
   },
 
   // List
@@ -178,53 +181,53 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.sm,
-    padding: spacing.md,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
+    padding: spacing.md,
     ...cardShadow,
   },
   cardHeader: {
+    alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
   },
   cardName: {
     ...textStyles.bodyLg,
-    fontFamily: "publicSansSemiBold",
     color: colors.onSurface,
     flex: 1,
+    fontFamily: "publicSansSemiBold",
     marginRight: spacing.sm,
   },
   divider: {
-    height: 1,
     backgroundColor: colors.surfaceVariant,
+    height: 1,
     marginVertical: spacing.sm,
   },
   cardFooter: {
+    alignItems: "flex-end",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
   },
   sisaLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginBottom: 2 },
-  lunasRow: { flexDirection: "row", alignItems: "center" },
+  lunasRow: { alignItems: "center", flexDirection: "row" },
   awalText: { ...textStyles.bodyMd, color: colors.onSurfaceVariant },
-  chevron: { position: "absolute", top: spacing.md, right: spacing.md },
+  chevron: { position: "absolute", right: spacing.md, top: spacing.md },
 
   // FAB
   fab: {
-    position: "absolute",
-    right: spacing.base,
-    bottom: spacing.xl,
-    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    bottom: spacing.xl,
+    elevation: 8,
+    flexDirection: "row",
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderRadius: 999,
-    backgroundColor: colors.primary,
-    elevation: 8,
+    position: "absolute",
+    right: spacing.base,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,

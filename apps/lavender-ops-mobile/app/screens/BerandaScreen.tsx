@@ -16,13 +16,13 @@ import { useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { StatusPill } from "@/components/form/StatusPill"
+import { useAuth } from "@/context/AuthContext"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
 import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
 import { colors, textStyles, borderRadius, spacing, cardShadow } from "@/theme/tokens"
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
-import { useAuth } from "@/context/AuthContext"
-import { StatusPill } from "@/components/form/StatusPill"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 

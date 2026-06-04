@@ -14,7 +14,9 @@ export interface StatusPillProps {
 export function StatusPill({ label, bg, color, icon }: StatusPillProps) {
   return (
     <View style={[styles.pill, { backgroundColor: bg }]}>
-      {icon ? <MaterialIcons name={icon} size={14} color={color} style={{ marginRight: 4 }} /> : null}
+      {icon ? (
+        <MaterialIcons name={icon} size={14} color={color} style={{ marginRight: 4 }} />
+      ) : null}
       <Text style={[textStyles.labelMd, { color }]}>{label}</Text>
     </View>
   )
@@ -22,9 +24,9 @@ export function StatusPill({ label, bg, color, icon }: StatusPillProps) {
 
 const styles = StyleSheet.create({
   pill: {
-    flexDirection: "row",
     alignItems: "center",
     borderRadius: 999,
+    flexDirection: "row",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
   },

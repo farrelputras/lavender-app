@@ -14,12 +14,12 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { SearchField } from "@/components/form/SearchField"
 import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
 import { getUserSummary, getVehicleSummaries } from "@/services/rentals"
 import type { UserSummary, VehicleSummary, VehicleCategory } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { initialsFromName } from "@/utils/format"
-import { SearchField } from "@/components/form/SearchField"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -201,11 +201,7 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
 
       {/* Search */}
       <View style={styles.searchRow}>
-        <SearchField
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Cari plat nomor..."
-        />
+        <SearchField value={query} onChangeText={setQuery} placeholder="Cari plat nomor..." />
       </View>
 
       {/* Filter chips */}

@@ -12,11 +12,11 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import { SectionLabel } from "@/components/form/SectionLabel"
+import { BottomActionBar } from "@/components/form/BottomActionBar"
 import { FieldCard } from "@/components/form/FieldCard"
 import { RupiahInput } from "@/components/form/RupiahInput"
-import { BottomActionBar } from "@/components/form/BottomActionBar"
 import { SearchField } from "@/components/form/SearchField"
+import { SectionLabel } from "@/components/form/SectionLabel"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { createManualHutang, getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
@@ -100,7 +100,11 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
                     activeOpacity={0.8}
                   >
                     <Text
-                      style={[textStyles.bodyMd, styles.userRowName, selected && styles.userRowNameSelected]}
+                      style={[
+                        textStyles.bodyMd,
+                        styles.userRowName,
+                        selected && styles.userRowNameSelected,
+                      ]}
                       numberOfLines={1}
                     >
                       {u.nickname ? `${u.name} (${u.nickname})` : u.name}
@@ -149,15 +153,15 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
 
   // App Bar
   appBar: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
   appBarTitle: {
     ...textStyles.headlineSm,
@@ -173,40 +177,40 @@ const styles = StyleSheet.create({
   pelangganCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
-    marginHorizontal: spacing.base,
+    elevation: 2,
     marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
     shadowRadius: 12,
-    elevation: 2,
   },
   pelangganSearch: {
-    padding: spacing.md,
-    borderBottomWidth: 1,
     borderBottomColor: colors.surfaceVariant,
+    borderBottomWidth: 1,
+    padding: spacing.md,
   },
   userRow: {
-    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    flexDirection: "row",
     justifyContent: "space-between",
+    minHeight: 48,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    minHeight: 48,
-    backgroundColor: colors.surfaceContainerLowest,
   },
   userRowBorder: {
-    borderTopWidth: 1,
     borderTopColor: colors.surfaceVariant,
+    borderTopWidth: 1,
   },
   userRowSelected: {
     backgroundColor: colors.primaryFixed,
-    borderLeftWidth: 4,
     borderLeftColor: colors.primary,
+    borderLeftWidth: 4,
   },
-  userRowName: { flex: 1, color: colors.onSurface, marginRight: spacing.sm },
-  userRowNameSelected: { fontFamily: "publicSansSemiBold", color: colors.onSurface },
+  userRowName: { color: colors.onSurface, flex: 1, marginRight: spacing.sm },
+  userRowNameSelected: { color: colors.onSurface, fontFamily: "publicSansSemiBold" },
 
   // Field inside FieldCard
   fieldLabel: {

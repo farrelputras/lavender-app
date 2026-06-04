@@ -12,8 +12,8 @@ import { MaterialIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import PembayaranSheet from "@/components/PembayaranSheet"
 import { StatusPill } from "@/components/form/StatusPill"
+import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { addHutangPayment, getHutangFull } from "@/services/rentals"
 import type { HutangFull, Payment } from "@/services/rentals/types"
@@ -108,7 +108,9 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
           {/* Sisa */}
           <View style={styles.heroSection}>
             <Text style={styles.heroFieldLabel}>Sisa Hutang</Text>
-            <Text style={[textStyles.displayLg, { color: isLunas ? colors.primary : colors.error }]}>
+            <Text
+              style={[textStyles.displayLg, { color: isLunas ? colors.primary : colors.error }]}
+            >
               {formatRupiah(h.sisa)}
             </Text>
             <Text style={styles.heroSubtitle}>dari {formatRupiah(h.jumlahAwal)}</Text>
@@ -135,7 +137,12 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
 
         {h.payments.length === 0 ? (
           <View style={styles.emptyState}>
-            <MaterialIcons name="receipt" size={48} color={colors.outlineVariant} style={{ marginBottom: spacing.md }} />
+            <MaterialIcons
+              name="receipt"
+              size={48}
+              color={colors.outlineVariant}
+              style={{ marginBottom: spacing.md }}
+            />
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
               Belum ada pembayaran
             </Text>
@@ -172,9 +179,7 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
             activeOpacity={0.85}
           >
             <MaterialIcons name="add" size={20} color={colors.onPrimary} />
-            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
-              Tambah Pembayaran
-            </Text>
+            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Tambah Pembayaran</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -190,21 +195,21 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // App Bar
   appBar: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
   appBarTitle: {
     ...textStyles.headlineSm,
@@ -214,92 +219,92 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: { paddingHorizontal: spacing.base, paddingBottom: spacing.xxl, paddingTop: spacing.sm },
+  scroll: { paddingBottom: spacing.xxl, paddingHorizontal: spacing.base, paddingTop: spacing.sm },
 
   // Hero card
   heroCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
-    padding: spacing.xl,
     marginBottom: spacing.sm,
+    padding: spacing.xl,
     ...cardShadow,
   },
   statusBadge: {
     position: "absolute",
-    top: spacing.md,
     right: spacing.md,
+    top: spacing.md,
   },
   heroSection: { gap: spacing.xs },
   heroFieldLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant },
   heroName: { ...textStyles.headlineMd, color: colors.onSurface },
   heroDivider: {
-    height: 1,
     backgroundColor: colors.surfaceVariant,
+    height: 1,
     marginVertical: spacing.md,
   },
   heroSubtitle: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginTop: spacing.xs },
 
   // Rental source link
   rentalLink: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 12,
+    flexDirection: "row",
     height: 52,
-    paddingHorizontal: spacing.md,
+    justifyContent: "space-between",
     marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
     ...cardShadow,
   },
-  rentalLinkLeft: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  rentalLinkLeft: { alignItems: "center", flexDirection: "row", gap: spacing.sm },
   rentalLinkText: { ...textStyles.bodyMd, color: colors.primary },
 
   // Pembayaran section
   sectionHeading: {
     ...textStyles.labelLg,
     color: colors.onSurface,
-    marginTop: spacing.md,
     marginBottom: spacing.sm,
+    marginTop: spacing.md,
   },
 
   // Payment row
   payRow: {
-    flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 12,
-    padding: spacing.md,
+    flexDirection: "row",
     marginBottom: spacing.sm,
+    padding: spacing.md,
     ...cardShadow,
   },
   payMethod: { ...textStyles.bodyLg, color: colors.onSurface },
   payDate: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginTop: 2 },
-  payAmountRow: { flexDirection: "row", alignItems: "center" },
+  payAmountRow: { alignItems: "center", flexDirection: "row" },
   payAmount: { ...textStyles.bodyLg, color: colors.onSurface },
 
   // Empty state
   emptyState: {
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.xl,
-    paddingHorizontal: spacing.md,
     backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 16,
-    borderWidth: 1,
     borderColor: colors.outlineVariant,
+    borderRadius: 16,
     borderStyle: "dashed",
+    borderWidth: 1,
+    justifyContent: "center",
     marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xl,
   },
 
   // Add button
   addBtn: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    flexDirection: "row",
     gap: spacing.sm,
     height: 52,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
+    justifyContent: "center",
     marginTop: spacing.md,
     ...cardShadow,
   },

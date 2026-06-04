@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react"
 import type { Session } from "@supabase/supabase-js"
+
 import { supabase } from "../supabase/client"
 
 interface UseSessionResult {

@@ -138,7 +138,12 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Hutang</Text>
-            <Text style={[styles.statValue, { color: summary.debtAmount > 0 ? colors.error : colors.success }]}>
+            <Text
+              style={[
+                styles.statValue,
+                { color: summary.debtAmount > 0 ? colors.error : colors.success },
+              ]}
+            >
               {formatRupiah(summary.debtAmount)}
             </Text>
           </View>
@@ -150,7 +155,9 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
           <View style={styles.photoRow}>
             <PhotoSlot
               label="Foto Profil"
-              photo={user.profilPhoto ? { id: user.profilPhoto.id, uri: user.profilPhoto.uri } : null}
+              photo={
+                user.profilPhoto ? { id: user.profilPhoto.id, uri: user.profilPhoto.uri } : null
+              }
               readonly
               onCapture={() => {}}
               onRemove={() => {}}
@@ -201,7 +208,8 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Universitas</Text>
               <Text style={styles.infoValue}>
-                {user.universitas ?? "—"}{user.prodi ? ` · ${user.prodi}` : ""}
+                {user.universitas ?? "—"}
+                {user.prodi ? ` · ${user.prodi}` : ""}
               </Text>
             </View>
           </View>
@@ -209,7 +217,11 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
 
         {/* Action Buttons */}
         <View style={styles.actionSection}>
-          <TouchableOpacity style={styles.whatsappBtn} onPress={handleWhatsApp} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.whatsappBtn}
+            onPress={handleWhatsApp}
+            activeOpacity={0.85}
+          >
             <FontAwesome name="whatsapp" size={22} color="#FFFFFF" />
             <Text style={[textStyles.labelLg, { color: "#FFFFFF" }]}>WhatsApp</Text>
           </TouchableOpacity>
@@ -224,26 +236,26 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // App Bar
   appBar: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
   },
   appBarBtn: {
-    width: 48,
+    alignItems: "center",
     height: 48,
     justifyContent: "center",
-    alignItems: "center",
+    width: 48,
   },
   appBarTitle: {
     ...textStyles.headlineMd,
@@ -252,18 +264,18 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   appBarSide: {
-    width: 48,
+    alignItems: "center",
     height: 48,
     justifyContent: "center",
-    alignItems: "center",
+    width: 48,
   },
   editBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.primaryContainer,
-    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.primaryContainer,
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: 40,
   },
 
   // Scroll
@@ -272,10 +284,10 @@ const styles = StyleSheet.create({
   // Profile Hero
   hero: {
     alignItems: "center",
+    gap: spacing.xs,
+    paddingBottom: spacing.lg,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    gap: spacing.xs,
   },
   heroName: { ...textStyles.headlineLg, color: colors.onSurface, textAlign: "center" },
   heroPhone: { ...textStyles.bodyLg, color: colors.onSurfaceVariant, textAlign: "center" },
@@ -284,17 +296,17 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     gap: spacing.sm,
-    paddingHorizontal: spacing.base,
     marginBottom: spacing.lg,
+    paddingHorizontal: spacing.base,
   },
   statCard: {
-    flex: 1,
+    alignItems: "center",
     backgroundColor: colors.surfaceContainer,
     borderRadius: 16,
-    padding: spacing.md,
-    minHeight: 100,
+    flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    minHeight: 100,
+    padding: spacing.md,
     ...cardShadow,
   },
   statLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginBottom: spacing.xs },
@@ -304,8 +316,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
-    marginHorizontal: spacing.base,
     marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
     padding: spacing.md,
     ...cardShadow,
   },
@@ -316,8 +328,8 @@ const styles = StyleSheet.create({
   },
   photoRow: {
     flexDirection: "row",
-    gap: spacing.md,
     flexWrap: "wrap",
+    gap: spacing.md,
   },
 
   // Info fields inside card
@@ -325,35 +337,35 @@ const styles = StyleSheet.create({
   infoLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant },
   infoValue: { ...textStyles.bodyMd, color: colors.onSurface },
   infoDivider: {
-    height: 1,
     backgroundColor: colors.surfaceVariant,
+    height: 1,
     marginVertical: spacing.sm,
   },
 
   // Action buttons
   actionSection: {
-    paddingHorizontal: spacing.base,
     gap: spacing.sm,
     marginTop: spacing.lg,
     paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.base,
   },
   whatsappBtn: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#25D366",
+    borderRadius: 999,
+    flexDirection: "row",
     gap: spacing.sm,
     height: 52,
-    borderRadius: 999,
-    backgroundColor: "#25D366",
+    justifyContent: "center",
   },
   deleteBtn: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.sm,
-    height: 52,
+    borderColor: colors.error,
     borderRadius: 999,
     borderWidth: 2,
-    borderColor: colors.error,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
+    justifyContent: "center",
   },
 })

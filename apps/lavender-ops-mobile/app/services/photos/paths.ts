@@ -14,6 +14,10 @@ export function buildUserPhotoPath(userId: string, slot: UserPhotoSlot, ext: str
   return `users/${userId}/${slot}/${uuidv4()}.${ext}`
 }
 
-export function buildRentalPhotoPath(rentalId: string, phase: RentalPhotoPhase, ext: string): string {
+export function buildRentalPhotoPath(
+  rentalId: string,
+  phase: RentalPhotoPhase,
+  ext: string,
+): string {
   return `rentals/${rentalId}/${phase}/${uuidv4()}.${ext}`
 }

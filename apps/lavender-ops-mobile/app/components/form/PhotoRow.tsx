@@ -19,7 +19,13 @@ export interface PhotoRowProps {
   readonly?: boolean
 }
 
-export function PhotoRow({ photos, onAdd, onRemove, addLabel = "Tambah Foto", readonly }: PhotoRowProps) {
+export function PhotoRow({
+  photos,
+  onAdd,
+  onRemove,
+  addLabel = "Tambah Foto",
+  readonly,
+}: PhotoRowProps) {
   return (
     <ScrollView
       horizontal

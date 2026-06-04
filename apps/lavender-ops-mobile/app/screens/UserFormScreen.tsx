@@ -13,14 +13,14 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import { SectionLabel } from "@/components/form/SectionLabel"
+import { BottomActionBar } from "@/components/form/BottomActionBar"
 import { FieldCard } from "@/components/form/FieldCard"
 import { PhotoSlot } from "@/components/form/PhotoSlot"
-import { BottomActionBar } from "@/components/form/BottomActionBar"
+import { SectionLabel } from "@/components/form/SectionLabel"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { choosePhotoSource } from "@/services/photos/capture"
 import { createUser, getUser, updateUser } from "@/services/rentals"
 import type { PhotoInput } from "@/services/rentals/types"
-import { choosePhotoSource } from "@/services/photos/capture"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 type SlotState =
@@ -62,7 +62,11 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
   const [ktpSlot, setKtpSlot] = useState<SlotState>(NONE)
   const [ktmSlot, setKtmSlot] = useState<SlotState>(NONE)
   // Originals allow restoring the pre-capture state when user cancels a new capture
-  const originals = useRef({ profil: NONE as SlotState, ktp: NONE as SlotState, ktm: NONE as SlotState })
+  const originals = useRef({
+    profil: NONE as SlotState,
+    ktp: NONE as SlotState,
+    ktm: NONE as SlotState,
+  })
 
   useEffect(() => {
     if (mode !== "edit" || !userId) return
@@ -104,10 +108,7 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
     }
   }
 
-  function makeRemove(
-    setter: Dispatch<SetStateAction<SlotState>>,
-    getOriginal: () => SlotState,
-  ) {
+  function makeRemove(setter: Dispatch<SetStateAction<SlotState>>, getOriginal: () => SlotState) {
     return () => {
       setter((prev) => {
         if (prev.status === "existing") return { status: "removed" }
@@ -166,9 +167,7 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.appBarTitle}>
-          {mode === "create" ? "User Baru" : "Edit User"}
-        </Text>
+        <Text style={styles.appBarTitle}>{mode === "create" ? "User Baru" : "Edit User"}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -284,21 +283,21 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // App Bar
   appBar: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    gap: spacing.sm,
   },
   appBarTitle: {
     ...textStyles.headlineSm,
@@ -317,8 +316,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   divider: {
-    height: 1,
     backgroundColor: colors.outlineVariant,
+    height: 1,
     marginVertical: spacing.sm,
   },
   input: {
@@ -328,16 +327,16 @@ const styles = StyleSheet.create({
   },
   multiline: { minHeight: 60, textAlignVertical: "top" },
   toggleRow: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
   },
 
   // Photo row (outside FieldCard, matches FieldCard marginHorizontal)
   photoRow: {
     flexDirection: "row",
-    gap: spacing.md,
-    paddingHorizontal: spacing.base,
-    paddingBottom: spacing.sm,
     flexWrap: "wrap",
+    gap: spacing.md,
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.base,
   },
 })

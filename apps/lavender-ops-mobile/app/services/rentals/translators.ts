@@ -158,14 +158,16 @@ export function rowToUser(row: Record<string, unknown>): User {
 }
 
 export function rowToHutangFull(row: Record<string, unknown>): HutangFull {
-  const payments = ((row.payments as Record<string, unknown>[] | null) ?? []).map((p): Payment => ({
-    id: p.id as string,
-    amount: p.amount as number,
-    method: p.method as Payment["method"],
-    methodDescription: (p.method_description as string | undefined) ?? undefined,
-    paidAt: new Date(p.paid_at as string),
-    notes: (p.notes as string | undefined) ?? undefined,
-  }))
+  const payments = ((row.payments as Record<string, unknown>[] | null) ?? []).map(
+    (p): Payment => ({
+      id: p.id as string,
+      amount: p.amount as number,
+      method: p.method as Payment["method"],
+      methodDescription: (p.method_description as string | undefined) ?? undefined,
+      paidAt: new Date(p.paid_at as string),
+      notes: (p.notes as string | undefined) ?? undefined,
+    }),
+  )
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0)
   const jumlahAwal = row.jumlah_awal as number
   return {

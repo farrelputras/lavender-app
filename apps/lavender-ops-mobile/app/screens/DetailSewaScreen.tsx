@@ -17,9 +17,10 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
-import PembayaranSheet from "@/components/PembayaranSheet"
 import { PhotoRow } from "@/components/form/PhotoRow"
+import PembayaranSheet from "@/components/PembayaranSheet"
 import type { SewaBaruScreenProps, AppStackParamList } from "@/navigators/navigationTypes"
+import { choosePhotoSource } from "@/services/photos/capture"
 import { getUserSummary, getVehicle, createRental } from "@/services/rentals"
 import type {
   UserSummary,
@@ -30,8 +31,6 @@ import type {
 } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime, initialsFromName } from "@/utils/format"
-import { choosePhotoSource } from "@/services/photos/capture"
-import { uuidv4 } from "@/utils/uuid"
 import {
   composeTarif,
   addDuration,
@@ -40,6 +39,7 @@ import {
   computeTotalBill,
   formatPaket,
 } from "@/utils/rentalMath"
+import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -284,7 +284,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   async function handleAddPhoto() {
     const captured = await choosePhotoSource()
     if (captured) {
-      setPhotos((prev) => [...prev, { id: uuidv4(), uri: captured.uri, mimeType: captured.mimeType }])
+      setPhotos((prev) => [
+        ...prev,
+        { id: uuidv4(), uri: captured.uri, mimeType: captured.mimeType },
+      ])
     }
   }
 

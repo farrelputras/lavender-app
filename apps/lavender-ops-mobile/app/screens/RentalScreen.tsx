@@ -1,24 +1,17 @@
 import { useState, useCallback, useMemo } from "react"
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native"
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { SearchField } from "@/components/form/SearchField"
+import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getRentals } from "@/services/rentals"
 import type { RentalListItem } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatDateShort, formatRupiah } from "@/utils/format"
-import { StatusPill } from "@/components/form/StatusPill"
-import { SearchField } from "@/components/form/SearchField"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type FilterTab = "ALL" | "ACTIVE" | "COMPLETED"
@@ -170,25 +163,25 @@ export function RentalScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // Header
   header: {
+    paddingBottom: 0,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.lg,
-    paddingBottom: 0,
   },
   title: {
+    color: colors.primary,
     fontFamily: "publicSansBold",
     fontSize: 40,
     lineHeight: 48,
-    color: colors.primary,
   },
   subtitle: {
     ...textStyles.bodyMd,
@@ -198,27 +191,27 @@ const styles = StyleSheet.create({
 
   // Search
   searchRow: {
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.sm,
   },
 
   // Filter tabs
   tabRow: {
     flexDirection: "row",
     gap: spacing.sm,
-    paddingHorizontal: spacing.base,
     paddingBottom: spacing.md,
+    paddingHorizontal: spacing.base,
   },
   tab: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
+    alignItems: "center",
+    borderColor: colors.outlineVariant,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: colors.outlineVariant,
-    minHeight: 48,
     justifyContent: "center",
-    alignItems: "center",
+    minHeight: 48,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 10,
   },
   tabActive: {
     backgroundColor: colors.primaryContainer,
@@ -233,17 +226,17 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.sm,
-    padding: spacing.md,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
+    padding: spacing.md,
     ...cardShadow,
   },
   cardHeader: {
+    alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: spacing.xs,
   },
   cardName: {
@@ -258,16 +251,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   divider: {
-    height: 1,
     backgroundColor: colors.surfaceVariant,
+    height: 1,
     marginVertical: spacing.sm,
   },
   cardFooter: {
+    alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
   },
-  dateRow: { flexDirection: "row", alignItems: "center" },
+  dateRow: { alignItems: "center", flexDirection: "row" },
   dateText: { ...textStyles.bodyMd, color: colors.onSurfaceVariant },
   sisaText: { ...textStyles.labelLg, color: colors.error },
   lunasText: { ...textStyles.labelLg, color: colors.success },

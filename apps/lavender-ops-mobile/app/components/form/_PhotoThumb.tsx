@@ -1,6 +1,8 @@
 import { View, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
+
 import { colors } from "@/theme/tokens"
+
 import type { PhotoItem } from "./PhotoRow"
 
 interface PhotoThumbProps {
@@ -41,27 +43,6 @@ export function PhotoThumb({ photo, onRemove, readonly }: PhotoThumbProps) {
 }
 
 const styles = StyleSheet.create({
-  thumb: {
-    borderColor: colors.outlineVariant,
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 120,
-    overflow: "hidden",
-    width: 120,
-  },
-  image: { width: 120, height: 120, borderRadius: 14 },
-  placeholder: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    flex: 1,
-    justifyContent: "center",
-  },
-  pendingOverlay: {
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "center",
-  },
-  failedOverlay: { backgroundColor: "rgba(176,0,32,0.35)" },
   close: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.85)",
@@ -72,5 +53,26 @@ const styles = StyleSheet.create({
     right: 6,
     top: 6,
     width: 22,
+  },
+  failedOverlay: { backgroundColor: "rgba(176,0,32,0.35)" },
+  image: { borderRadius: 14, height: 120, width: 120 },
+  pendingOverlay: {
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+  },
+  placeholder: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainer,
+    flex: 1,
+    justifyContent: "center",
+  },
+  thumb: {
+    borderColor: colors.outlineVariant,
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 120,
+    overflow: "hidden",
+    width: 120,
   },
 })

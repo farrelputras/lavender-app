@@ -228,25 +228,25 @@ const CARD_SHADOW = {
 } as const
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
+  safe: { backgroundColor: colors.background, flex: 1 },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    flex: 1,
+    justifyContent: "center",
   },
 
   // Header
   header: {
+    paddingBottom: 0,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.lg,
-    paddingBottom: 0,
   },
   title: {
+    color: colors.primary,
     fontFamily: "publicSansBold",
     fontSize: 40,
     lineHeight: 48,
-    color: colors.primary,
   },
   subtitle: {
     ...textStyles.bodyMd,
@@ -256,31 +256,31 @@ const styles = StyleSheet.create({
 
   // Search
   searchRow: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
     gap: spacing.sm,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.sm,
   },
   searchInputContainer: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 24,
     flex: 1,
     flexDirection: "row",
-    alignItems: "center",
     height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.surfaceContainerLowest,
     paddingHorizontal: spacing.md,
     ...CARD_SHADOW,
   },
-  searchInput: { flex: 1, color: colors.onSurface, padding: 0 },
+  searchInput: { color: colors.onSurface, flex: 1, padding: 0 },
 
   // Section header (sticky)
   sectionHeader: {
     backgroundColor: colors.background,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.sm,
   },
   sectionLetter: {
     ...textStyles.headlineSm,
@@ -293,34 +293,34 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: spacing.md,
-    marginHorizontal: spacing.base,
-    marginBottom: spacing.sm,
-    padding: spacing.md,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
+    flexDirection: "row",
+    gap: spacing.md,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.base,
+    padding: spacing.md,
     ...CARD_SHADOW,
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     alignItems: "center",
+    borderRadius: 24,
+    height: 48,
     justifyContent: "center",
+    width: 48,
   },
-  avatarImage: { width: 48, height: 48, borderRadius: 24 },
+  avatarImage: { borderRadius: 24, height: 48, width: 48 },
   cardBody: { flex: 1 },
   nameText: {
     ...textStyles.bodyLg,
-    fontFamily: "publicSansSemiBold",
     color: colors.onSurface,
+    fontFamily: "publicSansSemiBold",
   },
   nicknameText: {
     ...textStyles.bodyLg,
-    fontFamily: "publicSansRegular",
     color: colors.secondary,
+    fontFamily: "publicSansRegular",
   },
   phoneText: {
     ...textStyles.bodyMd,
@@ -342,17 +342,17 @@ const styles = StyleSheet.create({
 
   // FAB
   fab: {
-    position: "absolute",
-    right: spacing.base,
-    bottom: spacing.xl,
-    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    bottom: spacing.xl,
+    elevation: 8,
+    flexDirection: "row",
     gap: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    borderRadius: 999,
-    backgroundColor: colors.primary,
-    elevation: 8,
+    position: "absolute",
+    right: spacing.base,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.15,

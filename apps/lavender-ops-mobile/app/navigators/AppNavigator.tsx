@@ -1,17 +1,16 @@
 import { ActivityIndicator, View } from "react-native"
-
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 import Config from "@/config"
+import { useAuth } from "@/context/AuthContext"
 import { ErrorBoundary } from "@/screens/ErrorScreen/ErrorBoundary"
-import { PengembalianScreen } from "@/screens/PengembalianScreen"
-import { RentalDetailScreen } from "@/screens/RentalDetailScreen"
 import { HutangDetailScreen } from "@/screens/HutangDetailScreen"
 import { HutangFormScreen } from "@/screens/HutangFormScreen"
+import { PengembalianScreen } from "@/screens/PengembalianScreen"
+import { RentalDetailScreen } from "@/screens/RentalDetailScreen"
 import { UserDetailScreen } from "@/screens/UserDetailScreen"
 import { UserFormScreen } from "@/screens/UserFormScreen"
-import { useAuth } from "@/context/AuthContext"
 import { useAppTheme } from "@/theme/context"
 import { colors } from "@/theme/tokens"
 
@@ -60,7 +59,14 @@ export const AppNavigator = (props: NavigationProps) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     )

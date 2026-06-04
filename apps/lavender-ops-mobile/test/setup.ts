@@ -9,7 +9,11 @@ import mockFile from "./mockFile"
 // to node's webcrypto (node >= 20). Guarded — won't clobber an existing global.crypto.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { webcrypto } = require("node:crypto")
-if (typeof globalThis.crypto === "undefined" || typeof globalThis.crypto.getRandomValues === "undefined") {
+
+if (
+  typeof globalThis.crypto === "undefined" ||
+  typeof globalThis.crypto.getRandomValues === "undefined"
+) {
   // @ts-expect-error assign node's webcrypto to the global that `uuid` reads
   globalThis.crypto = webcrypto
 }

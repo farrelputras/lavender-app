@@ -1,3 +1,8 @@
+import type { UserPhotoSlot, RentalPhotoPhase } from "@/services/photos/paths"
+import { buildUserPhotoPath, buildRentalPhotoPath, extFromMime } from "@/services/photos/paths"
+import { uploadPhoto, signPaths } from "@/services/photos/storage"
+import { uuidv4 } from "@/utils/uuid"
+
 import {
   rowToRental,
   rowToUserSummary,
@@ -28,10 +33,6 @@ import {
   RentalListItem,
 } from "./types"
 import { supabase } from "../supabase/client"
-import { uuidv4 } from "@/utils/uuid"
-import { uploadPhoto, signPaths } from "@/services/photos/storage"
-import type { UserPhotoSlot, RentalPhotoPhase } from "@/services/photos/paths"
-import { buildUserPhotoPath, buildRentalPhotoPath, extFromMime } from "@/services/photos/paths"
 
 export interface CloseRentalInput {
   returnedAt: Date
@@ -63,7 +64,8 @@ export async function getUserSummaries(): Promise<UserSummary[]> {
     const signed = await signPaths(allPaths)
     users.forEach((u, i) => {
       const profil = rawRows[i].profil_photo as { id: string; path: string } | null
-      if (profil && u.profilPhoto) u.profilPhoto = { ...u.profilPhoto, uri: signed.get(profil.path) ?? null }
+      if (profil && u.profilPhoto)
+        u.profilPhoto = { ...u.profilPhoto, uri: signed.get(profil.path) ?? null }
     })
   }
   return users
@@ -109,9 +111,12 @@ export async function getUser(id: string): Promise<User | null> {
   if (profil) pathsToSign.push(profil.path)
   if (pathsToSign.length > 0) {
     const signed = await signPaths(pathsToSign)
-    if (ktp && user.ktpPhoto) user.ktpPhoto = { ...user.ktpPhoto, uri: signed.get(ktp.path) ?? null }
-    if (ktm && user.ktmPhoto) user.ktmPhoto = { ...user.ktmPhoto, uri: signed.get(ktm.path) ?? null }
-    if (profil && user.profilPhoto) user.profilPhoto = { ...user.profilPhoto, uri: signed.get(profil.path) ?? null }
+    if (ktp && user.ktpPhoto)
+      user.ktpPhoto = { ...user.ktpPhoto, uri: signed.get(ktp.path) ?? null }
+    if (ktm && user.ktmPhoto)
+      user.ktmPhoto = { ...user.ktmPhoto, uri: signed.get(ktm.path) ?? null }
+    if (profil && user.profilPhoto)
+      user.profilPhoto = { ...user.profilPhoto, uri: signed.get(profil.path) ?? null }
   }
   return user
 }
@@ -139,8 +144,8 @@ export async function createUser(
   const photoFailures: string[] = []
   const photoUpdates: Record<string, unknown> = {}
   for (const [col, uiSlot, photoInput] of [
-    ["ktp_photo",    "ktpPhoto",    input.ktpPhoto],
-    ["ktm_photo",    "ktmPhoto",    input.ktmPhoto],
+    ["ktp_photo", "ktpPhoto", input.ktpPhoto],
+    ["ktm_photo", "ktmPhoto", input.ktmPhoto],
     ["profil_photo", "profilPhoto", input.profilPhoto],
   ] as [string, string, PhotoInput | undefined][]) {
     if (!photoInput || photoInput.kind !== "new") continue
@@ -156,7 +161,9 @@ export async function createUser(
   // if any photos succeeded, update the row; capture failures per slot
   if (Object.keys(photoUpdates).length > 0) {
     const colToUiSlot: Record<string, string> = {
-      ktp_photo: "ktpPhoto", ktm_photo: "ktmPhoto", profil_photo: "profilPhoto",
+      ktp_photo: "ktpPhoto",
+      ktm_photo: "ktmPhoto",
+      profil_photo: "profilPhoto",
     }
     const { error: updateError } = await supabase
       .from("users")
@@ -188,7 +195,10 @@ export async function updateUser(id: string, input: UpdateUserInput): Promise<Us
     ["profil_photo", input.profilPhoto, "profil"],
   ] as [string, PhotoInput | undefined, string][]) {
     if (!photoInput) continue // keep — don't include in update
-    if (photoInput.kind === "remove") { colUpdates[col] = null; continue }
+    if (photoInput.kind === "remove") {
+      colUpdates[col] = null
+      continue
+    }
     if (photoInput.kind === "new") {
       const ext = extFromMime(photoInput.mimeType)
       const path = buildUserPhotoPath(id, slot as UserPhotoSlot, ext)

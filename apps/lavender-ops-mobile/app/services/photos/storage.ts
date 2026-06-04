@@ -1,12 +1,19 @@
 // app/services/photos/storage.ts
-import * as FileSystem from "expo-file-system/legacy"
 import { decode } from "base64-arraybuffer"
+import * as FileSystem from "expo-file-system/legacy"
+
 import { supabase } from "../supabase/client"
 
 const BUCKET = "rental-photos"
 
-export async function uploadPhoto(localUri: string, storagePath: string, contentType: string): Promise<void> {
-  const base64 = await FileSystem.readAsStringAsync(localUri, { encoding: FileSystem.EncodingType.Base64 })
+export async function uploadPhoto(
+  localUri: string,
+  storagePath: string,
+  contentType: string,
+): Promise<void> {
+  const base64 = await FileSystem.readAsStringAsync(localUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  })
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(storagePath, decode(base64), { contentType, upsert: false })

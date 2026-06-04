@@ -16,7 +16,12 @@ export interface SearchFieldProps {
 export function SearchField({ value, onChangeText, placeholder = "Cari..." }: SearchFieldProps) {
   return (
     <View style={styles.container}>
-      <MaterialIcons name="search" size={20} color={colors.secondary} style={{ marginRight: spacing.sm }} />
+      <MaterialIcons
+        name="search"
+        size={20}
+        color={colors.secondary}
+        style={{ marginRight: spacing.sm }}
+      />
       <TextInput
         style={[textStyles.bodyMd, styles.input]}
         value={value}
@@ -25,7 +30,10 @@ export function SearchField({ value, onChangeText, placeholder = "Cari..." }: Se
         placeholderTextColor={colors.outlineVariant}
       />
       {value.length > 0 && (
-        <TouchableOpacity onPress={() => onChangeText("")} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+        <TouchableOpacity
+          onPress={() => onChangeText("")}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <MaterialIcons name="close" size={20} color={colors.secondary} />
         </TouchableOpacity>
       )}
@@ -35,13 +43,13 @@ export function SearchField({ value, onChangeText, placeholder = "Cari..." }: Se
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
     alignItems: "center",
-    height: 48,
-    borderRadius: 24,
     backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 24,
+    flexDirection: "row",
+    height: 48,
     paddingHorizontal: spacing.md,
     ...cardShadow,
   },
-  input: { flex: 1, color: colors.onSurface, padding: 0 },
+  input: { color: colors.onSurface, flex: 1, padding: 0 },
 })
