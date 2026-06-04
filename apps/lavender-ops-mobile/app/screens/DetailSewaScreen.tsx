@@ -56,12 +56,6 @@ function parseRupiahInput(raw: string): number {
   return isNaN(n) ? 0 : n
 }
 
-function todayMidnight(): Date {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function SectionLabel({ children }: { children: string }) {
@@ -200,6 +194,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   const paid = sumPayments(payments as Payment[])
   const remaining = Math.max(0, totalBill - paid)
 
+  // ─── Tujuan
+  const [tujuan, setTujuan] = useState("")
+  const [tujuanError, setTujuanError] = useState(false)
+
   // ─── Catatan
   const [notes, setNotes] = useState("")
 
@@ -293,6 +291,10 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
 
   // ─── Validate & Save
   function validate(): string | null {
+    if (tujuan.trim() === "") {
+      setTujuanError(true)
+      return "Tujuan harus diisi"
+    }
     if (jaminanItems.size === 0) {
       setJaminanError(true)
       return "Pilih minimal satu jaminan"
@@ -341,6 +343,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
         } as KondisiSnapshot,
         payments,
         notes,
+        tujuan,
       })
       showToast("Rental berhasil disimpan")
       navigation.getParent<NativeStackNavigationProp<AppStackParamList>>()?.reset({
@@ -971,6 +974,30 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                 </Text>
               </View>
             </View>
+          </View>
+
+          {/* ── Tujuan ───────────────────────────────────────── */}
+          <View>
+            <SectionLabel>Tujuan</SectionLabel>
+            <TextInput
+              style={[
+                textStyles.bodyMd,
+                styles.textInput,
+                tujuanError ? { borderColor: colors.error } : undefined,
+              ]}
+              placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
+              placeholderTextColor={colors.outline}
+              value={tujuan}
+              onChangeText={(v) => {
+                setTujuan(v)
+                if (tujuanError) setTujuanError(false)
+              }}
+            />
+            {tujuanError && (
+              <Text style={[textStyles.labelMd, { color: colors.error, marginTop: spacing.xs }]}>
+                Tujuan harus diisi
+              </Text>
+            )}
           </View>
 
           {/* ── Catatan ──────────────────────────────────────── */}

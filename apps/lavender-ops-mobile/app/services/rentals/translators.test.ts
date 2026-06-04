@@ -1,4 +1,44 @@
-import { rowToUser } from "./translators"
+import { rowToRental, rowToUser } from "./translators"
+
+// Minimal row shape that satisfies rowToRental without touching real Supabase.
+const baseRentalRow: Record<string, unknown> = {
+  id: "r1",
+  user_id: "u1",
+  vehicle_id: "v1",
+  start_at: "2026-06-04T08:00:00.000Z",
+  due_at: "2026-06-05T08:00:00.000Z",
+  returned_at: null,
+  status: "ACTIVE",
+  paket_hari: 1,
+  paket_jam: 0,
+  tarif: 100000,
+  add_on: { description: "", amount: 0 },
+  discount: 0,
+  total_bill: 100000,
+  total_paid: 0,
+  payments: [],
+  jaminan: { items: [] },
+  kondisi_keluar: null,
+  kondisi_kembali: null,
+  notes: "",
+}
+
+describe("rowToRental", () => {
+  it("maps tujuan string value through to the UI type", () => {
+    const rental = rowToRental({ ...baseRentalRow, tujuan: "Pantai Kenjeran" })
+    expect(rental.tujuan).toBe("Pantai Kenjeran")
+  })
+
+  it("coerces null tujuan to empty string", () => {
+    const rental = rowToRental({ ...baseRentalRow, tujuan: null })
+    expect(rental.tujuan).toBe("")
+  })
+
+  it("coerces undefined tujuan to empty string", () => {
+    const rental = rowToRental({ ...baseRentalRow })
+    expect(rental.tujuan).toBe("")
+  })
+})
 
 describe("rowToUser", () => {
   it("maps full user row to camelCase UI shape", () => {

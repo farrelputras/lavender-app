@@ -15,7 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { StatusPill } from "@/components/form/StatusPill"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
-import { addHutangPayment, getHutangFull } from "@/services/rentals"
+import {
+  addHutangPayment,
+  getHutangFull,
+  updateHutangPayment,
+  deleteHutangPayment,
+} from "@/services/rentals"
 import type { HutangFull, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime } from "@/utils/format"
@@ -38,6 +43,7 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
   const [h, setH] = useState<HutangFull | null>(null)
   const [loading, setLoading] = useState(true)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
   const reload = useCallback(() => {
     return getHutangFull(hutangId).then((res) => setH(res))
@@ -167,6 +173,17 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
                   />
                 )}
               </View>
+              <TouchableOpacity
+                style={styles.editPayBtn}
+                onPress={() => {
+                  setEditingPayment(p)
+                  setSheetOpen(true)
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialIcons name="edit" size={16} color={colors.primary} />
+                <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+              </TouchableOpacity>
             </View>
           ))
         )}
@@ -186,9 +203,43 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
 
       <PembayaranSheet
         visible={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        onSubmit={handleAddPayment}
-        defaultAmount={h.sisa}
+        onClose={() => {
+          setSheetOpen(false)
+          setEditingPayment(null)
+        }}
+        onSubmit={async (p) => {
+          try {
+            const next = editingPayment
+              ? await updateHutangPayment(hutangId, editingPayment.id, p)
+              : await addHutangPayment(hutangId, p)
+            setH(next)
+            setSheetOpen(false)
+            setEditingPayment(null)
+          } catch (e) {
+            Alert.alert(
+              editingPayment ? "Gagal mengedit pembayaran" : "Gagal menyimpan pembayaran",
+              e instanceof Error ? e.message : "Coba lagi",
+            )
+          }
+        }}
+        defaultAmount={!editingPayment ? h.sisa : undefined}
+        editingPayment={editingPayment ?? undefined}
+        onDelete={
+          editingPayment
+            ? async () => {
+                try {
+                  const next = await deleteHutangPayment(hutangId, editingPayment.id)
+                  setH(next)
+                  setEditingPayment(null)
+                } catch (e) {
+                  Alert.alert(
+                    "Gagal menghapus pembayaran",
+                    e instanceof Error ? e.message : "Coba lagi",
+                  )
+                }
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   )
@@ -281,6 +332,7 @@ const styles = StyleSheet.create({
   payDate: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginTop: 2 },
   payAmountRow: { alignItems: "center", flexDirection: "row" },
   payAmount: { ...textStyles.bodyLg, color: colors.onSurface },
+  editPayBtn: { alignItems: "center", flexDirection: "row", gap: 2, marginLeft: spacing.sm },
 
   // Empty state
   emptyState: {

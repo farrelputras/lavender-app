@@ -20,7 +20,14 @@ import { PhotoRow } from "@/components/form/PhotoRow"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { choosePhotoSource } from "@/services/photos/capture"
-import { getRental, getUserSummary, getVehicle, closeRental } from "@/services/rentals"
+import {
+  getRental,
+  getUserSummary,
+  getVehicle,
+  closeRental,
+  updatePayment,
+  deletePayment,
+} from "@/services/rentals"
 import type { CloseRentalInput } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
@@ -186,6 +193,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
   // ── Pembayaran ────────────────────────────────────────────────────────────
   const [pendingPayments, setPendingPayments] = useState<Omit<Payment, "id">[]>([])
   const [showPaySheet, setShowPaySheet] = useState(false)
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
   // ── Kondisi Kembali Photos ────────────────────────────────────────────────
   const [kembaliPhotos, setKembaliPhotos] = useState<
@@ -797,6 +805,17 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                             : p.method.toUpperCase()}
                         </Text>
                       </View>
+                      <TouchableOpacity
+                        style={styles.editPayBtn}
+                        onPress={() => {
+                          setEditingPayment(p)
+                          setShowPaySheet(true)
+                        }}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <MaterialIcons name="edit" size={16} color={colors.primary} />
+                        <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+                      </TouchableOpacity>
                     </View>
                   ))}
                   {pendingPayments.map((p, i) => (
@@ -965,12 +984,40 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
       <PembayaranSheet
         visible={showPaySheet}
-        onClose={() => setShowPaySheet(false)}
-        onSubmit={(p) => {
-          setPendingPayments((prev) => [...prev, p])
+        onClose={() => {
           setShowPaySheet(false)
+          setEditingPayment(null)
         }}
-        defaultAmount={sisa > 0 ? sisa : undefined}
+        onSubmit={async (p) => {
+          if (editingPayment) {
+            try {
+              const updated = await updatePayment(rental.id, editingPayment.id, p)
+              setRental(updated)
+              setEditingPayment(null)
+              setShowPaySheet(false)
+            } catch {
+              showToast("Gagal mengedit pembayaran")
+            }
+          } else {
+            setPendingPayments((prev) => [...prev, p])
+            setShowPaySheet(false)
+          }
+        }}
+        defaultAmount={!editingPayment && sisa > 0 ? sisa : undefined}
+        editingPayment={editingPayment ?? undefined}
+        onDelete={
+          editingPayment
+            ? async () => {
+                try {
+                  const updated = await deletePayment(rental.id, editingPayment.id)
+                  setRental(updated)
+                  setEditingPayment(null)
+                } catch {
+                  showToast("Gagal menghapus pembayaran")
+                }
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   )
@@ -1239,6 +1286,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
+  editPayBtn: { alignItems: "center", flexDirection: "row", gap: 2, marginLeft: spacing.xs },
   addPaymentBtn: {
     alignItems: "center",
     flexDirection: "row",

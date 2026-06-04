@@ -405,6 +405,7 @@ export async function createRental(input: CreateRentalInput): Promise<Rental> {
       kondisiKeluar: { ...input.kondisiKeluar, photos: keluarPhotos },
       discount: input.discount,
       notes: input.notes ?? "",
+      tujuan: input.tujuan,
       newPayments: input.payments.map((p) => ({
         amount: p.amount,
         method: p.method,
@@ -490,6 +491,71 @@ export async function addHutangPayment(
   if (error) throw error
   const h = await getHutangFull(hutangId)
   if (!h) throw new Error(`Hutang ${hutangId} not found after addHutangPayment`)
+  return h
+}
+
+export async function updatePayment(
+  rentalId: string,
+  paymentId: string,
+  input: Omit<Payment, "id">,
+): Promise<Rental> {
+  const { error } = await supabase.rpc("rpc_update_payment", {
+    p_payment_id: paymentId,
+    patch: {
+      amount: input.amount,
+      method: input.method,
+      methodDescription: input.methodDescription,
+      paidAt: input.paidAt instanceof Date ? input.paidAt.toISOString() : input.paidAt,
+      notes: input.notes,
+    },
+  })
+  if (error) throw error
+  const rental = await getRental(rentalId)
+  if (!rental) throw new Error(`Rental ${rentalId} not found after updatePayment`)
+  return rental
+}
+
+export async function deletePayment(rentalId: string, paymentId: string): Promise<Rental> {
+  const { error } = await supabase.rpc("rpc_delete_payment", {
+    p_payment_id: paymentId,
+  })
+  if (error) throw error
+  const rental = await getRental(rentalId)
+  if (!rental) throw new Error(`Rental ${rentalId} not found after deletePayment`)
+  return rental
+}
+
+export async function updateHutangPayment(
+  hutangId: string,
+  paymentId: string,
+  input: Omit<Payment, "id">,
+): Promise<HutangFull> {
+  const { error } = await supabase.rpc("rpc_update_payment", {
+    p_payment_id: paymentId,
+    patch: {
+      amount: input.amount,
+      method: input.method,
+      methodDescription: input.methodDescription,
+      paidAt: input.paidAt instanceof Date ? input.paidAt.toISOString() : input.paidAt,
+      notes: input.notes,
+    },
+  })
+  if (error) throw error
+  const h = await getHutangFull(hutangId)
+  if (!h) throw new Error(`Hutang ${hutangId} not found after updateHutangPayment`)
+  return h
+}
+
+export async function deleteHutangPayment(
+  hutangId: string,
+  paymentId: string,
+): Promise<HutangFull> {
+  const { error } = await supabase.rpc("rpc_delete_payment", {
+    p_payment_id: paymentId,
+  })
+  if (error) throw error
+  const h = await getHutangFull(hutangId)
+  if (!h) throw new Error(`Hutang ${hutangId} not found after deleteHutangPayment`)
   return h
 }
 

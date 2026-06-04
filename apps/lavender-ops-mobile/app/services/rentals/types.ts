@@ -145,6 +145,7 @@ export interface Rental {
   kondisiKembali: KondisiSnapshot | null
   // Meta
   notes: string
+  tujuan: string
   paketHari: number
   paketJam: 0 | 6 | 12
 }
@@ -163,6 +164,7 @@ export interface CreateRentalInput {
   kondisiKeluar: KondisiSnapshot
   payments: Omit<Payment, "id">[]
   notes?: string
+  tujuan: string
 }
 
 export interface DashboardSummary {

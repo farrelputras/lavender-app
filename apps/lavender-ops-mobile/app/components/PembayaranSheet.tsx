@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import {
+  Alert,
   View,
   Text,
   StyleSheet,
@@ -22,6 +23,8 @@ type Props = {
   onClose: () => void
   onSubmit: (p: Omit<Payment, "id">) => void
   defaultAmount?: number
+  editingPayment?: Payment
+  onDelete?: () => void
 }
 
 const METHODS: { key: PaymentMethod; label: string }[] = [
@@ -39,7 +42,14 @@ function todayMidnight(): Date {
   return d
 }
 
-export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmount }: Props) {
+export default function PembayaranSheet({
+  visible,
+  onClose,
+  onSubmit,
+  defaultAmount,
+  editingPayment,
+  onDelete,
+}: Props) {
   const [rawDigits, setRawDigits] = useState(defaultAmount ? String(defaultAmount) : "")
   const [method, setMethod] = useState<PaymentMethod>("CASH")
   const [methodDesc, setMethodDesc] = useState("")
@@ -48,6 +58,30 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [amountError, setAmountError] = useState(false)
   const [kbOffset, setKbOffset] = useState(0)
+
+  // Prefill from editingPayment (or reset to defaults) whenever the sheet opens.
+  useEffect(() => {
+    if (!visible) return
+    if (editingPayment) {
+      setRawDigits(String(editingPayment.amount))
+      setMethod(editingPayment.method)
+      setMethodDesc(editingPayment.methodDescription ?? "")
+      setPaidAt(
+        editingPayment.paidAt instanceof Date
+          ? editingPayment.paidAt
+          : new Date(editingPayment.paidAt as unknown as string),
+      )
+      setNotes(editingPayment.notes ?? "")
+    } else {
+      setRawDigits(defaultAmount ? String(defaultAmount) : "")
+      setMethod("CASH")
+      setMethodDesc("")
+      setPaidAt(todayMidnight())
+      setNotes("")
+    }
+    setAmountError(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible])
 
   useEffect(() => {
     if (!visible) return
@@ -81,6 +115,20 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
   function handleClose() {
     reset()
     onClose()
+  }
+
+  function handleDelete() {
+    Alert.alert("Hapus Pembayaran", "Pembayaran ini akan dihapus. Lanjutkan?", [
+      { text: "Batal", style: "cancel" },
+      {
+        text: "Hapus",
+        style: "destructive",
+        onPress: () => {
+          handleClose()
+          onDelete?.()
+        },
+      },
+    ])
   }
 
   function handleSubmit() {
@@ -123,7 +171,7 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
           <View style={styles.header}>
             <View style={{ width: 32 }} />
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>
-              Tambah Pembayaran
+              {editingPayment ? "Edit Pembayaran" : "Tambah Pembayaran"}
             </Text>
             <TouchableOpacity
               style={styles.closeBtn}
@@ -265,6 +313,12 @@ export default function PembayaranSheet({ visible, onClose, onSubmit, defaultAmo
             <TouchableOpacity style={styles.btnSimpan} onPress={handleSubmit} activeOpacity={0.8}>
               <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Simpan</Text>
             </TouchableOpacity>
+            {onDelete && (
+              <TouchableOpacity style={styles.btnHapus} onPress={handleDelete} activeOpacity={0.8}>
+                <MaterialIcons name="delete-outline" size={18} color={colors.error} />
+                <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Pembayaran</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
@@ -289,6 +343,15 @@ const styles = StyleSheet.create({
     gap: 24,
     paddingHorizontal: 16,
     paddingVertical: 24,
+  },
+  btnHapus: {
+    alignItems: "center",
+    borderRadius: 8,
+    flexDirection: "row",
+    gap: 6,
+    height: 48,
+    justifyContent: "center",
+    marginTop: 8,
   },
   btnSimpan: {
     alignItems: "center",

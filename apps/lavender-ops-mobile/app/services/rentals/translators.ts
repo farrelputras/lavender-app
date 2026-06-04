@@ -73,6 +73,7 @@ export function rowToRental(row: Record<string, unknown>): Rental {
     kondisiKeluar: toKondisi(row.kondisi_keluar),
     kondisiKembali: row.kondisi_kembali ? toKondisi(row.kondisi_kembali) : null,
     notes: (row.notes as string) ?? "",
+    tujuan: (row.tujuan as string | null) ?? "",
   }
 }
 

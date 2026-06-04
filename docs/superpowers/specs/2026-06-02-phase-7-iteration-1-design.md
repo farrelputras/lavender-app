@@ -55,7 +55,7 @@
 | **A — Infra** | 0 (UUID), 1 (OTA) | **APK** → mom | ✅ done (2026-06-02) | One native rebuild. The *only* APK trip; turns on OTA for everything after. **Zero visible change** to mom. |
 | **B — Stitch redesign (core screens)** | 2 (screens 09–15) | OTA | ✅ done (2026-06-03) | UserScreen, Rental/Hutang lists, User/Hutang detail+form redesigned from Stitch. New `StatusPill`/`SearchField`, shadow-only `FieldCard`, tokens extended. 63/63 tests. |
 | **B2 — Stitch redesign (rental-flow) + copy** | rest of 2, **absorbing** 4 (Paket→Durasi), 5 (Waktu Sewa 3-row), 6 (edit-icon consistency — finish), 8 (Penyewaan→Rental — finish) | OTA | ✅ done (2026-06-04) | Derived in-code from Stage-B design language. `PenyewaanDetail` route renamed → `RentalDetail`; Beranda/PilihKendaraan/DetailSewa/RentalDetail/Pengembalian redesigned; Waktu Sewa → 3-row (Option C); all "Paket"/"Penyewaan"/"Ubah" copy replaced; shadow-only cards. 63/63 tests. Tujuan field (item 7) deferred to Stage C. |
-| **C — Features** | 3 (edit/delete pembayaran), 7 (Tujuan field) | OTA | ⏳ pending | Real new capability. Data/connector layer is visual-independent; UI lands on the redesigned screens. |
+| **C — Features** | 3 (edit/delete pembayaran), 7 (Tujuan field) | OTA | ✅ done (2026-06-04) | Soft-delete payments (migration 0014), rpc_update/delete_payment, recompute_rental_hutang helper, 4 new connectors, useSession.role, PembayaranSheet edit mode, wired on RentalDetail/HutangDetail/Pengembalian. Tujuan: UI types + form capture + display. 66/66 tests. |
 
 ### Sequential vs parallel
 

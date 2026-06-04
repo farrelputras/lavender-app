@@ -64,7 +64,8 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 ### 3. Edit / delete pembayaran
 - **Detail:** Allow editing or deleting a recorded payment, to recover from a typo
   or mistaken entry.
-- **Status:** open
+- **Resolution:** Soft-delete via `payments.deleted_at` (migration `0014`). Auth-gated: active-rental + hutang payments editable by any operator (mom); closed-rental payments admin-only (Farrel emergency). New SECURITY-DEFINER RPCs `rpc_update_payment`/`rpc_delete_payment` with `recompute_rental_hutang` helper for closed-rental Hutang recompute. Four new locked connectors (`updatePayment`, `deletePayment`, `updateHutangPayment`, `deleteHutangPayment`). `useSession` extended with `role`. `PembayaranSheet` extended with edit mode + "Hapus Pembayaran" destructive action. Wired on `RentalDetailScreen`, `HutangDetailScreen`, `PengembalianScreen`.
+- **Status:** done (Stage C — 2026-06-04, on branch feat/phase7-stage-c)
 
 ### 4. "Paket" → "Durasi" rename
 - **Detail:** Replace all "Paket" wording with "Durasi" across the app — in
@@ -96,8 +97,9 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 - **Status:** done (Stage B2 — 2026-06-04)
 
 ### 7. Tujuan field adjustment
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** New required "Tujuan" (destination) field on rentals.
+- **Resolution:** DB column `rentals.tujuan TEXT` was already reserved in `0003`; `v_rentals` and `rpc_create_rental` were already wired. Stage C added UI only: `tujuan: string` to `Rental` type and `CreateRentalInput`, translator mapping in `rowToRental`, required-validated `TextInput` in `DetailSewaScreen`, and read-only display block in `RentalDetailScreen`. 3 new `rowToRental` translator tests added.
+- **Status:** done (Stage C — 2026-06-04, on branch feat/phase7-stage-c)
 
 ### 8. Change all "Penyewaan" into "Rental"
 - **Detail:** Rename "Penyewaan" → "Rental" app-wide.
@@ -122,6 +124,7 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 ### 3. Never pre-fill the following fields
 - **Detail:** To make my mom aware, never pre-fill these fields:
   - Jumlah Pembayaran (in Tambah Pembayaran)
+  - Tarif & Total even placeholder (in Sewa Baru)
 - **Status:** open
 
 ### 4. Zoom in and show the picture once clicked

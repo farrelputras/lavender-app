@@ -18,7 +18,15 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
-import { getRental, getUserSummary, getVehicle, addPayment } from "@/services/rentals"
+import { useSession } from "@/services/auth/useSession"
+import {
+  getRental,
+  getUserSummary,
+  getVehicle,
+  addPayment,
+  updatePayment,
+  deletePayment,
+} from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import {
@@ -77,11 +85,15 @@ function BensinGauge({ value }: { value: number }) {
 export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"RentalDetail">) {
   const { rentalId, justCreated, justClosed } = route.params
 
+  const { role } = useSession()
+  const isAdmin = role === "admin"
+
   const [rental, setRental] = useState<Rental | null>(null)
   const [user, setUser] = useState<UserSummary | null>(null)
   const [vehicle, setVehicle] = useState<Vehicle | null>(null)
   const [loading, setLoading] = useState(true)
   const [showPaySheet, setShowPaySheet] = useState(false)
+  const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -505,6 +517,19 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
                         {paymentMethodLabel(p)}
                       </Text>
                     </View>
+                    {(rental.status === "ACTIVE" || isAdmin) && (
+                      <TouchableOpacity
+                        style={styles.editPayBtn}
+                        onPress={() => {
+                          setEditingPayment(p)
+                          setShowPaySheet(true)
+                        }}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <MaterialIcons name="edit" size={16} color={colors.primary} />
+                        <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 ))
               )}
@@ -552,7 +577,28 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
           </View>
         </View>
 
-        {/* ── 7. Catatan ───────────────────────────────── */}
+        {/* ── 7. Tujuan ─────────────────────────────────── */}
+        <View>
+          <Text
+            style={[textStyles.headlineSm, { color: colors.onSurface, marginBottom: spacing.xs }]}
+          >
+            Tujuan
+          </Text>
+          <View style={styles.card}>
+            <View style={styles.insetBlock}>
+              <Text
+                style={[
+                  textStyles.bodyMd,
+                  { color: rental.tujuan ? colors.onSurface : colors.onSurfaceVariant },
+                ]}
+              >
+                {rental.tujuan || "Tidak ada tujuan."}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ── 8. Catatan ───────────────────────────────── */}
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
@@ -599,16 +645,36 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
 
       <PembayaranSheet
         visible={showPaySheet}
-        onClose={() => setShowPaySheet(false)}
+        onClose={() => {
+          setShowPaySheet(false)
+          setEditingPayment(null)
+        }}
         onSubmit={async (p) => {
           try {
-            const updated = await addPayment(rental.id, p)
+            const updated = editingPayment
+              ? await updatePayment(rental.id, editingPayment.id, p)
+              : await addPayment(rental.id, p)
             setRental(updated)
+            setEditingPayment(null)
           } catch {
-            showToast("Gagal menyimpan pembayaran")
+            showToast(editingPayment ? "Gagal mengedit pembayaran" : "Gagal menyimpan pembayaran")
           }
         }}
-        defaultAmount={sisa > 0 ? sisa : undefined}
+        defaultAmount={!editingPayment && sisa > 0 ? sisa : undefined}
+        editingPayment={editingPayment ?? undefined}
+        onDelete={
+          editingPayment
+            ? async () => {
+                try {
+                  const updated = await deletePayment(rental.id, editingPayment.id)
+                  setRental(updated)
+                  setEditingPayment(null)
+                } catch {
+                  showToast("Gagal menghapus pembayaran")
+                }
+              }
+            : undefined
+        }
       />
     </SafeAreaView>
   )
@@ -688,6 +754,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.outlineVariant,
     height: 1,
     marginVertical: spacing.xs,
+  },
+  editPayBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 2,
+    marginLeft: spacing.xs,
   },
   emptyPayment: {
     alignItems: "center",
