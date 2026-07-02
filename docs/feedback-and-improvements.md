@@ -9,7 +9,7 @@ Phase definitions live in the roadmap:
 bundled into **Phase 7 (Feedback polish + QA)**.
 
 ## v1.0 — Phase 7 (Feedback polish + QA)
-- **Status:** in-progress
+- **Status:** done — Stages A / B / B2 / C all shipped (2026-06-04)
 - **Due:** 5 June 2026
 
 ### 0. Replace Math.random() UUID with cryptographically secure UUID
@@ -110,30 +110,60 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 - **Status:** done (Stage B2 — 2026-06-04)
 
 ## v1.0.1
-- **Status:** open
+- **Status:** designed — see `docs/superpowers/specs/2026-07-02-v1-0-1-design.md`
 - **Due:** TBD
+- **Delivery:** OTA (channel `preview`) — no APK rebuild. Migration `0016` (item 6) is
+  applied to Supabase directly.
 
 ### 1. When opening camera, default to main camera instead of selfie camera
 - **Detail:** TBD
-- **Status:** open
+- **Status:** closed (not needed)
 
 ### 2. Add "Kembali ke Beranda" button in Detail Rental Selesai screen
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** `RentalDetailScreen` renders a sticky bottom bar only for `ACTIVE` rentals
+  (the "Proses Pengembalian" CTA); a completed rental has no bottom bar, so the only way
+  back is the top-left arrow. Add a mirror bottom bar for the completed state with a
+  full-width **"Kembali ke Beranda"** button calling the existing `handleBack()`
+  (`navigation.reset` → MainTabs).
+- **Status:** designed (v1.0.1) — see design doc
 
 ### 3. Never pre-fill the following fields
-- **Detail:** To make my mom aware, never pre-fill these fields:
-  - Jumlah Pembayaran (in Tambah Pembayaran)
-  - Tarif & Total even placeholder (in Sewa Baru)
-- **Status:** open
+- **Detail:** To make mom aware, never pre-fill these fields:
+  - **Jumlah Pembayaran** (Tambah Pembayaran) — drop `defaultAmount` on the *add* path so
+    the field opens empty. The *edit* path still shows the existing amount (that is the
+    record, not a pre-fill).
+  - **Tarif & Total, even the placeholder** (Sewa Baru) — keep the `composeTarif`-computed
+    value **visible but read-only** as `Saran tarif: Rp X`; remove the numeric placeholder,
+    the silent empty→default fallback, and any auto-seed of the field. An empty tarif is
+    invalid (existing "Tarif harus lebih dari 0" guard); Total reads Rp 0 until mom types
+    the number.
+- **Status:** designed (v1.0.1) — see design doc
 
 ### 4. Zoom in and show the picture once clicked
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** `PhotoThumb` has no tap handler today. Add a shared `PhotoViewer` full-screen
+  `Modal` with pinch-zoom + pan + double-tap-to-zoom, built on the already-installed
+  `react-native-gesture-handler` + `react-native-reanimated` (OTA-safe, no native rebuild).
+  Wire tap on `RentalDetailScreen` (Kondisi Keluar/Kembali photos) and `UserDetailScreen`
+  (KTP/KTM/profil).
+- **Status:** designed (v1.0.1) — see design doc
 
 ### 5. Adjust some text sizes
-- **Detail:** TBD
-- **Status:** open
+- **Detail:** Deferred — awaiting mom's specific "too small / too large" spots. Once
+  gathered, likely a small pass on the smallest `labelMd`/hint tiers in `theme/tokens.ts`,
+  or enabling `allowFontScaling` to respect the OS accessibility setting.
+- **Status:** open (deferred — awaiting mom's pain points)
+
+### 6. Add admin-specific operations
+- **Detail:** Admin-only (Farrel) hard-delete across entities, **block-if-referenced**
+  (confirmed). Migration `0016` adds four `SECURITY DEFINER`, admin-gated RPCs:
+  `rpc_admin_delete_rental` (cascade owned `payments`/`charges`/linked `hutang`, release an
+  `ACTIVE` vehicle), `rpc_admin_delete_hutang` (delete its payments, then the hutang), and
+  `rpc_admin_delete_user` / `rpc_admin_delete_vehicle` (raise if any rental/hutang still
+  references them). Four locked connectors (`hardDeleteRental` / `hardDeleteHutang` /
+  `hardDeleteUser` / `hardDeleteVehicle`) that also clean up owned storage photos.
+  Admin-only (`isAdmin`) destructive actions on the four detail screens, behind a
+  confirmation.
+- **Status:** designed (v1.0.1) — see design doc
 
 ## v1.1
 - **Status:** open
