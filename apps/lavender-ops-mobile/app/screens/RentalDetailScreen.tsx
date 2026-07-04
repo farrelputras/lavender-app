@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { PhotoRow } from "@/components/form/PhotoRow"
+import { PhotoViewer } from "@/components/form/PhotoViewer"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useSession } from "@/services/auth/useSession"
@@ -94,6 +95,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
   const [loading, setLoading] = useState(true)
   const [showPaySheet, setShowPaySheet] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
+  const [viewerUri, setViewerUri] = useState<string | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -379,6 +381,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
                   readonly
                   onAdd={() => {}}
                   onRemove={() => {}}
+                  onPhotoPress={(p) => setViewerUri(p.uri)}
                 />
               </>
             )}
@@ -424,6 +427,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
                     readonly
                     onAdd={() => {}}
                     onRemove={() => {}}
+                    onPhotoPress={(p) => setViewerUri(p.uri)}
                   />
                 </>
               )}
@@ -685,6 +689,12 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
               }
             : undefined
         }
+      />
+
+      <PhotoViewer
+        visible={viewerUri != null}
+        uri={viewerUri}
+        onClose={() => setViewerUri(null)}
       />
     </SafeAreaView>
   )
