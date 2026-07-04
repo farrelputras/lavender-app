@@ -1022,7 +1022,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
             setShowPaySheet(false)
           }
         }}
-        defaultAmount={!editingPayment && sisa > 0 ? sisa : undefined}
+        defaultAmount={undefined}
         editingPayment={editingPayment ?? undefined}
         onDelete={
           editingPayment

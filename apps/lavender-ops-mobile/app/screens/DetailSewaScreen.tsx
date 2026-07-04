@@ -1058,7 +1058,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
             setPayments((prev) => [...prev, { ...p, id: uuidv4() }])
           }
         }}
-        defaultAmount={!editingPayment && remaining > 0 ? remaining : undefined}
+        defaultAmount={undefined}
         editingPayment={editingPayment ?? undefined}
         onDelete={
           editingPayment

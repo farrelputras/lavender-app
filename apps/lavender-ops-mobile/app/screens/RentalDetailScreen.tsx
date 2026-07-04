@@ -670,7 +670,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
             showToast(editingPayment ? "Gagal mengedit pembayaran" : "Gagal menyimpan pembayaran")
           }
         }}
-        defaultAmount={!editingPayment && sisa > 0 ? sisa : undefined}
+        defaultAmount={undefined}
         editingPayment={editingPayment ?? undefined}
         onDelete={
           editingPayment

@@ -222,7 +222,7 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
             )
           }
         }}
-        defaultAmount={!editingPayment ? h.sisa : undefined}
+        defaultAmount={undefined}
         editingPayment={editingPayment ?? undefined}
         onDelete={
           editingPayment
