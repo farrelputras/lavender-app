@@ -28,3 +28,9 @@ export async function signPaths(paths: string[]): Promise<Map<string, string>> {
   for (const row of data ?? []) if (row.signedUrl && row.path) map.set(row.path, row.signedUrl)
   return map
 }
+
+export async function removePaths(paths: string[]): Promise<void> {
+  if (paths.length === 0) return
+  const { error } = await supabase.storage.from(BUCKET).remove(paths)
+  if (error) throw error
+}
