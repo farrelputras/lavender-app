@@ -57,6 +57,18 @@ jest.mock("../app/i18n/index.ts", () => ({
   },
 }))
 
+// react-native-reanimated ships an official jest mock; register it so components using
+// useSharedValue / useAnimatedStyle (e.g. PhotoViewer) render under jest-expo.
+// reanimated 4.x moved its native worklets runtime into the separate `react-native-worklets`
+// package, which the reanimated mock still imports transitively — mock it too, or the real
+// (native) module gets required and throws under jest.
+jest.mock("react-native-worklets", () => require("react-native-worklets/lib/module/mock"))
+jest.mock("react-native-reanimated", () => require("react-native-reanimated/mock"))
+// react-native-gesture-handler ships its own jest setup that mocks the native module (used by
+// GestureHandlerRootView / GestureDetector, e.g. in PhotoViewer) — required per the library's docs.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("react-native-gesture-handler/jestSetup")
+
 declare const tron // eslint-disable-line @typescript-eslint/no-unused-vars
 
 declare global {
