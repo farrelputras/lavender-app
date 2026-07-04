@@ -14,6 +14,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { PhotoSlot } from "@/components/form/PhotoSlot"
+import { PhotoViewer } from "@/components/form/PhotoViewer"
 import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { getUser, getUserSummary, softDeleteUser } from "@/services/rentals"
@@ -26,6 +27,7 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
   const [user, setUser] = useState<User | null>(null)
   const [summary, setSummary] = useState<UserSummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [viewerUri, setViewerUri] = useState<string | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -161,6 +163,9 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
               readonly
               onCapture={() => {}}
               onRemove={() => {}}
+              onPress={
+                user.profilPhoto?.uri ? () => setViewerUri(user.profilPhoto!.uri) : undefined
+              }
             />
             <PhotoSlot
               label="KTP"
@@ -168,6 +173,7 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
               readonly
               onCapture={() => {}}
               onRemove={() => {}}
+              onPress={user.ktpPhoto?.uri ? () => setViewerUri(user.ktpPhoto!.uri) : undefined}
             />
             <PhotoSlot
               label="KTM"
@@ -175,6 +181,7 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
               readonly
               onCapture={() => {}}
               onRemove={() => {}}
+              onPress={user.ktmPhoto?.uri ? () => setViewerUri(user.ktmPhoto!.uri) : undefined}
             />
           </View>
         </View>
@@ -231,6 +238,12 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <PhotoViewer
+        visible={viewerUri != null}
+        uri={viewerUri}
+        onClose={() => setViewerUri(null)}
+      />
     </SafeAreaView>
   )
 }
