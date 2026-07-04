@@ -643,6 +643,16 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         </View>
       )}
 
+      {/* Sticky bottom CTA — completed rentals: back to home */}
+      {rental.status === "COMPLETED" && (
+        <View style={styles.bottomBar}>
+          <TouchableOpacity style={styles.btnKembali} onPress={handleBack} activeOpacity={0.8}>
+            <MaterialIcons name="home" size={20} color={colors.onPrimary} />
+            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Kembali ke Beranda</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       <PembayaranSheet
         visible={showPaySheet}
         onClose={() => {
@@ -720,6 +730,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     padding: spacing.base,
     paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
+  },
+  btnKembali: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 56,
+    justifyContent: "center",
   },
   btnProses: {
     alignItems: "center",
