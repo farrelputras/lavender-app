@@ -9,13 +9,20 @@ interface PhotoThumbProps {
   photo: PhotoItem
   onRemove: () => void
   readonly?: boolean
+  onPress?: () => void
 }
 
-export function PhotoThumb({ photo, onRemove, readonly }: PhotoThumbProps) {
+export function PhotoThumb({ photo, onRemove, readonly, onPress }: PhotoThumbProps) {
   return (
     <View style={styles.thumb}>
       {photo.uri != null ? (
-        <Image source={{ uri: photo.uri }} style={styles.image} testID="photo-thumb-image" />
+        onPress ? (
+          <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+            <Image source={{ uri: photo.uri }} style={styles.image} testID="photo-thumb-image" />
+          </TouchableOpacity>
+        ) : (
+          <Image source={{ uri: photo.uri }} style={styles.image} testID="photo-thumb-image" />
+        )
       ) : (
         <View style={styles.placeholder}>
           <MaterialIcons name="image" size={32} color={colors.outlineVariant} />

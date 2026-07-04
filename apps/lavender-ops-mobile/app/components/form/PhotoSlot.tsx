@@ -12,9 +12,10 @@ export interface PhotoSlotProps {
   onCapture: () => void
   onRemove: () => void
   readonly?: boolean
+  onPress?: () => void
 }
 
-export function PhotoSlot({ label, photo, onCapture, onRemove, readonly }: PhotoSlotProps) {
+export function PhotoSlot({ label, photo, onCapture, onRemove, readonly, onPress }: PhotoSlotProps) {
   if (photo == null) {
     if (readonly) {
       return (
@@ -36,7 +37,7 @@ export function PhotoSlot({ label, photo, onCapture, onRemove, readonly }: Photo
 
   return (
     <View style={styles.container}>
-      <PhotoThumb photo={photo} onRemove={onRemove} readonly={readonly} />
+      <PhotoThumb photo={photo} onRemove={onRemove} readonly={readonly} onPress={onPress} />
       <Text style={[textStyles.labelMd, styles.label]}>{label}</Text>
     </View>
   )

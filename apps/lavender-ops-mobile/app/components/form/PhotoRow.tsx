@@ -17,6 +17,7 @@ export interface PhotoRowProps {
   onRemove: (id: string) => void
   addLabel?: string
   readonly?: boolean
+  onPhotoPress?: (photo: PhotoItem) => void
 }
 
 export function PhotoRow({
@@ -25,6 +26,7 @@ export function PhotoRow({
   onRemove,
   addLabel = "Tambah Foto",
   readonly,
+  onPhotoPress,
 }: PhotoRowProps) {
   return (
     <ScrollView
@@ -41,7 +43,13 @@ export function PhotoRow({
         </TouchableOpacity>
       )}
       {photos.map((p) => (
-        <PhotoThumb key={p.id} photo={p} onRemove={() => onRemove(p.id)} readonly={readonly} />
+        <PhotoThumb
+          key={p.id}
+          photo={p}
+          onRemove={() => onRemove(p.id)}
+          readonly={readonly}
+          onPress={onPhotoPress ? () => onPhotoPress(p) : undefined}
+        />
       ))}
     </ScrollView>
   )
