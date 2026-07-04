@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import {
   View,
   Text,
@@ -184,7 +184,7 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   // ─── Tarif & Total
   const defaultTarif = vehicle ? composeTarif(vehicle, hari, jam) : 0
   const [tarifRaw, setTarifRaw] = useState("")
-  const tarifValue = tarifRaw ? parseRupiahInput(tarifRaw) : defaultTarif
+  const tarifValue = tarifRaw ? parseRupiahInput(tarifRaw) : 0
 
   const [addOnDesc, setAddOnDesc] = useState("")
   const [addOnAmountRaw, setAddOnAmountRaw] = useState("")
@@ -212,13 +212,6 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
 
   // ─── Saving
   const [saving, setSaving] = useState(false)
-
-  const tarifSeeded = useRef(false)
-  useEffect(() => {
-    if (vehicle && !tarifSeeded.current) {
-      tarifSeeded.current = true
-    }
-  }, [vehicle])
 
   // Kembali is always derived from Mulai + Durasi stepper (never manually edited)
   useEffect(() => {
@@ -381,7 +374,6 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
   const durasLabel = formatPaket(hari, jam)
 
   const tarifHint = formatRupiah(defaultTarif)
-  const tarifChanged = tarifRaw !== "" && tarifValue !== defaultTarif
 
   const MONTHS_SHORT = [
     "Jan",
@@ -838,20 +830,15 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                   <TextInput
                     style={[textStyles.bodyMd, styles.rupiahField]}
                     keyboardType="numeric"
-                    placeholder={String(defaultTarif)}
+                    placeholder="Masukkan tarif"
                     placeholderTextColor={colors.outline}
                     value={tarifRaw}
                     onChangeText={setTarifRaw}
                     returnKeyType="done"
                   />
                 </View>
-                <Text
-                  style={[
-                    textStyles.labelMd,
-                    { color: tarifChanged ? colors.primary : colors.onSurfaceVariant },
-                  ]}
-                >
-                  Tarif default: {tarifHint}
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  Saran tarif: {tarifHint}
                 </Text>
               </View>
 
