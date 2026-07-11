@@ -85,6 +85,31 @@ eas update:list --branch preview   # See published OTA updates
 > `version` in app.json and ship a new APK. `expo-updates` is disabled in `dev` builds, so
 > verify OTA behavior on a `preview` build, not via Metro.
 
+## Database Migrations
+
+The project is linked to Supabase project `tuufzjxoprjsrrkagncz`. The CLI is a devDependency —
+there is no global install, so **always `npx supabase`**, run from `apps/lavender-ops-mobile`.
+
+```powershell
+npx supabase migration list                 # Which migrations are applied? ALWAYS check first.
+npx supabase migration new <name>           # Create a new migration file
+npx supabase db push                        # Apply pending migrations to remote
+npx supabase db query --linked -f x.sql     # Run a query (Management API — no DB password)
+```
+
+- **Never hand-paste migration SQL into the web SQL editor.** That applies the schema without
+  recording it in `supabase_migrations.schema_migrations`, so `migration list` and the console's
+  Migrations page both go blind. Migrations 0001–0016 were applied that way and had to be
+  back-filled with `migration repair`; migration 0016 was found never to have run at all.
+- Versions are `0001`-style, not the Supabase-default 14-digit timestamp. The CLI accepts these
+  fine (it sorts version strings lexicographically), but the console cannot parse them as dates,
+  so its "Inserted at" column reads *Unknown* for them. Cosmetic only. New files from
+  `migration new` will be timestamped and still sort after `0016`.
+- `migration repair --status applied <v>` writes a history row **without executing the SQL**.
+  Only ever use it for a migration you have confirmed is already in the database — otherwise
+  `db push` skips it forever and the schema silently drifts.
+- `seed.sql` lives at `supabase/seed.sql` (not in `migrations/`) and runs only on local `db reset`.
+
 ## Windows Notes
 
 - **Developer Mode** must be enabled for npm workspace symlinks
