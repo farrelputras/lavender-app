@@ -17,13 +17,16 @@ import { PhotoSlot } from "@/components/form/PhotoSlot"
 import { PhotoViewer } from "@/components/form/PhotoViewer"
 import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
-import { getUser, getUserSummary, softDeleteUser } from "@/services/rentals"
+import { useSession } from "@/services/auth/useSession"
+import { getUser, getUserSummary, softDeleteUser, hardDeleteUser } from "@/services/rentals"
 import type { User, UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah, toWaNumber } from "@/utils/format"
 
 export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"UserDetail">) {
   const { userId } = route.params
+  const { role } = useSession()
+  const isAdmin = role === "admin"
   const [user, setUser] = useState<User | null>(null)
   const [summary, setSummary] = useState<UserSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -92,6 +95,28 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
 
   const isVerified = user.verificationStatus === "TERVERIFIKASI_PDDIKTI"
   const displayName = user.nickname ? `${user.name} (${user.nickname})` : user.name
+
+  const handleHardDelete = () => {
+    Alert.alert(
+      "Hapus User Permanen?",
+      `"${displayName}" akan dihapus permanen. Hanya bisa jika user tidak punya rental atau hutang. Tidak bisa dibatalkan.`,
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus Permanen",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await hardDeleteUser(userId)
+              navigation.goBack()
+            } catch (e) {
+              Alert.alert("Gagal menghapus user", e instanceof Error ? e.message : "Coba lagi")
+            }
+          },
+        },
+      ],
+    )
+  }
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safe}>
@@ -236,6 +261,16 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
             <MaterialIcons name="delete" size={20} color={colors.error} />
             <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus User</Text>
           </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={handleHardDelete}
+              activeOpacity={0.85}
+            >
+              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+              <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Permanen</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
