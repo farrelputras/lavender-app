@@ -15,11 +15,13 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { StatusPill } from "@/components/form/StatusPill"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
+import { useSession } from "@/services/auth/useSession"
 import {
   addHutangPayment,
   getHutangFull,
   updateHutangPayment,
   deleteHutangPayment,
+  hardDeleteHutang,
 } from "@/services/rentals"
 import type { HutangFull, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
@@ -45,6 +47,9 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
 
+  const { role } = useSession()
+  const isAdmin = role === "admin"
+
   const reload = useCallback(() => {
     return getHutangFull(hutangId).then((res) => setH(res))
   }, [hutangId])
@@ -64,6 +69,28 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
     } catch (e) {
       Alert.alert("Gagal menyimpan pembayaran", e instanceof Error ? e.message : "Coba lagi")
     }
+  }
+
+  const handleHardDelete = () => {
+    Alert.alert(
+      "Hapus Hutang Permanen?",
+      "Hutang ini beserta pembayarannya akan dihapus permanen. Tidak bisa dibatalkan.",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus Permanen",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await hardDeleteHutang(hutangId)
+              navigation.goBack()
+            } catch (e) {
+              Alert.alert("Gagal menghapus hutang", e instanceof Error ? e.message : "Coba lagi")
+            }
+          },
+        },
+      ],
+    )
   }
 
   if (loading) {
@@ -197,6 +224,17 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
           >
             <MaterialIcons name="add" size={20} color={colors.onPrimary} />
             <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Tambah Pembayaran</Text>
+          </TouchableOpacity>
+        )}
+
+        {isAdmin && (
+          <TouchableOpacity
+            style={styles.hardDeleteBtn}
+            onPress={handleHardDelete}
+            activeOpacity={0.85}
+          >
+            <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Hutang Permanen</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -359,5 +397,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: spacing.md,
     ...cardShadow,
+  },
+
+  // Hard delete button (admin only)
+  hardDeleteBtn: {
+    alignItems: "center",
+    borderColor: colors.error,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
+    justifyContent: "center",
+    marginTop: spacing.md,
   },
 })
