@@ -1,6 +1,6 @@
 import type { UserPhotoSlot, RentalPhotoPhase } from "@/services/photos/paths"
 import { buildUserPhotoPath, buildRentalPhotoPath, extFromMime } from "@/services/photos/paths"
-import { uploadPhoto, signPaths } from "@/services/photos/storage"
+import { uploadPhoto, signPaths, removePaths } from "@/services/photos/storage"
 import { uuidv4 } from "@/utils/uuid"
 
 import {
@@ -458,6 +458,66 @@ export async function softDeleteVehicle(id: string): Promise<void> {
     .from("vehicles")
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id)
+  if (error) throw error
+}
+
+// ─── Admin hard-delete (v1.0.1 item 6) ──────────────────────────────────────────
+// All admin-gated in SQL (0016). RPC first; then best-effort owned-photo cleanup —
+// a storage failure leaves orphaned files (tolerable) rather than a live row.
+
+async function collectRentalPhotoPaths(rentalId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("rentals")
+    .select("kondisi_keluar, kondisi_kembali")
+    .eq("id", rentalId)
+    .maybeSingle()
+  if (!data) return []
+  const row = data as Record<string, unknown>
+  const paths: string[] = []
+  for (const key of ["kondisi_keluar", "kondisi_kembali"] as const) {
+    const k = row[key] as { photos?: { path?: string }[] } | null
+    for (const p of k?.photos ?? []) if (p.path) paths.push(p.path)
+  }
+  return paths
+}
+
+async function collectUserPhotoPaths(userId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from("users")
+    .select("ktp_photo, ktm_photo, profil_photo")
+    .eq("id", userId)
+    .maybeSingle()
+  if (!data) return []
+  const row = data as Record<string, unknown>
+  const paths: string[] = []
+  for (const key of ["ktp_photo", "ktm_photo", "profil_photo"] as const) {
+    const p = row[key] as { path?: string } | null
+    if (p?.path) paths.push(p.path)
+  }
+  return paths
+}
+
+export async function hardDeleteRental(rentalId: string): Promise<void> {
+  const paths = await collectRentalPhotoPaths(rentalId)
+  const { error } = await supabase.rpc("rpc_admin_delete_rental", { p_rental_id: rentalId })
+  if (error) throw error
+  await removePaths(paths).catch(() => {})
+}
+
+export async function hardDeleteHutang(hutangId: string): Promise<void> {
+  const { error } = await supabase.rpc("rpc_admin_delete_hutang", { p_hutang_id: hutangId })
+  if (error) throw error
+}
+
+export async function hardDeleteUser(userId: string): Promise<void> {
+  const paths = await collectUserPhotoPaths(userId)
+  const { error } = await supabase.rpc("rpc_admin_delete_user", { p_user_id: userId })
+  if (error) throw error
+  await removePaths(paths).catch(() => {})
+}
+
+export async function hardDeleteVehicle(vehicleId: string): Promise<void> {
+  const { error } = await supabase.rpc("rpc_admin_delete_vehicle", { p_vehicle_id: vehicleId })
   if (error) throw error
 }
 
