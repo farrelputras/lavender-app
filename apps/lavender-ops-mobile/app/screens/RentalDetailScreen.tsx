@@ -27,6 +27,7 @@ import {
   addPayment,
   updatePayment,
   deletePayment,
+  hardDeleteRental,
 } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
@@ -126,6 +127,29 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
 
   function handleBack() {
     navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] })
+  }
+
+  function handleHardDelete() {
+    Alert.alert(
+      "Hapus Rental Permanen?",
+      "Rental ini beserta pembayaran, biaya, dan hutang terkait akan dihapus permanen. Tidak bisa dibatalkan.",
+      [
+        { text: "Batal", style: "cancel" },
+        {
+          text: "Hapus Permanen",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await hardDeleteRental(rentalId)
+              showToast("Rental dihapus")
+              handleBack()
+            } catch (e) {
+              showToast(e instanceof Error ? e.message : "Gagal menghapus rental")
+            }
+          },
+        },
+      ],
+    )
   }
 
   if (loading) {
@@ -628,6 +652,13 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
           </View>
         </View>
 
+        {isAdmin && (
+          <TouchableOpacity style={styles.hardDeleteBtn} onPress={handleHardDelete} activeOpacity={0.85}>
+            <MaterialIcons name="delete-forever" size={20} color={colors.error} />
+            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Rental Permanen</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={{ height: spacing.xxxl + 64 }} />
       </ScrollView>
 
@@ -798,6 +829,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: spacing.md,
+  },
+  hardDeleteBtn: {
+    alignItems: "center",
+    borderColor: colors.error,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
+    justifyContent: "center",
+    marginTop: spacing.sm,
   },
   infoRow: {
     alignItems: "center",
