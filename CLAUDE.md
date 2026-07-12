@@ -3,14 +3,29 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Status: v1.0.1 shipped ✅
+## Current Status: v1.0.1 shipped ✅ · v1.0.2 designed, not built
 
 **v1.0.1 shipped OTA 2026-07-12** (channel `preview`, no APK / no `version` bump) — completed-rental
 "Kembali ke Beranda" bar, no payment/tarif pre-fill, pinch-to-zoom `PhotoViewer`, and admin-only
 hard-delete (migrations `0016` + `0017`). See `docs/feedback-and-improvements.md` § v1.0.1.
 
-Only open v1.0.1 item: **#5 text sizes** — deferred, awaiting mom's specific pain points.
-Known debt carried forward is logged under "Known technical debt" in the feedback doc.
+**v1.0.2 is next** — designed 2026-07-12, no code written yet. Theme: *polish + honesty*.
+Pure OTA: **no migration, no native dep, no APK, no `version` bump.** Spec: `docs/releases/v1-0-2.md`.
+
+> ⚠️ **Do not bump `version` in `app.json` for v1.0.2.** `runtimeVersion` policy is `appVersion`, so
+> bumping it would target OTA at runtime `1.0.2` while mom's installed APK is `1.0.0` — she would
+> silently stop receiving updates. The displayed version comes from a JS constant instead
+> (`app/config/release.ts`).
+
+### Where work lives (docs split 2026-07-12)
+
+| Doc | Contains |
+|---|---|
+| `docs/feedback-and-improvements.md` | **Closed history** — v1.0 Phase 7 + v1.0.1 only |
+| `docs/releases/v1-0-2.md` | The open release. New feedback from mom goes here. |
+| `docs/releases/v1-0-3.md` | Scoping note — editing an active rental (needs its own design) |
+| `docs/releases/v1-1.md` | Undesigned — replacing Supabase with a bespoke backend |
+| `docs/known-technical-debt.md` | Standing debt register, triaged per release |
 
 ### v1.0.0 Roadmap (complete)
 
@@ -84,7 +99,9 @@ any code related to:
 | `apps/lavender-ops-mobile/app/theme/` | Ignite theme — import via `useAppTheme()` hook; type screen styles with `ThemedStyle<ViewStyle>` |
 | `apps/lavender-ops-mobile/app/services/rentals/` | Connector layer (async functions, types, seed data) |
 | `docs/02-demo-development.md` | Connector-contract rules, rental math |
-| `docs/feedback-and-improvements.md` | Running feedback log + per-release outcomes + known debt |
+| `docs/releases/` | Per-release specs — `v1-0-2.md` is the open one |
+| `docs/known-technical-debt.md` | Standing debt register (cross-release) |
+| `docs/feedback-and-improvements.md` | Closed history: v1.0 Phase 7 + v1.0.1 outcomes |
 | `docs/verification/` | SQL scripts that verify live DB behavior (RLS, `SECURITY DEFINER` RPCs) — read its README before writing a new one |
 | `docs/superpowers/specs/2026-05-26-v1-roadmap-design.md` | Full v1.0.0 roadmap and phase ordering |
 

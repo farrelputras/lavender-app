@@ -1,8 +1,22 @@
-# Feedback & Improvements
+# Feedback & Improvements — v1.0 and v1.0.1
 
-Running log of feedback (primarily from mom's real-world use) and improvement
-items. Each entry records the resolution detail, target phase, and status, so the
-relevant implementation plan can pull from a single source as it accumulates.
+> **This document is now a closed historical record.** It covers **v1.0 (Phase 7)** and **v1.0.1**,
+> both shipped. Nothing here is open work.
+>
+> Current and future work lives elsewhere — split out on 2026-07-12 because this file had grown into
+> four different kinds of thing at once:
+>
+> | Looking for | Go to |
+> |---|---|
+> | The release being worked on now | `docs/releases/v1-0-2.md` |
+> | Editing an active rental (scoping note) | `docs/releases/v1-0-3.md` |
+> | Replacing Supabase with our own backend | `docs/releases/v1-1.md` |
+> | Standing debt, triaged per release | `docs/known-technical-debt.md` |
+>
+> **New feedback from mom goes into the open release doc**, not here.
+
+Log of feedback (primarily from mom's real-world use) and improvement items. Each entry records the
+resolution detail, target phase, and status.
 
 Phase definitions live in the roadmap:
 `docs/superpowers/specs/2026-05-26-v1-roadmap-design.md`. Most v1.0 feedback is
@@ -169,8 +183,10 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 - **Detail:** Deferred — awaiting mom's specific "too small / too large" spots. Once
   gathered, likely a small pass on the smallest `labelMd`/hint tiers in `theme/tokens.ts`,
   or enabling `allowFontScaling` to respect the OS accessibility setting.
-- **Status:** open — **did not ship in v1.0.1** (deliberately deferred; the only v1.0.1 item
-  left open, still awaiting mom's specific pain points)
+- **Status:** did not ship in v1.0.1 (deliberately deferred). **Carried over to v1.0.2 —
+  see `docs/releases/v1-0-2.md` item 1**, which records a finding that may reframe it:
+  `allowFontScaling` is unset app-wide, so RN's default (`true`) already applies and Android's
+  system font slider resizes the app today.
 
 ### 6. Add admin-specific operations
 - **Detail:** Admin-only (Farrel) hard-delete across entities, **block-if-referenced**
@@ -217,31 +233,10 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   style so it can't be confused with the reversible soft-delete sitting next to it.
 - **Status:** done (v1.0.1 Phase 3 — shipped OTA 2026-07-12)
 
-## Known technical debt (carried forward)
+---
 
-### 1. ~24 connectors still throw postgrest's raw error object
-- **Detail:** v1.0.1 fixed this in the four `hardDelete*` connectors only (see v1.0.1 item 6).
-  Every *other* `if (error) throw error` site in `app/services/rentals/index.ts` still throws a
-  **plain object, not an `Error`** — so any caller that checks `e instanceof Error` silently
-  loses the database's message and falls back to a generic string. Nothing is visibly broken
-  today, because those paths rarely error and their callers mostly don't branch on the message.
-- **Fix:** either a repo-wide sweep to `throw new Error(error.message)`, or — cleaner — enable
-  `.throwOnError()` on the client in `app/services/supabase/client.ts` so postgrest wraps errors
-  in a real `PostgrestError` itself, and drop the manual throws. The latter changes behavior
-  everywhere at once and needs its own review.
-- **Status:** open (candidate for v1.0.2)
+## Moved out of this document (2026-07-12)
 
-### 2. No re-entrancy guard / in-flight state on destructive actions
-- **Detail:** The hard-delete confirmations fire an async call with no spinner and no disabled
-  state. The native `Alert` dismisses on tap so a double-fire is not realistically reachable,
-  but on a slow connection the screen sits idle with live buttons and no feedback. On airplane
-  mode, nothing happens at all (React Native's `fetch` never times out).
-- **Status:** open (low priority — admin-only surface)
-
-## v1.1
-- **Status:** open
-- **Due:** TBD
-
-### 1. Rather than using supabase library, make seperate backend service
-- **Detail:** TBD (need to be discussed critically because this is a major architectural change)
-- **Status:** open
+- **Known technical debt** → `docs/known-technical-debt.md` (both items still open, plus a third
+  found during the v1.0.2 audit)
+- **v1.1 — separate backend service** → `docs/releases/v1-1.md`
