@@ -6,9 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
   Alert,
-  ToastAndroid,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation } from "@react-navigation/native"
@@ -25,14 +23,6 @@ import { colors, textStyles, borderRadius, spacing, cardShadow } from "@/theme/t
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
 
 export function BerandaScreen() {
   const navigation = useNavigation<BerandaNavProp>()

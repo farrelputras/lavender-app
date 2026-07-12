@@ -7,8 +7,6 @@ import {
   TextInput,
   ScrollView,
   Platform,
-  Alert,
-  ToastAndroid,
   ActivityIndicator,
   KeyboardAvoidingView,
 } from "react-native"
@@ -38,17 +36,10 @@ import {
   computeFuelAdjustment,
   computeReturnTotal,
 } from "@/utils/rentalMath"
+import { showToast } from "@/utils/showToast"
 import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
 
 function parseRupiahInput(raw: string): number {
   const cleaned = raw.replace(/[^\d-]/g, "")

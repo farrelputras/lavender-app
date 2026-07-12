@@ -8,9 +8,6 @@ import {
   FlatList,
   SectionList,
   ActivityIndicator,
-  Platform,
-  Alert,
-  ToastAndroid,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -20,16 +17,9 @@ import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, initialsFromName } from "@/utils/format"
+import { showToast } from "@/utils/showToast"
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
 
 function groupByFirstLetter(summaries: UserSummary[]): { title: string; data: UserSummary[] }[] {
   const map = new Map<string, UserSummary[]>()

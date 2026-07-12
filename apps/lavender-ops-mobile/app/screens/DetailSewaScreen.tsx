@@ -9,8 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
-  ToastAndroid,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
@@ -39,17 +37,10 @@ import {
   computeTotalBill,
   formatPaket,
 } from "@/utils/rentalMath"
+import { showToast } from "@/utils/showToast"
 import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
 
 function parseRupiahInput(raw: string): number {
   const n = parseInt(raw.replace(/\D/g, ""), 10)

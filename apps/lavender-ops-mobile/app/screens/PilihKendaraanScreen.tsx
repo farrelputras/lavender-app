@@ -6,9 +6,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  Platform,
-  Alert,
-  ToastAndroid,
   ScrollView,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
@@ -20,16 +17,7 @@ import { getUserSummary, getVehicleSummaries } from "@/services/rentals"
 import type { UserSummary, VehicleSummary, VehicleCategory } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { initialsFromName } from "@/utils/format"
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
+import { showToast } from "@/utils/showToast"
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

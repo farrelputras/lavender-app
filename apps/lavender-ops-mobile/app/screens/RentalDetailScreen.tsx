@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
-  ToastAndroid,
   Linking,
 } from "react-native"
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
@@ -40,14 +39,7 @@ import {
   toWaNumber,
 } from "@/utils/format"
 import { sumPayments, formatPaket, isOverdue, hoursLate } from "@/utils/rentalMath"
-
-function showToast(msg: string) {
-  if (Platform.OS === "android") {
-    ToastAndroid.show(msg, ToastAndroid.SHORT)
-  } else {
-    Alert.alert("", msg)
-  }
-}
+import { showToast } from "@/utils/showToast"
 
 const JAMINAN_LABELS: Record<string, string> = { KTP: "KTP", KTM: "KTM", LAINNYA: "Lainnya" }
 
