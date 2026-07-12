@@ -358,13 +358,6 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Kondisi Keluar</Text>
-            <TouchableOpacity
-              onPress={() => showToast("Akan segera tersedia")}
-              style={styles.inlineEditBtn}
-            >
-              <MaterialIcons name="edit" size={16} color={colors.primary} />
-              <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
-            </TouchableOpacity>
           </View>
           <View style={styles.card}>
             <View style={styles.infoRow}>
@@ -625,13 +618,6 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
-            <TouchableOpacity
-              onPress={() => showToast("Akan segera tersedia")}
-              style={styles.inlineEditBtn}
-            >
-              <MaterialIcons name="edit" size={16} color={colors.primary} />
-              <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
-            </TouchableOpacity>
           </View>
           <View style={styles.card}>
             <View style={styles.insetBlock}>
@@ -844,11 +830,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     paddingVertical: spacing.xs,
-  },
-  inlineEditBtn: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 4,
   },
   insetBlock: {
     backgroundColor: colors.surfaceContainerLow,
