@@ -500,25 +500,25 @@ async function collectUserPhotoPaths(userId: string): Promise<string[]> {
 export async function hardDeleteRental(rentalId: string): Promise<void> {
   const paths = await collectRentalPhotoPaths(rentalId)
   const { error } = await supabase.rpc("rpc_admin_delete_rental", { p_rental_id: rentalId })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || "Gagal menghapus. Coba lagi.")
   await removePaths(paths).catch(() => {})
 }
 
 export async function hardDeleteHutang(hutangId: string): Promise<void> {
   const { error } = await supabase.rpc("rpc_admin_delete_hutang", { p_hutang_id: hutangId })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || "Gagal menghapus. Coba lagi.")
 }
 
 export async function hardDeleteUser(userId: string): Promise<void> {
   const paths = await collectUserPhotoPaths(userId)
   const { error } = await supabase.rpc("rpc_admin_delete_user", { p_user_id: userId })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || "Gagal menghapus. Coba lagi.")
   await removePaths(paths).catch(() => {})
 }
 
 export async function hardDeleteVehicle(vehicleId: string): Promise<void> {
   const { error } = await supabase.rpc("rpc_admin_delete_vehicle", { p_vehicle_id: vehicleId })
-  if (error) throw new Error(error.message)
+  if (error) throw new Error(error.message || "Gagal menghapus. Coba lagi.")
 }
 
 // ─── Hutang (Phase 5c) ────────────────────────────────────────────────────────

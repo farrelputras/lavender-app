@@ -76,6 +76,20 @@ describe("hardDeleteHutang", () => {
     expect(mockRpc).toHaveBeenCalledWith("rpc_admin_delete_hutang", { p_hutang_id: "h1" })
     expect(mockRemovePaths).not.toHaveBeenCalled()
   })
+
+  it("throws a real Error carrying the RPC's message when the RPC errors", async () => {
+    mockRpc.mockResolvedValue({
+      error: { message: "unauthorized", details: "", hint: "", code: "42501" },
+    })
+    let caught: unknown
+    try {
+      await hardDeleteHutang("h1")
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toBe("unauthorized")
+  })
 })
 
 describe("hardDeleteUser", () => {
@@ -113,5 +127,24 @@ describe("hardDeleteVehicle", () => {
     await hardDeleteVehicle("v1")
     expect(mockRpc).toHaveBeenCalledWith("rpc_admin_delete_vehicle", { p_vehicle_id: "v1" })
     expect(mockRemovePaths).not.toHaveBeenCalled()
+  })
+
+  it("throws a real Error carrying the RPC's message when the RPC errors", async () => {
+    mockRpc.mockResolvedValue({
+      error: {
+        message: "Tidak bisa dihapus: masih ada rental terkait",
+        details: "",
+        hint: "",
+        code: "P0001",
+      },
+    })
+    let caught: unknown
+    try {
+      await hardDeleteVehicle("v1")
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toBe("Tidak bisa dihapus: masih ada rental terkait")
   })
 })

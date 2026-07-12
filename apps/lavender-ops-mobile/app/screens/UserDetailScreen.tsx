@@ -267,8 +267,8 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
               onPress={handleHardDelete}
               activeOpacity={0.85}
             >
-              <MaterialIcons name="delete-forever" size={20} color="#FFFFFF" />
-              <Text style={[textStyles.labelLg, { color: "#FFFFFF" }]}>Hapus Permanen</Text>
+              <MaterialIcons name="delete-forever" size={20} color={colors.onError} />
+              <Text style={[textStyles.labelLg, { color: colors.onError }]}>Hapus Permanen</Text>
             </TouchableOpacity>
           )}
         </View>
