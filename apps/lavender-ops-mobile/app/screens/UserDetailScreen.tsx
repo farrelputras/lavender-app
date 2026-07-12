@@ -263,12 +263,12 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
           </TouchableOpacity>
           {isAdmin && (
             <TouchableOpacity
-              style={styles.deleteBtn}
+              style={styles.hardDeleteBtn}
               onPress={handleHardDelete}
               activeOpacity={0.85}
             >
-              <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-              <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Permanen</Text>
+              <MaterialIcons name="delete-forever" size={20} color="#FFFFFF" />
+              <Text style={[textStyles.labelLg, { color: "#FFFFFF" }]}>Hapus Permanen</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -411,6 +411,15 @@ const styles = StyleSheet.create({
     borderColor: colors.error,
     borderRadius: 999,
     borderWidth: 2,
+    flexDirection: "row",
+    gap: spacing.sm,
+    height: 52,
+    justifyContent: "center",
+  },
+  hardDeleteBtn: {
+    alignItems: "center",
+    backgroundColor: colors.error,
+    borderRadius: 999,
     flexDirection: "row",
     gap: spacing.sm,
     height: 52,

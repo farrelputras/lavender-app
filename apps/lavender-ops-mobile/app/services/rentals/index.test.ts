@@ -47,10 +47,19 @@ describe("hardDeleteRental", () => {
     ])
   })
 
-  it("throws and does NOT remove photos when the RPC errors", async () => {
+  it("throws a real Error carrying the RPC's message and does NOT remove photos when the RPC errors", async () => {
     mockNextRow = rentalRow
-    mockRpc.mockResolvedValue({ error: new Error("unauthorized") })
-    await expect(hardDeleteRental("r1")).rejects.toThrow()
+    mockRpc.mockResolvedValue({
+      error: { message: "unauthorized", details: "", hint: "", code: "42501" },
+    })
+    let caught: unknown
+    try {
+      await hardDeleteRental("r1")
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toBe("unauthorized")
     expect(mockRemovePaths).not.toHaveBeenCalled()
   })
 
@@ -77,12 +86,24 @@ describe("hardDeleteUser", () => {
     expect(mockRemovePaths).toHaveBeenCalledWith(["users/u1/ktp/a.jpg", "users/u1/profil/c.jpg"])
   })
 
-  it("rethrows a block-if-referenced error and skips removal", async () => {
+  it("rethrows a block-if-referenced error as a real Error and skips removal", async () => {
     mockNextRow = userRow
     mockRpc.mockResolvedValue({
-      error: new Error("Tidak bisa dihapus: masih ada rental/hutang terkait"),
+      error: {
+        message: "Tidak bisa dihapus: masih ada rental/hutang terkait",
+        details: "",
+        hint: "",
+        code: "P0001",
+      },
     })
-    await expect(hardDeleteUser("u1")).rejects.toThrow("Tidak bisa dihapus")
+    let caught: unknown
+    try {
+      await hardDeleteUser("u1")
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).message).toBe("Tidak bisa dihapus: masih ada rental/hutang terkait")
     expect(mockRemovePaths).not.toHaveBeenCalled()
   })
 })
