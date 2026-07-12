@@ -130,9 +130,12 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
   }
 
   function handleHardDelete() {
+    const namaPenyewa = user?.name ?? "—"
+    const plat = vehicle?.plate ?? "—"
+    const tanggalMulai = rental ? formatHeaderDate(rental.startAt) : "—"
     Alert.alert(
       "Hapus Rental Permanen?",
-      "Rental ini beserta pembayaran, biaya, dan hutang terkait akan dihapus permanen. Tidak bisa dibatalkan.",
+      `Rental ${namaPenyewa} — ${plat} (${tanggalMulai}) beserta pembayaran, biaya, dan hutang terkait akan dihapus permanen. Tidak bisa dibatalkan.`,
       [
         { text: "Batal", style: "cancel" },
         {
@@ -653,7 +656,11 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         </View>
 
         {isAdmin && (
-          <TouchableOpacity style={styles.hardDeleteBtn} onPress={handleHardDelete} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.hardDeleteBtn}
+            onPress={handleHardDelete}
+            activeOpacity={0.85}
+          >
             <MaterialIcons name="delete-forever" size={20} color={colors.error} />
             <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Rental Permanen</Text>
           </TouchableOpacity>

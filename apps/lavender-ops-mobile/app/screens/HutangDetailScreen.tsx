@@ -72,9 +72,11 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
   }
 
   const handleHardDelete = () => {
+    const namaPenyewa = h?.userName ?? "—"
+    const sisaHutang = h ? formatRupiah(h.sisa) : "—"
     Alert.alert(
       "Hapus Hutang Permanen?",
-      "Hutang ini beserta pembayarannya akan dihapus permanen. Tidak bisa dibatalkan.",
+      `Hutang ${namaPenyewa} sebesar ${sisaHutang} beserta pembayarannya akan dihapus permanen. Tidak bisa dibatalkan.`,
       [
         { text: "Batal", style: "cancel" },
         {
