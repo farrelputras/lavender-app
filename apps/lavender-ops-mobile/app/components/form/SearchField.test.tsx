@@ -7,9 +7,9 @@ import { ThemeProvider } from "@/theme/context"
 import { SearchField } from "./SearchField"
 
 describe("SearchField", () => {
-  it("calls onFocus when the input is focused", () => {
+  it("forwards onFocus to the underlying TextInput", () => {
     const onFocus = jest.fn()
-    const { getByPlaceholderText } = render(
+    const { UNSAFE_getByType } = render(
       <ThemeProvider>
         <SearchField
           value=""
@@ -20,9 +20,11 @@ describe("SearchField", () => {
       </ThemeProvider>,
     )
 
-    fireEvent(getByPlaceholderText("Cari nama..."), "focus")
-
-    expect(onFocus).toHaveBeenCalledTimes(1)
+    // Assert the prop actually reaches the TextInput, rather than firing a "focus" event and
+    // asserting the mock ran. RNTL's fireEvent walks UP the tree for a handler and would find
+    // `onFocus` on the SearchField element itself — so that test passes even when SearchField
+    // drops the prop on the floor. Verified by mutation: it did.
+    expect(UNSAFE_getByType(TextInput).props.onFocus).toBe(onFocus)
   })
 
   it("forwards inputRef to the underlying TextInput so callers can blur it", () => {
