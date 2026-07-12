@@ -16,7 +16,8 @@ export type MainTabParamList = {
 }
 
 export type SewaBaruParamList = {
-  PilihUser: undefined
+  /** `createdUserId` is set when UserForm hands a freshly-created customer back to the rental flow. */
+  PilihUser: { createdUserId?: string } | undefined
   PilihKendaraan: { userId: string }
   DetailSewa: { userId: string; vehicleId: string }
 }
@@ -31,7 +32,9 @@ export type AppStackParamList = {
   Pengembalian: { rentalId: string }
   SewaBaru: NavigatorScreenParams<SewaBaruParamList> | undefined
   UserDetail: { userId: string }
-  UserForm: { mode: "create" } | { mode: "edit"; userId: string }
+  UserForm:
+    | { mode: "create"; returnTo?: "SewaBaru" }
+    | { mode: "edit"; userId: string }
   HutangDetail: { hutangId: string }
   HutangForm: undefined
 }

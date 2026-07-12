@@ -133,12 +133,21 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         ktpPhoto: toPhotoInput(ktpSlot),
         ktmPhoto: toPhotoInput(ktmSlot),
       }
-      if (mode === "create") {
+      if (route.params.mode === "create") {
         const { user, failedPhotoSlots } = await createUser(payload)
         if (failedPhotoSlots.length > 0) {
           Alert.alert("User tersimpan", "Beberapa foto gagal diupload — coba lagi dari Edit.")
         }
-        navigation.replace("UserDetail", { userId: user.id })
+        if (route.params.returnTo === "SewaBaru") {
+          // She came from the rental flow. Hand the new customer back and let her carry on
+          // at step 2 rather than stranding her on a profile page.
+          navigation.navigate("SewaBaru", {
+            screen: "PilihUser",
+            params: { createdUserId: user.id },
+          })
+        } else {
+          navigation.replace("UserDetail", { userId: user.id })
+        }
       } else if (userId) {
         await updateUser(userId, payload)
         navigation.goBack()

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
+import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { SearchField } from "@/components/form/SearchField"
@@ -18,7 +19,6 @@ import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, initialsFromName } from "@/utils/format"
-import { showToast } from "@/utils/showToast"
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -96,13 +96,9 @@ function UserCard({ summary, onPress }: { summary: UserSummary; onPress: () => v
   )
 }
 
-function ListFooter() {
+function ListFooter({ onPress }: { onPress: () => void }) {
   return (
-    <TouchableOpacity
-      style={styles.footerLink}
-      activeOpacity={0.8}
-      onPress={() => showToast("Belum tersedia di demo")}
-    >
+    <TouchableOpacity style={styles.footerLink} activeOpacity={0.8} onPress={onPress}>
       <Text style={[textStyles.labelLg, { color: colors.primary }]}>
         + Tidak ketemu? Daftarkan User Baru
       </Text>
@@ -112,20 +108,34 @@ function ListFooter() {
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
-export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">) {
+export function PilihUserScreen({ navigation, route }: SewaBaruScreenProps<"PilihUser">) {
   const [summaries, setSummaries] = useState<UserSummary[]>([])
   const [query, setQuery] = useState("")
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const searchInputRef = useRef<TextInput>(null)
+  const createdUserId = route.params?.createdUserId
 
+  useFocusEffect(
+    useCallback(() => {
+      getUserSummaries().then((data) => {
+        setSummaries(data)
+        setLoading(false)
+      })
+    }, []),
+  )
+
+  // UserForm hands a freshly-created customer back here. Clear the param before navigating so
+  // that backing out of PilihKendaraan lands on the list, not straight back into PilihKendaraan.
   useEffect(() => {
-    getUserSummaries().then((data) => {
-      setSummaries(data)
-      setLoading(false)
-    })
-  }, [])
+    if (!createdUserId) return
+    navigation.setParams({ createdUserId: undefined })
+    navigation.navigate("PilihKendaraan", { userId: createdUserId })
+  }, [createdUserId, navigation])
+
+  const handleDaftarkanUserBaru = () =>
+    navigation.navigate("UserForm", { mode: "create", returnTo: "SewaBaru" })
 
   const q = query.toLowerCase()
   const filtered = summaries.filter(
@@ -212,7 +222,7 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">
               />
             )}
             contentContainerStyle={styles.listContent}
-            ListFooterComponent={ListFooter}
+            ListFooterComponent={<ListFooter onPress={handleDaftarkanUserBaru} />}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <View style={styles.emptyState}>
@@ -241,7 +251,7 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">
             )}
             stickySectionHeadersEnabled
             contentContainerStyle={styles.listContent}
-            ListFooterComponent={ListFooter}
+            ListFooterComponent={<ListFooter onPress={handleDaftarkanUserBaru} />}
             keyboardShouldPersistTaps="handled"
           />
         )}
