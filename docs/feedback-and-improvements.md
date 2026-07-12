@@ -110,10 +110,14 @@ bundled into **Phase 7 (Feedback polish + QA)**.
 - **Status:** done (Stage B2 — 2026-06-04)
 
 ## v1.0.1
-- **Status:** designed — see `docs/superpowers/specs/2026-07-02-v1-0-1-design.md`
-- **Due:** TBD
-- **Delivery:** OTA (channel `preview`) — no APK rebuild. Migration `0016` (item 6) is
-  applied to Supabase directly.
+- **Status:** ✅ **done — shipped OTA 2026-07-12** (channel `preview`, no APK / no `version` bump)
+- **Design:** `docs/superpowers/specs/2026-07-02-v1-0-1-design.md`
+- **Plan:** `docs/superpowers/plans/2026-07-02-v1-0-1-plan.md`
+- **Shipped:** items 2, 3a, 3b, 4, 6. Item 1 closed (not needed); item 5 deferred.
+- **Migrations:** `0016_admin_hard_delete` (4 admin RPCs) and `0017_storage_delete_policy`
+  (DELETE policy on the photo bucket — see item 6's "Found during implementation").
+- **Verification:** 19 suites / 80 tests green; migration 0016 behaviorally verified against
+  production (`docs/verification/task-3.4-admin-hard-delete.sql`).
 
 ### 1. When opening camera, default to main camera instead of selfie camera
 - **Detail:** TBD
@@ -125,7 +129,9 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   back is the top-left arrow. Add a mirror bottom bar for the completed state with a
   full-width **"Kembali ke Beranda"** button calling the existing `handleBack()`
   (`navigation.reset` → MainTabs).
-- **Status:** designed (v1.0.1) — see design doc
+- **Resolution:** Mirror bottom bar added for `status === "COMPLETED"`, reusing the existing
+  `bottomBar` container and `handleBack()`. No new nav logic.
+- **Status:** done (v1.0.1 Phase 1 — shipped OTA 2026-07-12)
 
 ### 3. Never pre-fill the following fields
 - **Detail:** To make mom aware, never pre-fill these fields:
@@ -137,7 +143,14 @@ bundled into **Phase 7 (Feedback polish + QA)**.
     the silent empty→default fallback, and any auto-seed of the field. An empty tarif is
     invalid (existing "Tarif harus lebih dari 0" guard); Total reads Rp 0 until mom types
     the number.
-- **Status:** designed (v1.0.1) — see design doc
+- **Resolution (3a):** `defaultAmount` dropped on the *add* path at **four** callers, not the
+  three the design named — `DetailSewaScreen` was a fourth add-payment caller that also
+  pre-filled. Edit path untouched (it prefills from `editingPayment`, which is the record).
+- **Resolution (3b):** `DetailSewaScreen` tarif is now empty on open with a neutral
+  "Masukkan tarif" placeholder; the computed value shows as a read-only `Saran tarif: Rp X`
+  line. Silent empty→`defaultTarif` fallback removed (`tarifValue` is now `0` when empty),
+  auto-seed effect and the unused `tarifChanged` deleted. Total reads Rp 0 until mom types.
+- **Status:** done (v1.0.1 Phase 1 — shipped OTA 2026-07-12)
 
 ### 4. Zoom in and show the picture once clicked
 - **Detail:** `PhotoThumb` has no tap handler today. Add a shared `PhotoViewer` full-screen
@@ -145,13 +158,19 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   `react-native-gesture-handler` + `react-native-reanimated` (OTA-safe, no native rebuild).
   Wire tap on `RentalDetailScreen` (Kondisi Keluar/Kembali photos) and `UserDetailScreen`
   (KTP/KTM/profil).
-- **Status:** designed (v1.0.1) — see design doc
+- **Resolution:** New `app/components/form/PhotoViewer.tsx` — full-screen `Modal`, pinch +
+  pan + double-tap-to-zoom, ✕ to close. Optional `onPress` threaded through `_PhotoThumb` →
+  `PhotoRow` (`onPhotoPress`) and `PhotoSlot` (`onPress`), all back-compatible. Wired on
+  `RentalDetailScreen` (Kondisi photos) and `UserDetailScreen` (KTP/KTM/profil). Required a
+  `react-native-reanimated/mock` registration in `test/setup.ts` for the suite to render it.
+- **Status:** done (v1.0.1 Phase 2 — shipped OTA 2026-07-12)
 
 ### 5. Adjust some text sizes
 - **Detail:** Deferred — awaiting mom's specific "too small / too large" spots. Once
   gathered, likely a small pass on the smallest `labelMd`/hint tiers in `theme/tokens.ts`,
   or enabling `allowFontScaling` to respect the OS accessibility setting.
-- **Status:** open (deferred — awaiting mom's pain points)
+- **Status:** open — **did not ship in v1.0.1** (deliberately deferred; the only v1.0.1 item
+  left open, still awaiting mom's specific pain points)
 
 ### 6. Add admin-specific operations
 - **Detail:** Admin-only (Farrel) hard-delete across entities, **block-if-referenced**
@@ -163,7 +182,61 @@ bundled into **Phase 7 (Feedback polish + QA)**.
   `hardDeleteUser` / `hardDeleteVehicle`) that also clean up owned storage photos.
   Admin-only (`isAdmin`) destructive actions on the four detail screens, behind a
   confirmation.
-- **Status:** designed (v1.0.1) — see design doc
+- **Resolution:** Migration `0016` shipped the four `SECURITY DEFINER` RPCs as designed and is
+  live on production, **behaviorally verified** end-to-end (auth gate, rental cascade + vehicle
+  release, both block-if-referenced paths) — script kept at
+  `docs/verification/task-3.4-admin-hard-delete.sql`. Four locked connectors added, plus a
+  `removePaths` storage helper. Admin-only "Hapus … Permanen" actions on `RentalDetailScreen`,
+  `HutangDetailScreen`, `UserDetailScreen`. **Vehicle hard-delete ships as RPC + connector only,
+  no UI** — there is no vehicle detail screen (`KendaraanScreen` is a stub); it's a one-screen
+  wire-up whenever that screen exists.
+- **Found during implementation — two defects the design had reasoned wrong:**
+  1. **The real DB error never reached the operator.** The design assumed a failed RPC throws an
+     `Error`. It does not: the Supabase client isn't configured with `.throwOnError()`, so
+     `supabase.rpc()` returns its error as a **plain object** (`{message, details, hint, code}`).
+     Every screen's `e instanceof Error ? e.message : "…"` was therefore always false, and the
+     Postgres message was always discarded. This hit hardest on `hardDeleteUser`, where
+     block-if-referenced is the *dominant* path — the admin saw only a generic "Coba lagi" and
+     could never learn *why* a delete was refused. Fixed at the connector layer (`throw new
+     Error(error.message || …)`), which repairs all three screens at once. The unit tests had
+     hidden it by mocking `error: new Error(...)` — a shape Supabase never produces; they now
+     mock the real plain-object shape and fail if the connector regresses.
+  2. **Photo cleanup was a silent no-op.** The design concluded that because the RPCs are
+     `SECURITY DEFINER` (bypassing RLS), "no new DELETE RLS policies are required." That is true
+     for the *tables* but **not for storage** — `removePaths()` is a client-side call from the
+     app, not code inside the definer function, so it is subject to RLS. `storage.objects` had
+     only INSERT and SELECT policies (`0006_rls.sql` even states hard DELETE is denied
+     everywhere), so the removal was blocked and its error swallowed by the deliberate
+     `.catch(() => {})`. Hard-deleting a customer erased the row but left their **KTP/KTM ID
+     scans in the bucket forever** — a privacy issue, not just housekeeping. Fixed by migration
+     `0017_storage_delete_policy.sql`, granting DELETE on `rental-photos` to the **admin role
+     only** (mom's `ops` role still cannot delete any file).
+- **Also hardened past the plan:** the Rental and Hutang confirmations now *name the record*
+  they will destroy (customer + plate + date; customer + outstanding amount) instead of a
+  generic "Rental ini…", and `UserDetailScreen`'s permanent-delete uses a **filled** destructive
+  style so it can't be confused with the reversible soft-delete sitting next to it.
+- **Status:** done (v1.0.1 Phase 3 — shipped OTA 2026-07-12)
+
+## Known technical debt (carried forward)
+
+### 1. ~24 connectors still throw postgrest's raw error object
+- **Detail:** v1.0.1 fixed this in the four `hardDelete*` connectors only (see v1.0.1 item 6).
+  Every *other* `if (error) throw error` site in `app/services/rentals/index.ts` still throws a
+  **plain object, not an `Error`** — so any caller that checks `e instanceof Error` silently
+  loses the database's message and falls back to a generic string. Nothing is visibly broken
+  today, because those paths rarely error and their callers mostly don't branch on the message.
+- **Fix:** either a repo-wide sweep to `throw new Error(error.message)`, or — cleaner — enable
+  `.throwOnError()` on the client in `app/services/supabase/client.ts` so postgrest wraps errors
+  in a real `PostgrestError` itself, and drop the manual throws. The latter changes behavior
+  everywhere at once and needs its own review.
+- **Status:** open (candidate for v1.0.2)
+
+### 2. No re-entrancy guard / in-flight state on destructive actions
+- **Detail:** The hard-delete confirmations fire an async call with no spinner and no disabled
+  state. The native `Alert` dismisses on tap so a double-fire is not realistically reachable,
+  but on a slow connection the screen sits idle with live buttons and no feedback. On airplane
+  mode, nothing happens at all (React Native's `fetch` never times out).
+- **Status:** open (low priority — admin-only surface)
 
 ## v1.1
 - **Status:** open

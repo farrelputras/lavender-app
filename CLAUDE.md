@@ -3,9 +3,17 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Phase: v1.0.0 Roadmap
+## Current Status: v1.0.1 shipped ✅
 
-Demo is complete and validated. Now executing the v1.0.0 roadmap:
+**v1.0.1 shipped OTA 2026-07-12** (channel `preview`, no APK / no `version` bump) — completed-rental
+"Kembali ke Beranda" bar, no payment/tarif pre-fill, pinch-to-zoom `PhotoViewer`, and admin-only
+hard-delete (migrations `0016` + `0017`). See `docs/feedback-and-improvements.md` § v1.0.1.
+
+Only open v1.0.1 item: **#5 text sizes** — deferred, awaiting mom's specific pain points.
+Known debt carried forward is logged under "Known technical debt" in the feedback doc.
+
+### v1.0.0 Roadmap (complete)
+
 `docs/superpowers/specs/2026-05-26-v1-roadmap-design.md`
 
 | Phase | Work | Status |
@@ -36,6 +44,20 @@ swap a connector-layer-only change.
 4. **UI owns camelCase types.** Define UI types in camelCase; never let Postgres
    row shapes (snake_case) appear in screen code. The connector translates row ↔ UI type.
 
+### ⚠️ Supabase errors are NOT `Error` instances
+
+The client does not use `.throwOnError()`, so `supabase.rpc()` / `.from()` return `error` as a
+**plain object** (`{message, details, hint, code}`). A connector that does `if (error) throw error`
+throws that plain object — and any caller doing `e instanceof Error ? e.message : "…"` gets
+**`false` every time** and silently discards the real Postgres message.
+
+- When a connector's error message must reach the UI, throw a real Error:
+  `if (error) throw new Error(error.message)`. The four `hardDelete*` connectors do this; the
+  ~24 other `throw error` sites in `services/rentals/index.ts` still don't (logged as debt).
+- **Never mock a Supabase failure as `new Error(...)` in tests.** Supabase never produces that
+  shape, so the test proves your belief about the library rather than its behavior — this exact
+  mock hid a real bug through two green reviews. Mock the plain-object shape.
+
 ## Rental Math
 
 The calculation logic in `docs/02` §6 **must be correct**. Consult it before touching
@@ -62,6 +84,8 @@ any code related to:
 | `apps/lavender-ops-mobile/app/theme/` | Ignite theme — import via `useAppTheme()` hook; type screen styles with `ThemedStyle<ViewStyle>` |
 | `apps/lavender-ops-mobile/app/services/rentals/` | Connector layer (async functions, types, seed data) |
 | `docs/02-demo-development.md` | Connector-contract rules, rental math |
+| `docs/feedback-and-improvements.md` | Running feedback log + per-release outcomes + known debt |
+| `docs/verification/` | SQL scripts that verify live DB behavior (RLS, `SECURITY DEFINER` RPCs) — read its README before writing a new one |
 | `docs/superpowers/specs/2026-05-26-v1-roadmap-design.md` | Full v1.0.0 roadmap and phase ordering |
 
 ## Commands
@@ -109,6 +133,13 @@ npx supabase db query --linked -f x.sql     # Run a query (Management API — no
   Only ever use it for a migration you have confirmed is already in the database — otherwise
   `db push` skips it forever and the schema silently drifts.
 - `seed.sql` lives at `supabase/seed.sql` (not in `migrations/`) and runs only on local `db reset`.
+- **`SECURITY DEFINER` only bypasses RLS for what runs *inside* the function.** Any client-side
+  step in the same workflow — a storage call, a follow-up table write — is still an RLS subject and
+  needs its own policy. This was missed once: photo cleanup after a hard-delete ran client-side,
+  `storage.objects` had no DELETE policy, and the removal failed silently (fixed in `0017`).
+- Verifying live DB behavior (RLS, RPC gates, cascades)? See `docs/verification/` — and note that
+  session-level `set_config(..., false)` does **not** survive across statements against this project
+  (pooled connections), so `auth.uid()` impersonation must happen atomically inside one function call.
 
 ## Windows Notes
 
