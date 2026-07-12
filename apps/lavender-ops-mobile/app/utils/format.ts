@@ -79,3 +79,10 @@ export function parseRupiahInput(raw: string): number {
 export function formatDateShort(date: Date): string {
   return `${date.getDate()} ${MONTHS[date.getMonth()]}`
 }
+
+/**
+ * Format date as "12 Juli 2026" — used in the Beranda version footer.
+ */
+export function formatDateLong(date: Date): string {
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
+}

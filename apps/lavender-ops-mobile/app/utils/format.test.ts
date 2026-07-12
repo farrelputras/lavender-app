@@ -1,4 +1,4 @@
-import { parseRupiahInput } from "./format"
+import { formatDateLong, parseRupiahInput } from "./format"
 
 describe("parseRupiahInput", () => {
   it("parses a plain digit string", () => {
@@ -19,5 +19,11 @@ describe("parseRupiahInput", () => {
 
   it("returns 0 for non-numeric garbage", () => {
     expect(parseRupiahInput("abc")).toBe(0)
+  })
+})
+
+describe("formatDateLong", () => {
+  it("formats a date as day, Indonesian month name, and year", () => {
+    expect(formatDateLong(new Date(2026, 6, 12))).toBe("12 Juli 2026")
   })
 })

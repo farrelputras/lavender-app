@@ -15,6 +15,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { StatusPill } from "@/components/form/StatusPill"
+import { VersionFooter } from "@/components/VersionFooter"
 import { useAuth } from "@/context/AuthContext"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
@@ -92,7 +93,6 @@ export function BerandaScreen() {
               {formatHeaderDate(now)} • {formatTime(now)}
             </Text>
           </View>
-          <MaterialIcons name="notifications" size={24} color={colors.onSurfaceVariant} />
         </View>
 
         {/* Quick Actions */}
@@ -261,6 +261,8 @@ export function BerandaScreen() {
             </View>
           </View>
         </View>
+
+        <VersionFooter />
 
         <View style={styles.bottomPadding} />
       </ScrollView>
