@@ -49,14 +49,11 @@ function HutangCard({ h, onPress }: { h: HutangFull; onPress: () => void }) {
             </Text>
           )}
         </View>
-        <Text style={styles.awalText}>Awal {formatRupiah(h.jumlahAwal)}</Text>
+        <View style={styles.cardFooterRight}>
+          <Text style={styles.awalText}>Awal {formatRupiah(h.jumlahAwal)}</Text>
+          <MaterialIcons name="chevron-right" size={20} color={colors.outlineVariant} />
+        </View>
       </View>
-      <MaterialIcons
-        name="chevron-right"
-        size={20}
-        color={colors.outlineVariant}
-        style={styles.chevron}
-      />
     </TouchableOpacity>
   )
 }
@@ -210,10 +207,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  cardFooterRight: { alignItems: "center", flexDirection: "row", gap: spacing.xs },
   sisaLabel: { ...textStyles.labelMd, color: colors.onSurfaceVariant, marginBottom: 2 },
   lunasRow: { alignItems: "center", flexDirection: "row" },
   awalText: { ...textStyles.bodyMd, color: colors.onSurfaceVariant },
-  chevron: { position: "absolute", right: spacing.md, top: spacing.md },
 
   // FAB
   fab: {
