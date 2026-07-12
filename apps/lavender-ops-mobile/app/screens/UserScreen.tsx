@@ -15,6 +15,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { SearchField } from "@/components/form/SearchField"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
@@ -132,27 +133,14 @@ export function UserScreen() {
       </View>
 
       <View style={styles.searchRow}>
-        <View style={styles.searchInputContainer}>
-          <MaterialIcons
-            name="search"
-            size={20}
-            color={colors.secondary}
-            style={{ marginRight: spacing.sm }}
-          />
-          <TextInput
-            ref={searchRef}
-            style={[textStyles.bodyMd, styles.searchInput]}
+        <View style={styles.searchFieldWrap}>
+          <SearchField
             value={query}
             onChangeText={setQuery}
             onFocus={() => setSearchMode(true)}
             placeholder="Cari nama atau panggilan..."
-            placeholderTextColor={colors.outlineVariant}
+            inputRef={searchRef}
           />
-          {searchMode && query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery("")}>
-              <MaterialIcons name="close" size={20} color={colors.secondary} />
-            </TouchableOpacity>
-          )}
         </View>
         {searchMode && (
           <TouchableOpacity
@@ -263,17 +251,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingTop: spacing.xl,
   },
-  searchInputContainer: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 24,
-    flex: 1,
-    flexDirection: "row",
-    height: 48,
-    paddingHorizontal: spacing.md,
-    ...CARD_SHADOW,
-  },
-  searchInput: { color: colors.onSurface, flex: 1, padding: 0 },
+  searchFieldWrap: { flex: 1 },
 
   // Section header (sticky)
   sectionHeader: {

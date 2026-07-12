@@ -1,3 +1,4 @@
+import { Ref } from "react"
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
@@ -7,13 +8,23 @@ export interface SearchFieldProps {
   value: string
   onChangeText: (text: string) => void
   placeholder?: string
+  /** Called when the input gains focus — used by screens that have a "search mode". */
+  onFocus?: () => void
+  /** Forwarded to the underlying TextInput so callers can blur it (e.g. a "Batal" button). */
+  inputRef?: Ref<TextInput>
 }
 
 /**
- * Pill-shaped search input that matches UserScreen's search bar style.
- * Includes a search icon on the left and a clear button when there is text.
+ * Pill-shaped search input — the one search control in the app.
+ * Search icon on the left, clear button on the right once there is text.
  */
-export function SearchField({ value, onChangeText, placeholder = "Cari..." }: SearchFieldProps) {
+export function SearchField({
+  value,
+  onChangeText,
+  placeholder = "Cari...",
+  onFocus,
+  inputRef,
+}: SearchFieldProps) {
   return (
     <View style={styles.container}>
       <MaterialIcons
@@ -23,11 +34,14 @@ export function SearchField({ value, onChangeText, placeholder = "Cari..." }: Se
         style={{ marginRight: spacing.sm }}
       />
       <TextInput
+        ref={inputRef}
         style={[textStyles.bodyMd, styles.input]}
         value={value}
         onChangeText={onChangeText}
+        onFocus={onFocus}
         placeholder={placeholder}
         placeholderTextColor={colors.outlineVariant}
+        returnKeyType="search"
       />
       {value.length > 0 && (
         <TouchableOpacity

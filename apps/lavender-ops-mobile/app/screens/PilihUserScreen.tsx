@@ -12,6 +12,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { SearchField } from "@/components/form/SearchField"
 import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
 import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
@@ -132,8 +133,6 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">
   )
   const sections = groupByFirstLetter(summaries)
 
-  const handleClearQuery = () => setQuery("")
-
   const handleBatal = () => {
     setQuery("")
     setIsSearchMode(false)
@@ -175,31 +174,14 @@ export function PilihUserScreen({ navigation }: SewaBaruScreenProps<"PilihUser">
 
       {/* Search bar */}
       <View style={styles.searchRow}>
-        <View style={styles.searchInputContainer}>
-          <MaterialIcons
-            name="search"
-            size={20}
-            color={colors.onSurfaceVariant}
-            style={{ marginRight: 8 }}
-          />
-          <TextInput
-            ref={searchInputRef}
-            style={[textStyles.bodyMd, styles.searchInput]}
-            placeholder="Cari nama atau panggilan..."
-            placeholderTextColor={colors.onSurfaceVariant}
+        <View style={styles.searchFieldWrap}>
+          <SearchField
             value={query}
             onChangeText={setQuery}
             onFocus={() => setIsSearchMode(true)}
-            returnKeyType="search"
+            placeholder="Cari nama atau panggilan..."
+            inputRef={searchInputRef}
           />
-          {isSearchMode && query.length > 0 && (
-            <TouchableOpacity
-              onPress={handleClearQuery}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
-            </TouchableOpacity>
-          )}
         </View>
         {isSearchMode && (
           <TouchableOpacity onPress={handleBatal}>
@@ -323,20 +305,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
   },
-  searchInputContainer: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 24,
-    flex: 1,
-    flexDirection: "row",
-    height: 48,
-    paddingHorizontal: spacing.md,
-  },
-  searchInput: {
-    color: colors.onSurface,
-    flex: 1,
-    padding: 0,
-  },
+  searchFieldWrap: { flex: 1 },
 
   // Result count
   resultCount: {
