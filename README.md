@@ -1,200 +1,79 @@
 # LAVENDER
 
-Internal mobile operations tool for Mom's vehicle rental business.
+Internal vehicle-rental operations tool for Farrel's mom's business.
 
-**Users:** Mom (primary) + Farrel (admin)
-**Distribution:** APK sideloaded — not on Play Store
-
----
-
-## Stack
-
-- Expo SDK 55 (managed workflow)
-- React Native 0.83 / React 18.3
-- Expo Router 55 (file-based navigation)
-- Supabase (auth + database)
-- EAS Build (APK generation)
-- Expo Updates (OTA JS updates)
+**Users:** Mom (primary, ~50yo) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
 ---
 
-## Setup
+## Where the app lives
 
-### 1. Prerequisites
+The shipping app is **`apps/lavender-ops-mobile/`** — Expo SDK 55 + React Native 0.83 on the
+**Ignite** stack (React Navigation), with Supabase for auth/data and EAS for APK + OTA delivery.
 
-- Node 22 (`node --version` → `v22.x.x`)
-- npm 10+ (`npm --version`)
-- **Windows:** Developer Mode enabled — Settings → For Developers → Developer Mode  
-  (required for npm workspace symlinks)
-- EAS CLI: `npm install -g eas-cli`
-- Expo account: create at [expo.dev](https://expo.dev)
-
-### 2. Install dependencies
-
-```powershell
-npm install
-```
-
-### 3. Configure environment variables
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `.env` and fill in your keys:
-
-```
-EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
-
-Get these from your Supabase project dashboard: **Settings → API**.
-
-### 4. EAS login and project init (first time only)
-
-```powershell
-eas login
-cd apps\mobile
-eas init
-```
-
-After `eas init`, it prints your project UUID. Update these two fields in `apps/mobile/app.json`:
-- `plugins[1][1].username` → your Expo username
-- `updates.url` → `https://u.expo.dev/<YOUR_UUID>`
-- `extra.eas.projectId` → `<YOUR_UUID>` (eas init writes this automatically)
+> An earlier `apps/mobile/` prototype (Expo Router) was fully migrated into
+> `apps/lavender-ops-mobile/` and then removed. The migration record — with a file-by-file source →
+> destination mapping — lives in `docs/superpowers/plans/2026-05-25-ignite-migration.md`, and the
+> old app is recoverable from git history if ever needed.
 
 ---
 
-## Running the dev server
+## Getting started
 
 ```powershell
-cd apps\mobile
-npx expo start
+cd apps/lavender-ops-mobile
+pnpm install
+pnpm run compile   # TypeScript check
+pnpm test          # Jest unit tests
+pnpm run start     # Expo dev server (requires the dev-client APK on device)
 ```
 
-Or from the monorepo root:
+Copy `.env.example` → `.env.local` and fill in the Supabase keys
+(Supabase dashboard → **Settings → API**):
 
-```powershell
-npm run mobile
 ```
-
-Scan the QR code with **Expo Go** on Android to preview the app.  
-Press `a` in the terminal to open on an Android emulator (requires Android Studio + AVD).
+EXPO_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=<anon-key>
+```
 
 ---
 
-## Building an APK
-
-### Preview APK (for Mom and Farrel's phones)
+## Build & ship
 
 ```powershell
-cd apps\mobile
-eas build --profile preview --platform android
+cd apps/lavender-ops-mobile
+pnpm run build:preview             # EAS cloud APK for mom's phone
+pnpm ota:publish --message "..."   # JS/asset OTA to the preview channel
 ```
 
-This runs on EAS cloud servers — no local Android SDK required.
+Mom runs the `preview` APK and picks up OTA updates on launch. When native deps change, bump
+`version` in `app.json` and ship a fresh APK; JS-only changes go out over OTA.
 
-When the build completes, EAS prints a download URL. Download the `.apk`, then:
-
-1. Send to the phone via WhatsApp or email
-2. On the phone: Settings → Install unknown apps → allow your file manager
-3. Open the `.apk` to install
-
-### Development build (connects to your local Metro server)
-
-```powershell
-eas build --profile development --platform android
-```
-
-Install this APK on your phone, start the dev server (`npx expo start`), shake the phone to connect.
+See **`CLAUDE.md`** for the full operational guide — the connector-contract rules, rental math,
+the OTA / `runtimeVersion` model, and the database-migration workflow.
 
 ---
 
-## OTA Updates (JavaScript-only changes)
-
-Push JS/TypeScript changes without a new APK install:
-
-```powershell
-cd apps\mobile
-eas update --branch preview --message "describe what changed"
-```
-
-Phones running the `preview` APK check for updates on launch and apply them in the background.
-
-### When OTA is NOT enough (new APK required)
-
-- Added a new native package (anything requiring `expo prebuild`)
-- Changed native fields in `app.json` (permissions, package name, etc.)
-- Bumped `version` in `app.json` (OTA eligibility is tied to the version)
-
-In these cases: rebuild with `eas build --profile preview`, reinstall the APK.
-
-### Bumping the version
-
-In `apps/mobile/app.json`:
-- Increment `version` (e.g. `0.1.0` → `0.2.0`) for feature releases
-- Increment `android.versionCode` by 1 every time you build an APK (must be strictly increasing)
-
----
-
-## Project structure
+## Repo layout
 
 ```
 lavender-app/
 ├── apps/
-│   └── mobile/
-│       ├── app/                    ← Expo Router file-based routes
-│       │   ├── _layout.tsx         ← root Stack navigator
-│       │   └── (tabs)/             ← bottom tab group
-│       │       ├── _layout.tsx     ← tab bar config
-│       │       ├── index.tsx       ← Beranda
-│       │       ├── penyewaan.tsx
-│       │       ├── user.tsx
-│       │       ├── hutang.tsx
-│       │       └── test.tsx        ← throwaway Supabase test screen
-│       ├── src/
-│       │   ├── lib/supabase.ts     ← Supabase client
-│       │   └── theme/index.ts      ← design tokens
-│       ├── assets/images/          ← icon, splash, adaptive-icon PNGs
-│       ├── app.json
-│       ├── eas.json
-│       ├── metro.config.js         ← monorepo Metro config
-│       └── package.json
+│   └── lavender-ops-mobile/   ← the shipping app (Ignite / React Navigation)
 ├── packages/
-│   └── shared/                     ← future: shared types and business logic
-├── package.json                    ← npm workspaces root
-├── .env.example
+│   └── shared/                ← shared types / business logic (future)
+├── docs/                      ← specs, per-release notes, technical-debt register
+├── CLAUDE.md                  ← operational source of truth
 └── README.md
 ```
 
 ---
 
-## Design tokens
+## Windows notes
 
-Tokens are in `apps/mobile/src/theme/index.ts`. Import anywhere:
-
-```typescript
-import { colors, spacing, typography, borderRadius, tapTargetMin } from '../../src/theme';
-```
-
-Primary color: `#8B7AB8` (warm lavender). All tap targets are minimum 48px height.
-
----
-
-## Deleting the test screen
-
-Once Supabase is confirmed working:
-
-1. Delete `apps/mobile/app/(tabs)/test.tsx`
-2. Remove the `test` entry from the `TABS` array in `apps/mobile/app/(tabs)/_layout.tsx`
-3. Run `npx expo start` — the tab disappears automatically (file-based routing)
-
----
-
-## Windows gotchas
-
-- **Developer Mode** must be on for npm workspace symlinks to work
-- **Long paths**: if you hit 260-char path errors, run as Administrator:  
+- **Developer Mode** must be on — required for workspace symlinks
+  (Settings → For Developers → Developer Mode)
+- **Long paths**: if 260-char errors appear, run as Administrator:
   `reg add "HKLM\SYSTEM\CurrentControlSet\Control\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 1 /f`
-- **`.env` encoding**: save as UTF-8 (not UTF-16 LE). Use VS Code, not Notepad
-- **Watchman**: not available on Windows — Metro uses fs polling (slightly slower, no config needed)
+- Save `.env` files as **UTF-8**, not UTF-16 LE (use VS Code, not Notepad)
+- **Watchman** isn't available on Windows — Metro uses fs polling (slightly slower; no config needed)
