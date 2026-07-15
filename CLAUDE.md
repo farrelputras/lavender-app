@@ -3,29 +3,36 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Status: v1.0.1 shipped ✅ · v1.0.2 designed, not built
+## Current Status: v1.0.2 shipped ✅ · v1.0.3 scoped (needs design)
 
 **v1.0.1 shipped OTA 2026-07-12** (channel `preview`, no APK / no `version` bump) — completed-rental
 "Kembali ke Beranda" bar, no payment/tarif pre-fill, pinch-to-zoom `PhotoViewer`, and admin-only
 hard-delete (migrations `0016` + `0017`). See `docs/feedback-and-improvements.md` § v1.0.1.
 
-**v1.0.2 is next** — designed 2026-07-12, no code written yet. Theme: *polish + honesty*.
-Pure OTA: **no migration, no native dep, no APK, no `version` bump.** Spec: `docs/releases/v1-0-2.md`.
+**v1.0.2 shipped OTA 2026-07-15** (channel `preview`, runtime `1.0.0`, update group `0ce732a0`, no
+APK / no `version` bump) — theme *polish + honesty*: extracted `showToast` to a shared util, fixed the
+Hutang chevron overlapping its status pill, adopted the shared `SearchField` in User/PilihUser, wired
+"Daftarkan User Baru" into the rental flow, removed two dead Edit buttons + the dead notification bell,
+and added the Beranda version footer. Verified green (compile clean, 22 suites / 89 tests). Spec +
+outcome: `docs/releases/v1-0-2.md`.
 
-> ⚠️ **Do not bump `version` in `app.json` for v1.0.2.** `runtimeVersion` policy is `appVersion`, so
-> bumping it would target OTA at runtime `1.0.2` while mom's installed APK is `1.0.0` — she would
-> silently stop receiving updates. The displayed version comes from a JS constant instead
-> (`app/config/release.ts`).
+> ⚠️ **Do not bump `version` in `app.json` for an OTA-only release** (as v1.0.2 and v1.0.1 were).
+> `runtimeVersion` policy is `appVersion`, so bumping it would target OTA at a runtime mom's installed
+> APK does not report (still `1.0.0`) — she would silently stop receiving updates. The displayed
+> version comes from a JS constant instead (`app/config/release.ts`).
 
 ### Where work lives (docs split 2026-07-12)
 
 | Doc | Contains |
 |---|---|
 | `docs/feedback-and-improvements.md` | **Closed history** — v1.0 Phase 7 + v1.0.1 only |
-| `docs/releases/v1-0-2.md` | The open release. New feedback from mom goes here. |
+| `docs/releases/v1-0-2.md` | ✅ Shipped OTA 2026-07-15 (polish + honesty). |
 | `docs/releases/v1-0-3.md` | Scoping note — editing an active rental (needs its own design) |
 | `docs/releases/v1-1.md` | Undesigned — replacing Supabase with a bespoke backend |
 | `docs/known-technical-debt.md` | Standing debt register, triaged per release |
+
+> **Handoff docs:** `/handoff-prompt` output (AI Continuation Documents) goes in `docs/handoff-prompts/`,
+> not the repo root.
 
 ### v1.0.0 Roadmap (complete)
 

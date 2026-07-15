@@ -151,3 +151,46 @@ about what the UI does when it fires.
 
 Worth pairing with #1 — both are changes to the same client, both change error behaviour
 everywhere at once, and both want one careful review rather than two.
+
+---
+
+## 6. Lint is red on `master` — CRLF config noise + ~157 real pre-existing errors
+
+- **Status:** open — **not fixed in v1.0.2.** The config fix would rewrite every file's line endings,
+  including the two protected rental-math screens (#4).
+- **First quantified:** v1.0.2 execution, 2026-07-15
+
+`pnpm run lint` prints ~25,000+ errors on a clean `master` checkout. That is two unrelated problems
+stacked on top of each other:
+
+### a) ~25,000 phantom `Delete ␍` errors (CRLF checkout vs LF lint config)
+
+`git config core.autocrlf` is `true`, so files check out with **CRLF** line endings on Windows.
+There is **no `.gitattributes`** anywhere in the repo, and `.prettierrc` sets no `endOfLine`, so
+Prettier uses its default of `"lf"`. Result: `prettier/prettier` reports `Delete ␍` on **every line
+of every file**. These are not defects — they are a line-ending mismatch between checkout and lint
+config. (Verified this session: no `.gitattributes`; `.prettierrc` = `printWidth`/`semi`/`singleQuote`/
+`trailingComma`/`quoteProps` only, no `endOfLine`.)
+
+- **Do NOT "fix" this by running `eslint --fix` / `prettier --write` across the repo.** That would
+  rewrite the line endings of every file, including `DetailSewaScreen.tsx` and `PengembalianScreen.tsx`
+  (the tariff and fuel/hutang math — #4), producing a massive, unreviewable diff over the most
+  dangerous code in the app.
+- **The correct fix, when done deliberately:** add a `.gitattributes` pinning `* text=auto eol=lf`
+  (or set `endOfLine` in `.prettierrc`), renormalize in a single dedicated commit that touches nothing
+  else, and review it as a whitespace-only change. Its own task, not a ride-along.
+
+### b) ~157 real (non-`prettier`) pre-existing errors
+
+Underneath the phantom noise, `master` carries genuine lint errors — `react-native/no-inline-styles`,
+`no-restricted-imports` (raw `Text`/`TextInput` instead of the wrapped components),
+`react-native/no-color-literals`, `react-native/sort-styles`. All pre-existing; none introduced by
+v1.0.2.
+
+### The gate this forces (v1.0.2 decision, 2026-07-15)
+
+Because "lint green" is unreachable without (a)'s deliberate renormalization, the release gate is
+**"real (non-`prettier`) lint errors must not increase vs `master`"**, with `compile` and `test`
+staying fully green. Counts from the v1.0.2 execution session (not re-counted since): `master` ~164
+real → branch ~157 real — extracting `showToast` removed several `split-platform-components` errors,
+and **zero new real errors were introduced**.
