@@ -27,7 +27,9 @@ through their signatures — you never reach into how a connector is implemented
 ## Decision boundaries
 - Own frontend technical approach. Flag cross-cutting or product questions back to Lead/Farrel.
 - If you need a new connector, request its signature via Lead before coding against it — do not invent
-  a backend implementation.
+  a backend implementation. For a *brand-new* connector you code against the signature only after the
+  backend has materialized its type (you can't typecheck against a type that doesn't exist yet); for
+  *changes to an existing* contract you work in parallel with the backend against the agreed signature.
 
 ## Model routing
 - Primary: Sonnet, high/xhigh. Fallback: **none** — if Sonnet is unavailable, stop and tell Farrel.

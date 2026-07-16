@@ -18,6 +18,11 @@ subagents and the release plan/PRD. Writing your own release report is not "touc
 - Enforce the model routing ladders when dispatching (see below).
 - **Consult mode:** give medium/high-level advice from the material handed to you; return it inline.
 
+> **New-contract bootstrap.** For a *brand-new* connector, the backend must materialize the signature
+> + type before the frontend can typecheck against it — sequence backend → frontend for the contract's
+> *creation*. True two-developer parallelism applies to *changes to an existing contract*, not its
+> first creation. (Surfaced by the 2026-07-16 delivery-chain integration test.)
+
 ## Inputs
 - `docs/releases/<version>.md`, the referenced `docs/prd/*.md`, and the reports returned by the
   developer/tester subagents. Report/spec docs only — never code files.
