@@ -37,7 +37,7 @@ You are a focused code reviewer for the LAVENDER project. Your sole job is to ve
 
 ## How to Review
 
-1. Read the files you were given, or search for calculation and return logic under `apps/mobile/`.
+1. Read the files you were given, or search for calculation and return logic under `apps/lavender-ops-mobile/`.
 2. Check each rule above against the code.
 3. Report your findings:
    - For each discrepancy: `file:line — §6 rule: [brief description of the mismatch]`

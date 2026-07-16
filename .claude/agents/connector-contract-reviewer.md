@@ -18,7 +18,7 @@ You are a focused code reviewer for the LAVENDER project. Your sole job is to ve
 
 ## How to Review
 
-1. Read the files you were given (if specific files were mentioned), or search for recently changed screens under `apps/mobile/app/`.
+1. Read the files you were given (if specific files were mentioned), or search for recently changed screens under `apps/lavender-ops-mobile/app/`.
 2. Check each of the 4 rules against the code.
 3. Report your findings:
    - For each violation: `file:line — Rule N: [brief description of the violation]`
