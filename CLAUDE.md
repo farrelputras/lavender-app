@@ -21,6 +21,19 @@ outcome: `docs/releases/v1-0-2.md`.
 > APK does not report (still `1.0.0`) — she would silently stop receiving updates. The displayed
 > version comes from a JS constant instead (`app/config/release.ts`).
 
+### Agent System (built 2026-07-16)
+
+Role-based delivery agents + workflow. Canonical playbooks: `docs/agents/` (see its `README.md`).
+Roles: `/product`, `/pm`, `/lead` (session **skills** — run in your session, set the model to match)
+and `product`/`pm`/`lead`/`developer-backend`/`developer-frontend`/`tester` (**subagents**, models
+pinned in `.claude/agents/`). Files are the handoff contract between role-sessions:
+`docs/prd/` (PRDs) → `docs/releases/` (release plans) → `docs/reports/` (release + test reports).
+Design + plan: `docs/superpowers/{specs,plans}/2026-07-16-agent-system*.md`.
+
+> New `.claude/agents` files register only on **session restart** (skills register live). `.claude/`
+> is gitignored except `agents/` + `skills/`. Effort is **not** a frontmatter key — set session effort
+> for skills; subagents run at their model default.
+
 ### Where work lives (docs split 2026-07-12)
 
 | Doc | Contains |
