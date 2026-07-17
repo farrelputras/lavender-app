@@ -28,6 +28,9 @@ Roles: `/product`, `/pm`, `/lead` (session **skills** — run in your session, s
 and `product`/`pm`/`lead`/`developer-backend`/`developer-frontend`/`tester` (**subagents**, models
 pinned in `.claude/agents/`). Files are the handoff contract between role-sessions:
 `docs/prd/` (PRDs) → `docs/releases/` (release plans) → `docs/reports/` (release + test reports).
+`/lead` runs gated: it writes its pre-execution state + dispatch plan into the release report and
+**halts for Farrel's approval before dispatching any subagent**, then fills in the post-execution
+sections after.
 Design + plan: `docs/superpowers/{specs,plans}/2026-07-16-agent-system*.md`.
 **Verified end-to-end + merged to master 2026-07-16:** the full delivery chain was run once on a
 throwaway item (`/lead` brokering a connector signature → `developer-backend` + `developer-frontend`

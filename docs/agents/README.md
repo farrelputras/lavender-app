@@ -12,6 +12,9 @@ Role-based agents + workflow for LAVENDER. Design: `docs/superpowers/specs/2026-
   talk to you mid-run, message each other, or spawn subagents.
 - **Files are the contract between role-sessions:**
   `docs/prd/<slug>.md` → `docs/releases/<version>.md` → `docs/reports/<version>.md`.
+- **The lead halts for approval before executing.** `/lead` writes the pre-execution state + dispatch
+  plan into `docs/reports/<version>.md`, hands it to Farrel, and dispatches no subagent until he
+  approves; the post-execution sections are filled in afterward.
 
 ## Usage
 

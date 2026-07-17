@@ -137,7 +137,9 @@ which has no math surface.
 
 ## 5. Offline saves hang forever
 
-- **Status:** open — **excluded from v1.0.2** (client-config change; blast radius comparable to #1)
+- **Status:** **scheduled into v1.0.3** (2026-07-18, PM) as a ride-along beside PRD-1 — the new
+  handover save inherits this hang, and #5 completes PRD-1 BR-7's offline case. **Strike this item when
+  v1.0.3 ships.** (Was: excluded from v1.0.2 — client-config change; blast radius comparable to #1.)
 - **First found:** noted alongside #2 in v1.0.1; stated separately here on 2026-07-12
 
 React Native's `fetch` **never times out.** With no connection, a save doesn't fail — it simply never
@@ -194,3 +196,37 @@ Because "lint green" is unreachable without (a)'s deliberate renormalization, th
 staying fully green. Counts from the v1.0.2 execution session (not re-counted since): `master` ~164
 real → branch ~157 real — extracting `showToast` removed several `split-platform-components` errors,
 and **zero new real errors were introduced**.
+
+---
+
+## 7. Dead Ignite `services/api` demo folder — owned by the v1.1 backend swap, not now
+
+- **Status:** open — **parked for v1.1** (PRD-3). Not scheduled; no user-facing or urgency backing.
+- **First raised:** 2026-07-17, `/lead` advisory session (Farrel)
+
+`app/services/api/` is stock Ignite boilerplate: the apisauce `Api` class fetching the React Native
+Radio podcast RSS feed (`getEpisodes()`, `EpisodeItem`, `ApiFeedResponse`, `simplecast.com`). Its only
+consumers live under `ignite/demo-files/`; **nothing in `app/` imports it.** The `apisauce` dependency
+exists solely to feed this demo path.
+
+It is *not* the same layer as `app/services/rentals/` — that is the **Supabase connector seam** (the
+`docs/02` §3 contract), which every screen imports and which is deliberately organised per domain.
+Folding the connectors into `services/api` was considered and **rejected**: it would put Supabase-client
+code into an HTTP/apisauce-named folder, change ~15 screen imports for zero behaviour, and erode the
+one boundary the architecture most wants to keep stable.
+
+**Why v1.1 owns this, not now.** The v1.1 bespoke backend (PRD-3) will most likely be a **separate repo
+or a sibling `apps/backend` workspace on its own deployment** — not code inside the mobile app. That
+means the mobile app *will* need a real HTTP api-call service to reach it. So `services/api` is best
+understood as the **empty skeleton of that future mobile HTTP client**, not a mislocated folder today.
+When v1.1 lands, the connectors in `services/rentals` keep their signatures and call this HTTP client
+underneath; until then the folder is inert.
+
+**Decision (Farrel, this session):** leave it. When v1.1 starts, either delete `services/api` + drop
+`apisauce` and build the client fresh, or repurpose the folder as that client. No action before then.
+
+---
+
+> **Note on `services/api` vs `services/rentals`:** these are two different layers, not a naming
+> mistake. `rentals/` is the Supabase **connector seam** (stays); `api/` is dead demo scaffolding that
+> becomes the mobile app's **HTTP client to the v1.1 backend** (see #7). Don't merge them.
