@@ -57,3 +57,26 @@ Uses disposable fixtures tagged `TEST_TASK34`, self-cleans, and ends with a zero
 
 Post-run hygiene confirmed independently: `0` leftover `_test34_*` functions, `4`
 `rpc_admin_delete_*` functions present, `0` `TEST_TASK34` rows across all six tables.
+
+### `v1-0-3-rpc-auth-gate-hardening.sql`
+
+Verifies migration `20260720103317_rpc_auth_gate_hardening.sql` — the NULL-safe guard
+conversion + `REVOKE`/`GRANT` pass applied to the nine pre-existing `SECURITY DEFINER` RPCs
+(`rpc_get_dashboard_summary`, `rpc_create_rental`, `rpc_close_rental`, `rpc_update_payment`,
+`rpc_delete_payment`, `rpc_admin_delete_rental`/`_hutang`/`_user`/`_vehicle`), plus the
+`REVOKE`-only closure of `recompute_rental_hutang`.
+
+Uses disposable fixtures tagged `TEST_V103H`, self-cleans, ends with a zero-row sweep.
+
+**STATUS: AUTHORED, NOT YET RUN** — the migration has not been pushed
+(`npx supabase db push` is a separate, Farrel-gated step). Every privilege-gate assertion in
+this script will fail against the remote today, since the remote still carries the
+pre-hardening grants. Run section by section immediately after the push and record the
+per-section result here (mirroring `task-3.4-admin-hard-delete.sql`'s convention) before the
+release's privilege/NULL-auth gates are marked satisfied.
+
+| Section | What it proves |
+|---|---|
+| B | Privilege gate: `anon`=false, `authenticated`=true for all nine client RPCs; both false for `recompute_rental_hutang` |
+| C | NULL-auth gate: an unauthenticated call raises the exact `unauthorized` message on every guard branch (13 call sites across the nine functions), with no mutation |
+| D | Positive-path smoke: every legitimate ops/admin call still succeeds — the direct proof against a backwards `IS NOT TRUE` polarity flip |

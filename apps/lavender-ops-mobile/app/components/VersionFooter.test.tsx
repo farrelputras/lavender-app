@@ -19,7 +19,7 @@ describe("VersionFooter", () => {
         <VersionFooter />
       </ThemeProvider>,
     )
-    expect(getByText("Lavender Ops · v1.0.2")).toBeDefined()
+    expect(getByText("Lavender Ops · v1.0.3")).toBeDefined()
   })
 
   it("shows 'bawaan' when running the bundle embedded in the APK", () => {
