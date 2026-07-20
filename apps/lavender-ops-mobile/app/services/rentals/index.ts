@@ -45,6 +45,23 @@ export interface CloseRentalInput {
   newPayments: Omit<Payment, "id">[]
 }
 
+// ─── v1.0.3 (PRD-1): edit an active rental — locked connector signature ───────
+// Brokered by Lead; do not change without going back to Lead. See
+// docs/superpowers/plans/2026-07-15-v1-0-3-edit-active-rental.md §C.
+
+export type KondisiPhotoEdit =
+  | { kind: "keep"; id: string }
+  | { kind: "new"; uri: string; mimeType?: string }
+
+export interface UpdateRentalInput {
+  notes?: string
+  kondisiKeluar?: {
+    bensinKotak: number
+    km: number | null
+    photos: KondisiPhotoEdit[] // desired final set; omitted = removed
+  }
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export async function getUserSummaries(): Promise<UserSummary[]> {
@@ -330,6 +347,50 @@ async function uploadKondisiPhotos(
     result.push({ id: photo.id, path })
   }
   return result
+}
+
+// v1.0.3 (PRD-1): edit an active rental's exit condition and/or note. The auth
+// gate (which fields are editable on which status, by which role) and the
+// last-photo rule live entirely server-side in rpc_update_rental — this
+// connector performs no client-side gating, only upload + patch assembly.
+export async function updateRental(rentalId: string, input: UpdateRentalInput): Promise<Rental> {
+  const patch: Record<string, unknown> = {}
+
+  if (input.notes !== undefined) {
+    patch.notes = input.notes
+  }
+
+  if (input.kondisiKeluar) {
+    const keepPhotoIds: string[] = []
+    const toUpload: { id: string; uri: string; mimeType?: string }[] = []
+    for (const photo of input.kondisiKeluar.photos) {
+      if (photo.kind === "keep") {
+        keepPhotoIds.push(photo.id)
+      } else {
+        toUpload.push({ id: uuidv4(), uri: photo.uri, mimeType: photo.mimeType })
+      }
+    }
+    // Reuses the same upload helper createRental/closeRental use — new photos
+    // land under the same rentals/<id>/kondisi-keluar/ prefix so the admin
+    // hard-delete's storage sweep still reaps them (see plan §B).
+    const newPhotos = await uploadKondisiPhotos(rentalId, "kondisi-keluar", toUpload)
+    patch.kondisiKeluar = {
+      bensinKotak: input.kondisiKeluar.bensinKotak,
+      km: input.kondisiKeluar.km,
+      keepPhotoIds,
+      newPhotos,
+    }
+  }
+
+  const { error } = await supabase.rpc("rpc_update_rental", {
+    p_rental_id: rentalId,
+    patch,
+  })
+  if (error) throw new Error(error.message)
+
+  const rental = await getRental(rentalId)
+  if (!rental) throw new Error(`Rental ${rentalId} not found after updateRental`)
+  return rental
 }
 
 export async function addPayment(rentalId: string, input: Omit<Payment, "id">): Promise<Rental> {

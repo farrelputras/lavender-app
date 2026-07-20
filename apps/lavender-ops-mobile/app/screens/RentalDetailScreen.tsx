@@ -9,16 +9,21 @@ import {
   Platform,
   Alert,
   Linking,
+  TextInput,
 } from "react-native"
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { EditActionBar } from "@/components/form/EditActionBar"
+import { FuelGauge } from "@/components/form/FuelGauge"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import { PhotoViewer } from "@/components/form/PhotoViewer"
+import { Stepper } from "@/components/form/Stepper"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
 import { useSession } from "@/services/auth/useSession"
+import { choosePhotoSource } from "@/services/photos/capture"
 import {
   getRental,
   getUserSummary,
@@ -27,6 +32,7 @@ import {
   updatePayment,
   deletePayment,
   hardDeleteRental,
+  updateRental,
 } from "@/services/rentals"
 import type { Rental, UserSummary, Vehicle, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
@@ -40,6 +46,23 @@ import {
 } from "@/utils/format"
 import { sumPayments, formatPaket, isOverdue, hoursLate } from "@/utils/rentalMath"
 import { showToast } from "@/utils/showToast"
+import { uuidv4 } from "@/utils/uuid"
+
+import {
+  canEditKondisiKeluar,
+  canEditNotes,
+  editPhotosToPatch,
+  isLastPhotoRemovalBlocked,
+  parseKmInput,
+  rentalPhotosToEditState,
+  type EditPhotoItem,
+} from "./RentalDetailScreen.editLogic"
+
+// v1.0.3 (PRD-1): the exit-fuel edit control must use the SAME max as the control that
+// originally creates `kondisiKeluar.bensinKotak` — DetailSewaScreen's local Stepper/FuelGauge
+// (clamped 0..8, see DetailSewaScreen.tsx:159/584/587) — otherwise editing silently rescales the
+// baseline the return fuel adjustment reads (D-2, docs/reports/v1-0-3.md).
+const BENSIN_MAX = 8
 
 const JAMINAN_LABELS: Record<string, string> = { KTP: "KTP", KTM: "KTM", LAINNYA: "Lainnya" }
 
@@ -89,6 +112,18 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
   const [showPaySheet, setShowPaySheet] = useState(false)
   const [editingPayment, setEditingPayment] = useState<Payment | null>(null)
   const [viewerUri, setViewerUri] = useState<string | null>(null)
+
+  // ── v1.0.3 (PRD-1): inline edit — Kondisi Keluar ──────────────────────────
+  const [kondisiEditing, setKondisiEditing] = useState(false)
+  const [kondisiSaving, setKondisiSaving] = useState(false)
+  const [editBensin, setEditBensin] = useState(0)
+  const [editKm, setEditKm] = useState("")
+  const [editPhotos, setEditPhotos] = useState<EditPhotoItem[]>([])
+
+  // ── v1.0.3 (PRD-1): inline edit — Catatan Rental ──────────────────────────
+  const [notesEditing, setNotesEditing] = useState(false)
+  const [notesSaving, setNotesSaving] = useState(false)
+  const [editNotes, setEditNotes] = useState("")
 
   useFocusEffect(
     useCallback(() => {
@@ -145,6 +180,88 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         },
       ],
     )
+  }
+
+  // ── v1.0.3 (PRD-1): inline edit — Kondisi Keluar ──────────────────────────
+  function handleEditKondisi() {
+    if (!rental) return
+    setEditBensin(rental.kondisiKeluar.bensinKotak)
+    setEditKm(rental.kondisiKeluar.km != null ? String(rental.kondisiKeluar.km) : "")
+    setEditPhotos(rentalPhotosToEditState(rental.kondisiKeluar.photos))
+    setKondisiEditing(true)
+  }
+
+  function handleCancelKondisi() {
+    setKondisiEditing(false)
+  }
+
+  async function handleAddKondisiPhoto() {
+    const captured = await choosePhotoSource()
+    if (captured) {
+      setEditPhotos((prev) => [
+        ...prev,
+        { id: uuidv4(), kind: "new", uri: captured.uri, mimeType: captured.mimeType },
+      ])
+    }
+  }
+
+  function handleRemoveKondisiPhoto(id: string) {
+    const resulting = editPhotos.filter((p) => p.id !== id)
+    const originalWasNonEmpty = (rental?.kondisiKeluar.photos.length ?? 0) > 0
+    if (isLastPhotoRemovalBlocked(resulting.length, originalWasNonEmpty, isAdmin)) {
+      showToast("Foto terakhir tidak bisa dihapus. Minta Farrel untuk menghapusnya.")
+      return
+    }
+    setEditPhotos(resulting)
+  }
+
+  async function handleSaveKondisi() {
+    if (!rental || kondisiSaving) return
+    setKondisiSaving(true)
+    try {
+      // Wholesale rewrite (rpc_update_rental) — always send all three fields, even ones the
+      // user didn't touch, or an omitted field is silently nulled server-side.
+      const updated = await updateRental(rental.id, {
+        kondisiKeluar: {
+          bensinKotak: editBensin,
+          km: parseKmInput(editKm),
+          photos: editPhotosToPatch(editPhotos),
+        },
+      })
+      setRental(updated)
+      showToast("Kondisi keluar diperbarui")
+      setKondisiEditing(false)
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Gagal menyimpan kondisi keluar")
+    } finally {
+      setKondisiSaving(false)
+    }
+  }
+
+  // ── v1.0.3 (PRD-1): inline edit — Catatan Rental ──────────────────────────
+  function handleEditNotes() {
+    if (!rental) return
+    setEditNotes(rental.notes)
+    setNotesEditing(true)
+  }
+
+  function handleCancelNotes() {
+    setNotesEditing(false)
+  }
+
+  async function handleSaveNotes() {
+    if (!rental || notesSaving) return
+    setNotesSaving(true)
+    try {
+      const updated = await updateRental(rental.id, { notes: editNotes })
+      setRental(updated)
+      showToast("Catatan diperbarui")
+      setNotesEditing(false)
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "Gagal menyimpan catatan")
+    } finally {
+      setNotesSaving(false)
+    }
   }
 
   if (loading) {
@@ -358,43 +475,109 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Kondisi Keluar</Text>
+            {!kondisiEditing && canEditKondisiKeluar(rental.status) && (
+              <TouchableOpacity
+                testID="kondisi-edit-btn"
+                style={styles.editSectionBtn}
+                onPress={handleEditKondisi}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialIcons name="edit" size={16} color={colors.primary} />
+                <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View style={styles.card}>
-            <View style={styles.infoRow}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
-                Bensin
-              </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
-                <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                  {rental.kondisiKeluar.bensinKotak} kotak
-                </Text>
-                <BensinGauge value={rental.kondisiKeluar.bensinKotak} />
-              </View>
-            </View>
-
-            <View style={styles.rowDivider} />
-
-            <View style={styles.infoRow}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
-                KM
-              </Text>
-              <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
-                {rental.kondisiKeluar.km != null
-                  ? `${rental.kondisiKeluar.km.toLocaleString("id-ID")} km`
-                  : "—"}
-              </Text>
-            </View>
-
-            {rental.kondisiKeluar.photos.length > 0 && (
+            {kondisiEditing ? (
               <>
+                <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                  Bensin
+                </Text>
+                <View testID="kondisi-edit-bensin">
+                  <Stepper
+                    value={editBensin}
+                    min={0}
+                    max={BENSIN_MAX}
+                    label={`${editBensin} kotak`}
+                    onDecrement={() => setEditBensin((v) => Math.max(0, v - 1))}
+                    onIncrement={() => setEditBensin((v) => Math.min(BENSIN_MAX, v + 1))}
+                  />
+                </View>
+                <FuelGauge value={editBensin} max={BENSIN_MAX} />
+
                 <View style={styles.rowDivider} />
-                <PhotoRow
-                  photos={rental.kondisiKeluar.photos}
-                  readonly
-                  onAdd={() => {}}
-                  onRemove={() => {}}
-                  onPhotoPress={(p) => setViewerUri(p.uri)}
+
+                <View style={styles.infoRow}>
+                  <Text style={[textStyles.labelMd, styles.infoRowLabel]}>KM</Text>
+                  <TextInput
+                    testID="kondisi-km-input"
+                    style={[textStyles.bodyMd, styles.kmEditInput]}
+                    keyboardType="numeric"
+                    placeholder="Opsional"
+                    placeholderTextColor={colors.outline}
+                    value={editKm}
+                    onChangeText={setEditKm}
+                    returnKeyType="done"
+                  />
+                </View>
+
+                <View style={styles.rowDivider} />
+
+                <View testID="kondisi-edit-photos">
+                  <PhotoRow
+                    photos={editPhotos}
+                    onAdd={handleAddKondisiPhoto}
+                    onRemove={handleRemoveKondisiPhoto}
+                    onPhotoPress={(p) => setViewerUri(p.uri)}
+                  />
+                </View>
+
+                <EditActionBar
+                  testID="kondisi-edit-bar"
+                  saving={kondisiSaving}
+                  onSave={handleSaveKondisi}
+                  onCancel={handleCancelKondisi}
                 />
+              </>
+            ) : (
+              <>
+                <View style={styles.infoRow}>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                    Bensin
+                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
+                    <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                      {rental.kondisiKeluar.bensinKotak} kotak
+                    </Text>
+                    <BensinGauge value={rental.kondisiKeluar.bensinKotak} />
+                  </View>
+                </View>
+
+                <View style={styles.rowDivider} />
+
+                <View style={styles.infoRow}>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
+                    KM
+                  </Text>
+                  <Text style={[textStyles.labelMd, { color: colors.onSurface }]}>
+                    {rental.kondisiKeluar.km != null
+                      ? `${rental.kondisiKeluar.km.toLocaleString("id-ID")} km`
+                      : "—"}
+                  </Text>
+                </View>
+
+                {rental.kondisiKeluar.photos.length > 0 && (
+                  <>
+                    <View style={styles.rowDivider} />
+                    <PhotoRow
+                      photos={rental.kondisiKeluar.photos}
+                      readonly
+                      onAdd={() => {}}
+                      onRemove={() => {}}
+                      onPhotoPress={(p) => setViewerUri(p.uri)}
+                    />
+                  </>
+                )}
               </>
             )}
           </View>
@@ -618,18 +801,51 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         <View>
           <View style={styles.sectionHeader}>
             <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>Catatan Rental</Text>
+            {!notesEditing && canEditNotes(rental.status, isAdmin) && (
+              <TouchableOpacity
+                testID="notes-edit-btn"
+                style={styles.editSectionBtn}
+                onPress={handleEditNotes}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <MaterialIcons name="edit" size={16} color={colors.primary} />
+                <Text style={[textStyles.labelMd, { color: colors.primary }]}>Edit</Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View style={styles.card}>
-            <View style={styles.insetBlock}>
-              <Text
-                style={[
-                  textStyles.bodyMd,
-                  { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant },
-                ]}
-              >
-                {rental.notes || "Tidak ada catatan."}
-              </Text>
-            </View>
+            {notesEditing ? (
+              <>
+                <TextInput
+                  testID="notes-input"
+                  style={[textStyles.bodyMd, styles.notesInput]}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  placeholder="Catatan tambahan jika ada"
+                  placeholderTextColor={colors.outline}
+                  value={editNotes}
+                  onChangeText={setEditNotes}
+                />
+                <EditActionBar
+                  testID="notes-edit-bar"
+                  saving={notesSaving}
+                  onSave={handleSaveNotes}
+                  onCancel={handleCancelNotes}
+                />
+              </>
+            ) : (
+              <View style={styles.insetBlock}>
+                <Text
+                  style={[
+                    textStyles.bodyMd,
+                    { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant },
+                  ]}
+                >
+                  {rental.notes || "Tidak ada catatan."}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -806,6 +1022,11 @@ const styles = StyleSheet.create({
     gap: 2,
     marginLeft: spacing.xs,
   },
+  editSectionBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 2,
+  },
   emptyPayment: {
     alignItems: "center",
     padding: spacing.base,
@@ -831,6 +1052,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: spacing.xs,
   },
+  infoRowLabel: {
+    color: colors.onSurfaceVariant,
+    flex: 1,
+  },
   insetBlock: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
@@ -852,11 +1077,24 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.sm,
   },
+  kmEditInput: {
+    color: colors.onSurface,
+    minWidth: 100,
+    paddingVertical: 4,
+    textAlign: "right",
+  },
   methodBadge: {
     backgroundColor: colors.surfaceContainer,
     borderRadius: 999,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
+  },
+  notesInput: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
+    color: colors.onSurface,
+    minHeight: 80,
+    padding: spacing.md,
   },
   paketChip: {
     alignSelf: "flex-start",
