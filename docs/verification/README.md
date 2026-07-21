@@ -58,6 +58,28 @@ Uses disposable fixtures tagged `TEST_TASK34`, self-cleans, and ends with a zero
 Post-run hygiene confirmed independently: `0` leftover `_test34_*` functions, `4`
 `rpc_admin_delete_*` functions present, `0` `TEST_TASK34` rows across all six tables.
 
+### `v1-0-3-rpc-update-rental.sql`
+
+Verifies migration `20260720073455_rpc_update_rental.sql` — PRD-1's new RPC and the full permission
+matrix behind "edit an active rental". This is the script that closes **AC-4** and the server half of
+**AC-6**.
+
+Uses disposable fixtures, self-cleans, drops its helpers in Section Z.
+
+**Run against production Supabase (`tuufzjxoprjsrrkagncz`) on 2026-07-21, immediately after
+`npx supabase db push` — all sections passed.**
+
+| Section | What it proves |
+|---|---|
+| B–D | `kondisiKeluar`: succeeds for ops on ACTIVE; RAISEs on COMPLETED **even for admin**; RAISEs on CANCELLED. Exit fuel is the baseline for the return fuel adjustment, so it is editable only before that calculation runs |
+| E–H | `notes`: ops or admin on ACTIVE; **admin only** on COMPLETED (ops RAISEs); no one on CANCELLED |
+| I | **D-1** last-photo rule — ops RAISEs when emptying a non-empty photo set, admin succeeds |
+| J | The edge case D-1a exists for: ops editing a rental that **already** has zero photos must still succeed, because the RPC rewrites `kondisi_keluar` wholesale and so sends `photos: []` legitimately |
+| K | A caller with NULL identity is rejected by the in-function guard — the NULL-logic bypass |
+| K2 | `EXECUTE` is exactly `{authenticated}`, not `PUBLIC`/`anon` |
+| L | `bensinKotak` missing or JSON `null` is **rejected**, not silently defaulted to 4 kotak by `translators.ts`'s `?? 4` |
+| Z | Fixtures removed, helpers dropped |
+
 ### `v1-0-3-rpc-auth-gate-hardening.sql`
 
 Verifies migration `20260720103317_rpc_auth_gate_hardening.sql` — the NULL-safe guard
@@ -68,12 +90,13 @@ conversion + `REVOKE`/`GRANT` pass applied to the nine pre-existing `SECURITY DE
 
 Uses disposable fixtures tagged `TEST_V103H`, self-cleans, ends with a zero-row sweep.
 
-**STATUS: AUTHORED, NOT YET RUN** — the migration has not been pushed
-(`npx supabase db push` is a separate, Farrel-gated step). Every privilege-gate assertion in
-this script will fail against the remote today, since the remote still carries the
-pre-hardening grants. Run section by section immediately after the push and record the
-per-section result here (mirroring `task-3.4-admin-hard-delete.sql`'s convention) before the
-release's privilege/NULL-auth gates are marked satisfied.
+**Run against production Supabase (`tuufzjxoprjsrrkagncz`) on 2026-07-21, immediately after
+`npx supabase db push` — all sections passed.**
+
+Independently re-confirmed the same day by a separate read-only query against `pg_proc` /
+`has_function_privilege` (not by re-running this script): `anon` holds `EXECUTE` on none of the
+eleven functions, `authenticated` retains it on all ten client-facing ones,
+`recompute_rental_hutang` is closed to both, and no `_test*` helper was left in `public`.
 
 | Section | What it proves |
 |---|---|
@@ -92,8 +115,14 @@ Runs as **ops, not admin** — the bug is reachable by Mom alone (`PengembalianS
 
 Uses disposable fixtures tagged `TEST_V103D`, self-cleans, ends with a zero-row sweep.
 
-**STATUS: AUTHORED, NOT YET RUN** — pending `npx supabase db push`. Section C will FAIL against the
-remote today, which is the bug reproducing rather than a broken script.
+**Run against production Supabase (`tuufzjxoprjsrrkagncz`) on 2026-07-21, immediately after
+`npx supabase db push` — all sections passed.** Section C passing is the direct proof that the
+regression is closed: a soft-deleted payment covering the rest of the bill now produces the full
+hutang instead of none.
+
+Re-confirmed independently the same day: the deployed body of `rpc_close_rental` read out of
+`pg_proc` contains both `AND deleted_at IS NULL` and the NULL-safe `IS NOT TRUE` guard, and zero
+`TEST_V103D` fixture rows remain.
 
 | Section | What it proves |
 |---|---|
