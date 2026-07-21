@@ -37,20 +37,24 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- WHAT THIS DOES
 -- ═══════════════════════════════════════════════════════════════════════════
--- Re-GRANTs EXECUTE to PUBLIC on the ten functions the hardening migration
--- revoked it from. PUBLIC covers every role, including anon and authenticated,
--- so this is the single blunt lever guaranteed to restore Mom's access
--- regardless of which specific narrower grant turned out to be wrong (e.g. a
--- typo'd argument-type signature on the `GRANT ... TO authenticated` step).
+-- Re-GRANTs EXECUTE to PUBLIC on NINE of the ten functions the hardening
+-- migration revoked it from. PUBLIC covers every role, including anon and
+-- authenticated, so this is the single blunt lever guaranteed to restore Mom's
+-- access regardless of which specific narrower grant turned out to be wrong
+-- (e.g. a typo'd argument-type signature on the `GRANT ... TO authenticated`
+-- step).
 --
--- This restores the EXACT reachability all ten functions had before this
--- release: nine of them (everything except rpc_update_payment,
--- rpc_delete_payment, and the four rpc_admin_delete_* — which did carry an
--- explicit `GRANT ... TO authenticated`) had NO REVOKE statement in their
--- history at all, ever — PUBLIC's default EXECUTE grant was their only
--- protection, which in practice was none (see F-2 in
--- docs/reports/v1-0-3.md). Re-granting PUBLIC puts all ten back in that same
--- state.
+-- ⚠️ The tenth, recompute_rental_hutang, is deliberately left closed — its GRANT
+-- line below is commented out. See "WHAT THIS DOES **NOT** DO" for why, and do
+-- not uncomment it reflexively.
+--
+-- For those nine, this restores the EXACT reachability they had before this
+-- release: NONE of the ten carried a REVOKE anywhere in project history — PUBLIC's
+-- default EXECUTE grant was their only protection, which in practice was none
+-- (see F-2 in docs/reports/v1-0-3.md). Six of them (rpc_update_payment,
+-- rpc_delete_payment, and the four rpc_admin_delete_*) additionally carried an
+-- explicit `GRANT ... TO authenticated`, which the hardening migration keeps and
+-- which this script does not disturb.
 --
 -- ═══════════════════════════════════════════════════════════════════════════
 -- WHAT THIS DOES **NOT** DO
@@ -70,14 +74,32 @@
 -- needs a further forward migration correcting the guard logic itself, not
 -- this rollback.
 --
--- It also does not touch recompute_rental_hutang's DECISION to be fully
--- closed (REVOKE ... FROM PUBLIC, anon, authenticated, no GRANT at all) —
--- this script re-opens it to PUBLIC same as the other nine, on the reasoning
--- that "restore exactly the prior state" should not quietly leave one function
--- more closed than before if this script is ever run. If recompute_rental_hutang
--- specifically is the suspected cause of an outage, note that it has NO client
--- caller anywhere in the app (verified by grep, see the hardening migration's
--- own header) — re-opening it is very unlikely to be the fix needed.
+-- It also does NOT re-open recompute_rental_hutang. That is a deliberate
+-- exception to "restore exactly the prior state", decided 2026-07-21:
+--
+--   • It is the sharpest function in the set. SECURITY DEFINER, and it rewrites
+--     hutang.jumlah_awal and hutang.status directly — a direct write path into
+--     customer debt.
+--   • It has NO client caller anywhere in the app (verified by grep; see the
+--     hardening migration's own header), so it CANNOT be the cause of an app
+--     outage. Re-opening it could not fix one.
+--   • An operator running this file under pressure runs it whole. Leaving that
+--     GRANT live would hand `anon` that write path as a silent side effect of
+--     restoring Mom's access.
+--
+-- If you have a specific, articulated reason to re-open it, uncomment its GRANT
+-- line below. "The rollback didn't fully work" is not such a reason — check the
+-- guard-polarity failure mode described above first.
+--
+-- ⚠️ SCOPE GAP: this script covers only the functions the HARDENING migration
+-- touched. It does NOT cover rpc_update_rental, which 20260720073455 revoked from
+-- PUBLIC in the same release. If the smoke test shows Mom locked out of EDITING an
+-- active rental specifically (v1.0.3's headline feature) while create / close /
+-- payment / dashboard all still work, this file will not fix it — add
+-- `GRANT EXECUTE ON FUNCTION rpc_update_rental(uuid, jsonb) TO PUBLIC;` manually.
+-- Left out by default because that path is new in v1.0.3: losing it degrades a new
+-- feature, it does not take away anything Mom could do before, so it is not an
+-- outage in the sense this script exists for.
 --
 -- ═══════════════════════════════════════════════════════════════════════════
 -- HOW TO APPLY, IF NEEDED
@@ -108,10 +130,21 @@ GRANT EXECUTE ON FUNCTION rpc_admin_delete_rental(uuid)       TO PUBLIC;
 GRANT EXECUTE ON FUNCTION rpc_admin_delete_hutang(uuid)       TO PUBLIC;
 GRANT EXECUTE ON FUNCTION rpc_admin_delete_user(uuid)         TO PUBLIC;
 GRANT EXECUTE ON FUNCTION rpc_admin_delete_vehicle(uuid)      TO PUBLIC;
-GRANT EXECUTE ON FUNCTION recompute_rental_hutang(uuid)       TO PUBLIC;
+-- ⚠️ DELIBERATELY COMMENTED OUT — uncomment only with a specific reason.
+-- recompute_rental_hutang is the sharpest item in this set: SECURITY DEFINER, it
+-- rewrites hutang.jumlah_awal and hutang.status directly. It has NO client caller
+-- anywhere in the app (verified by grep — see the hardening migration's header), so
+-- re-opening it cannot be the fix for an app outage. An operator running this file
+-- under pressure runs it whole; leaving this line live would hand `anon` a direct
+-- write path into customer debt as a side effect of restoring Mom's access.
+-- GRANT EXECUTE ON FUNCTION recompute_rental_hutang(uuid)       TO PUBLIC;
 
--- Sanity check after running: every row below should show anon_exec = true
+-- Sanity check after running: the first NINE rows should show anon_exec = true
 -- (i.e. we are back to fully open — this is a rollback, not a fix).
+--
+-- `recompute_rental_hutang` is EXPECTED to read false — its GRANT above is
+-- deliberately commented out. A false there is this file working as intended, NOT
+-- a failed rollback. It has no client caller, so it cannot be causing an outage.
 SELECT
   'rpc_get_dashboard_summary' AS fn, has_function_privilege('anon', 'rpc_get_dashboard_summary()', 'EXECUTE') AS anon_exec
 UNION ALL SELECT 'rpc_create_rental', has_function_privilege('anon', 'rpc_create_rental(jsonb)', 'EXECUTE')

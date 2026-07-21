@@ -80,3 +80,24 @@ release's privilege/NULL-auth gates are marked satisfied.
 | B | Privilege gate: `anon`=false, `authenticated`=true for all nine client RPCs; both false for `recompute_rental_hutang` |
 | C | NULL-auth gate: an unauthenticated call raises the exact `unauthorized` message on every guard branch (13 call sites across the nine functions), with no mutation |
 | D | Positive-path smoke: every legitimate ops/admin call still succeeds — the direct proof against a backwards `IS NOT TRUE` polarity flip |
+
+### `v1-0-3-close-rental-deleted-payments.sql`
+
+Verifies migration `20260721150806_close_rental_exclude_deleted_payments.sql` — the restoration of
+`AND deleted_at IS NULL` to `rpc_close_rental`'s `v_total_paid` sum, which `0015` dropped when it
+replaced the whole function body to add one `tujuan` line.
+
+Runs as **ops, not admin** — the bug is reachable by Mom alone (`PengembalianScreen` calls
+`deletePayment` itself at `:1022`; `RentalDetailScreen:719` allows it on an ACTIVE rental).
+
+Uses disposable fixtures tagged `TEST_V103D`, self-cleans, ends with a zero-row sweep.
+
+**STATUS: AUTHORED, NOT YET RUN** — pending `npx supabase db push`. Section C will FAIL against the
+remote today, which is the bug reproducing rather than a broken script.
+
+| Section | What it proves |
+|---|---|
+| B | `v_rentals` (what the app shows) reports `total_paid = 40000`, excluding the retracted payment |
+| C | **Headline.** A soft-deleted payment covering the rest of the bill no longer suppresses the hutang: closing yields `jumlah_awal = 60000`, matching what the screen promised. Under the bug, `IF v_sisa > 0` skips the INSERT and **no hutang exists at all** |
+| D | Inverse control: a genuinely fully-paid rental still creates **no** hutang — proof the filter was not inverted |
+| E | Fixtures swept, `_test103d_*` helpers dropped (they spoof `auth.uid()`; leaving one is a full authorization bypass) |

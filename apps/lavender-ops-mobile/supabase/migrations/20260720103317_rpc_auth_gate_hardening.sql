@@ -293,8 +293,19 @@ GRANT  EXECUTE ON FUNCTION rpc_close_rental(uuid, jsonb) TO authenticated;
 -- that 0014 added to v_rentals/v_hutang/recompute_rental_hutang's equivalent
 -- sums). A payment soft-deleted before this rental is ever closed would still
 -- count toward "already paid" here, understating sisa and therefore the
--- auto-created hutang. Pre-existing since 0005; out of scope for this
--- security-only migration.
+-- auto-created hutang. Out of scope for this security-only migration.
+--
+-- ✅ FIXED IMMEDIATELY AFTER, in 20260721150806_close_rental_exclude_deleted_payments.sql,
+-- which sorts after this file and so wins. Read that file's header, not this note,
+-- for the real account.
+--
+-- CORRECTION to an earlier version of this note, which called the omission
+-- "pre-existing since 0005": it is a REGRESSION, not legacy debt. 0005 lacked the
+-- filter, but 0014:338-340 ADDED it deliberately with a comment saying so, and
+-- 0015:81 then dropped it while replacing the whole body to add one `tujuan` line.
+-- The distinction is not pedantic — it is the difference between accepted debt and
+-- a shipped fix silently coming undone, which is what justified fixing it inside
+-- v1.0.3 rather than deferring.
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 4. rpc_update_payment(uuid, jsonb) — money. Live body is 0014's (only ever
