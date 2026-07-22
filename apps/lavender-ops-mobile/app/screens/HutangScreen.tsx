@@ -1,10 +1,11 @@
 import { useState, useCallback, useMemo } from "react"
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
+import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { SearchField } from "@/components/form/SearchField"
 import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
@@ -21,9 +22,9 @@ function HutangCard({ h, onPress }: { h: HutangFull; onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardName} numberOfLines={1}>
-          {h.userName}
-        </Text>
+        {/* PRD-5 BR-1 (v1.0.4): identifying value — same class of risk as the Sisa row on
+            RentalScreen (AC-1/AC-9), so it wraps instead of truncating. */}
+        <Text style={styles.cardName}>{h.userName}</Text>
         <StatusPill
           label={h.rentalId ? "Dari rental" : "Manual"}
           bg={colors.surfaceContainer}
@@ -207,9 +208,15 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: spacing.sm,
   },
+  // PRD-5 AC-9 (v1.0.4): the Sisa amount (left) and "Awal Rp X" (right) are both rupiah
+  // values in one row with the same `space-between`-with-no-`gap` anti-pattern as the
+  // flagship AC-1 defect. `flexWrap` + `gap` let the row drop to a second line instead of
+  // relying on leftover slack.
   cardFooter: {
     alignItems: "flex-end",
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
   },
   cardFooterRight: { alignItems: "center", flexDirection: "row", gap: spacing.xs },

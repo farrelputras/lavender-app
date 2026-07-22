@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   FlatList,
@@ -11,6 +10,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { SearchField } from "@/components/form/SearchField"
 import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
 import { getUserSummary, getVehicleSummaries } from "@/services/rentals"
@@ -55,8 +55,10 @@ function VehicleCard({ vehicle, onPress }: { vehicle: VehicleSummary; onPress: (
       activeOpacity={vehicle.available ? 0.8 : 1}
       disabled={!vehicle.available}
       onPress={onPress}
+      testID={`vehicle-card-${vehicle.id}`}
     >
-      {/* Icon panel */}
+      {/* Icon panel — PRD-5 AC-3 (v1.0.4): corner-clipping lives here now, not on the outer
+          card, so the plate/name below can grow without being clipped. */}
       <View style={styles.vehicleIconPanel}>
         <MaterialIcons
           name={isMotor ? "two-wheeler" : "directions-car"}
@@ -72,14 +74,13 @@ function VehicleCard({ vehicle, onPress }: { vehicle: VehicleSummary; onPress: (
         )}
       </View>
 
-      {/* Info */}
+      {/* Info — the licence plate is how Mom tells two identical vehicles apart at handover.
+          Shrinking or truncating it is not an acceptable resolution (PRD-5 BR-3): the card
+          grows taller instead, via the two-column grid's default cross-axis `stretch` (both
+          cards in a row grow to match). */}
       <View style={styles.vehicleInfo}>
-        <Text style={[textStyles.headlineSm, { color: colors.onSurface }]} numberOfLines={1}>
-          {vehicle.plate}
-        </Text>
-        <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]} numberOfLines={1}>
-          {vehicle.name}
-        </Text>
+        <Text style={[textStyles.headlineSm, { color: colors.onSurface }]}>{vehicle.plate}</Text>
+        <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>{vehicle.name}</Text>
       </View>
     </TouchableOpacity>
   )
@@ -179,9 +180,9 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
             {userSummary ? initialsFromName(userSummary.name) : "?"}
           </Text>
         </View>
-        <Text style={[textStyles.bodyMd, styles.userStripText]} numberOfLines={1}>
-          {displayName}
-        </Text>
+        {/* PRD-5 BR-1 (v1.0.4): the selected user's name is identifying information — wraps
+            instead of truncating. */}
+        <Text style={[textStyles.bodyMd, styles.userStripText]}>{displayName}</Text>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -388,13 +389,16 @@ const styles = StyleSheet.create({
   },
 
   // Vehicle card
+  // PRD-5 AC-3 (v1.0.4): `overflow: "hidden"` used to sit here, which clipped the plate/name
+  // once they outgrew the card at large text scale. Corner-clipping moved to
+  // `vehicleIconPanel` below (the only child that actually needs it); the card itself no
+  // longer clips, so it can grow taller instead of cutting off an identifier.
   vehicleCard: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     flexBasis: "48%",
     flexGrow: 0,
     flexShrink: 0,
-    overflow: "hidden",
     ...cardShadow,
   },
   vehicleCardUnavailable: {
@@ -403,8 +407,11 @@ const styles = StyleSheet.create({
   vehicleIconPanel: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     height: 96,
     justifyContent: "center",
+    overflow: "hidden",
   },
   unavailableChip: {
     backgroundColor: colors.tertiaryContainer,

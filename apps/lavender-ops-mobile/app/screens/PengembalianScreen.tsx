@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Platform,
   ActivityIndicator,
@@ -14,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -382,16 +381,18 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
           >
             <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
+          {/* PRD-5 AC-4/BR-6 (v1.0.4): both lines used to be forced onto one line
+              (`numberOfLines={1}`) — the one hand-rolled header in the app that failed by
+              truncation instead of wrapping. `subtitle` concatenates three identifiers
+              (nickname/name · vehicle · plate), which is exactly the content BR-1 says must
+              never be cut off. `appBarTitle` already has `flex: 1` and the row has no pinned
+              height, so removing the caps is enough — same working pattern as
+              DetailSewaScreen's and PilihKendaraanScreen's headers. */}
           <View style={styles.appBarTitle}>
-            <Text style={[textStyles.labelLg, { color: colors.onSurface }]} numberOfLines={1}>
+            <Text style={[textStyles.labelLg, { color: colors.onSurface }]}>
               Proses Pengembalian
             </Text>
-            <Text
-              style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}
-              numberOfLines={1}
-            >
-              {subtitle}
-            </Text>
+            <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>{subtitle}</Text>
           </View>
         </View>
 
@@ -992,7 +993,12 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
             {saving ? (
               <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
-              <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
+              // PRD-5 BR-1 (v1.0.4): "Selesaikan & Buat Hutang" is the longest CTA label in the
+              // app (24 chars) — the button most likely to wrap at 1.5x. `styles.btnLabel`
+              // (`flexShrink: 1`, hoisted so it doesn't trip `no-inline-styles`) lets it wrap
+              // instead of overflowing; `btnSelesai` below is `minHeight` (not `height`) so the
+              // button grows to hold a second line instead of clipping it.
+              <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onPrimary }]}>
                 {sisa > 0 ? "Selesaikan & Buat Hutang" : "Selesaikan Pengembalian"}
               </Text>
             )}
@@ -1326,9 +1332,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     padding: spacing.base,
   },
+  // PRD-5 AC-9 (v1.0.4): a rupiah amount sits directly across from a label here, with the
+  // same `space-between`-with-no-`gap` anti-pattern the flagship AC-1 defect used — "no
+  // rupiah amount may ever touch adjacent text, no exception". `flexWrap` + `gap` let the
+  // amount drop to its own line instead of relying on leftover slack.
   paySummaryRow: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
   },
 
@@ -1375,9 +1387,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 12,
-    height: 56,
     justifyContent: "center",
+    minHeight: 56,
+    paddingVertical: spacing.sm,
   },
+  // PRD-5 BR-1 (v1.0.4): lets a button label wrap instead of overflowing — hoisted out of
+  // the JSX so it doesn't trip `no-inline-styles`.
+  btnLabel: { flexShrink: 1 },
   btnDisabled: {
     opacity: 0.6,
   },

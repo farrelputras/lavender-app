@@ -1,7 +1,8 @@
 import { Ref } from "react"
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native"
+import { View, TouchableOpacity, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
+import { TextInput } from "@/components/AppText"
 import { cardShadow, colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface SearchFieldProps {

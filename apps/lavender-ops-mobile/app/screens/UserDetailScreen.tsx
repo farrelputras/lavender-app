@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -13,6 +12,7 @@ import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { PhotoSlot } from "@/components/form/PhotoSlot"
 import { PhotoViewer } from "@/components/form/PhotoViewer"
 import { StatusPill } from "@/components/form/StatusPill"

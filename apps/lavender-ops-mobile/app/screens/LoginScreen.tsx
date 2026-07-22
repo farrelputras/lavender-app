@@ -1,17 +1,11 @@
 // app/screens/LoginScreen.tsx
 import { useState } from "react"
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native"
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { useAuth } from "@/context/AuthContext"
 import { colors, textStyles, spacing, borderRadius } from "@/theme/tokens"
 

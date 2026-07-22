@@ -1,5 +1,6 @@
-import { View, Text, TextInput, StyleSheet, ViewStyle, StyleProp } from "react-native"
+import { View, StyleSheet, ViewStyle, StyleProp } from "react-native"
 
+import { Text, TextInput } from "@/components/AppText"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
 export interface RupiahInputProps {

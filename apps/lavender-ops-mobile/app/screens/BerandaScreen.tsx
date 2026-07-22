@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import { useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { StatusPill } from "@/components/form/StatusPill"
 import { VersionFooter } from "@/components/VersionFooter"
 import { useAuth } from "@/context/AuthContext"
@@ -100,22 +100,34 @@ export function BerandaScreen() {
         </View>
 
         {/* Quick Actions */}
+        {/* PRD-5 AC-2 (v1.0.4): the button used to be pinned to a fixed `height`, and the label
+            had no `flexShrink` — RN's row default is 0, unlike web CSS's 1 — so at large text
+            scale the label's intrinsic width overflowed the button and got visually swallowed
+            by its neighbor (Mom's report: "Sewa Baru seems too big" — it was actually
+            incomplete). `minHeight` lets the button grow instead of clipping; `flexShrink: 1`
+            lets the label wrap onto a second line instead of overflowing. */}
         <View style={styles.quickActions}>
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnFilled]}
             activeOpacity={0.8}
             onPress={() => navigation.navigate("SewaBaru", { screen: "PilihUser" })}
+            testID="action-btn-sewa-baru"
           >
             <MaterialIcons name="add-circle" size={28} color={colors.onPrimary} />
-            <Text style={[textStyles.headlineSm, { color: colors.onPrimary }]}>Sewa Baru</Text>
+            <Text style={[textStyles.headlineSm, styles.actionBtnLabel, { color: colors.onPrimary }]}>
+              Sewa Baru
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnOutlined]}
             activeOpacity={0.8}
             onPress={() => navigation.navigate("UserForm", { mode: "create" })}
+            testID="action-btn-user-baru"
           >
             <MaterialIcons name="person-add" size={28} color={colors.primary} />
-            <Text style={[textStyles.headlineSm, { color: colors.primary }]}>User Baru</Text>
+            <Text style={[textStyles.headlineSm, styles.actionBtnLabel, { color: colors.primary }]}>
+              User Baru
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -145,12 +157,11 @@ export function BerandaScreen() {
               onPress={() => navigation.navigate("RentalDetail", { rentalId: item.rentalId })}
               style={[styles.rentalCard, item.status === "TERLAMBAT" && styles.rentalCardOverdue]}
             >
-              {/* Row 1: customer name + status chip */}
+              {/* Row 1: customer name + status chip — PRD-5 BR-1 (v1.0.4): the customer name
+                  is identifying information ("who still owes me money?", the same class of
+                  risk as AC-1/AC-9), so it wraps instead of truncating. */}
               <View style={styles.cardRow}>
-                <Text
-                  style={[textStyles.labelLg, { color: colors.onSurface, flex: 1 }]}
-                  numberOfLines={1}
-                >
+                <Text style={[textStyles.labelLg, { color: colors.onSurface, flex: 1 }]}>
                   {item.customerName}
                 </Text>
                 <StatusPill
@@ -160,11 +171,8 @@ export function BerandaScreen() {
                 />
               </View>
 
-              {/* Row 2: vehicle info */}
-              <Text
-                style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}
-                numberOfLines={1}
-              >
+              {/* Row 2: vehicle info — includes the plate (PRD-5 BR-3), so it wraps too. */}
+              <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, marginTop: 4 }]}>
                 {item.vehicleName} — {item.vehiclePlate}
               </Text>
 
@@ -323,11 +331,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     gap: 8,
-    height: 80,
     justifyContent: "center",
+    minHeight: 80,
+    paddingVertical: spacing.sm,
   },
   actionBtnFilled: {
     backgroundColor: colors.primary,
+  },
+  actionBtnLabel: {
+    flexShrink: 1,
   },
   actionBtnOutlined: {
     backgroundColor: "transparent",

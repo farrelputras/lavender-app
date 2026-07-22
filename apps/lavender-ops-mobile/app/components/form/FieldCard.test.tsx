@@ -1,6 +1,6 @@
-import { Text } from "react-native"
 import { render } from "@testing-library/react-native"
 
+import { Text } from "@/components/AppText"
 import { ThemeProvider } from "@/theme/context"
 
 import { FieldCard } from "./FieldCard"

@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
+import { Text } from "@/components/AppText"
 import { textStyles, spacing } from "@/theme/tokens"
 
 export interface StatusPillProps {

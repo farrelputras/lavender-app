@@ -2,12 +2,10 @@ import { useEffect, useState } from "react"
 import {
   Alert,
   View,
-  Text,
   StyleSheet,
   Modal,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  TextInput,
   ScrollView,
   Platform,
   Keyboard,
@@ -15,6 +13,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
+import { Text, TextInput } from "@/components/AppText"
 import { Payment, PaymentMethod } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 

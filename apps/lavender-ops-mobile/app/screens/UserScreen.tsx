@@ -1,11 +1,9 @@
 import { useState, useCallback, useRef } from "react"
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   FlatList,
   SectionList,
   ActivityIndicator,
@@ -15,6 +13,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { SearchField } from "@/components/form/SearchField"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
 import { getUserSummaries } from "@/services/rentals"
@@ -63,13 +62,13 @@ function UserRow({ u, onPress }: { u: UserSummary; onPress: () => void }) {
         </View>
       )}
       <View style={styles.cardBody}>
-        <Text style={styles.nameText} numberOfLines={1}>
+        {/* PRD-5 BR-1 (v1.0.4): name and phone are identifying values Mom relies on to reach
+            this user — neither may be cut off, so both wrap instead of truncating. */}
+        <Text style={styles.nameText}>
           {u.name}
           {u.nickname ? <Text style={styles.nicknameText}> ({u.nickname})</Text> : null}
         </Text>
-        <Text style={styles.phoneText} numberOfLines={1}>
-          {u.phone}
-        </Text>
+        <Text style={styles.phoneText}>{u.phone}</Text>
         {hasChips && (
           <View style={styles.chipRow}>
             {u.debtAmount > 0 && (

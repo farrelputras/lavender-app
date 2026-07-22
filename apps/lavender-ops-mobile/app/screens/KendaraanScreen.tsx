@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, StyleSheet } from "react-native"
 
+import { Text } from "@/components/AppText"
 import { colors, typography, spacing } from "@/theme/tokens"
 
 export function KendaraanScreen() {

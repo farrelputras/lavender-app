@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -12,6 +10,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
 import { FieldCard } from "@/components/form/FieldCard"
 import { RupiahInput } from "@/components/form/RupiahInput"
@@ -107,13 +106,13 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
                     onPress={() => setSelectedUserId(u.id)}
                     activeOpacity={0.8}
                   >
+                    {/* PRD-5 BR-1 (v1.0.4): identifying value, wraps instead of truncating. */}
                     <Text
                       style={[
                         textStyles.bodyMd,
                         styles.userRowName,
                         selected && styles.userRowNameSelected,
                       ]}
-                      numberOfLines={1}
                     >
                       {u.nickname ? `${u.name} (${u.nickname})` : u.name}
                     </Text>

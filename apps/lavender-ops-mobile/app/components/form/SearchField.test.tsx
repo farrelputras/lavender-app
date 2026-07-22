@@ -1,7 +1,7 @@
 import { createRef } from "react"
-import { TextInput } from "react-native"
 import { fireEvent, render } from "@testing-library/react-native"
 
+import { TextInput } from "@/components/AppText"
 import { ThemeProvider } from "@/theme/context"
 
 import { SearchField } from "./SearchField"

@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native"
+import { View, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
+import { Text } from "@/components/AppText"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { useBottomBarPadding } from "@/utils/useBottomBarPadding"
 
@@ -33,7 +34,13 @@ export function BottomActionBar({
     <View testID={testID} style={[styles.bar, { paddingBottom: barPadding }]}>
       <TouchableOpacity style={styles.cancel} onPress={onCancel} activeOpacity={0.8}>
         <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
-        <Text style={[textStyles.labelLg, { color: colors.onSurfaceVariant }]}>{cancelLabel}</Text>
+        {/* PRD-5 BR-1/BR-8 (v1.0.4): this is a shared primitive, so callers' labels must be
+            allowed to wrap rather than clip — `styles.label` (flexShrink) + `minHeight` below
+            let the bar grow instead of relying on today's short "Batal"/"Simpan" strings
+            staying short forever. */}
+        <Text style={[textStyles.labelLg, styles.label, { color: colors.onSurfaceVariant }]}>
+          {cancelLabel}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.primary, loading && { opacity: 0.7 }]}
@@ -46,7 +53,9 @@ export function BottomActionBar({
         ) : (
           <MaterialIcons name={primaryIconName} size={20} color={colors.onPrimary} />
         )}
-        <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>{primaryLabel}</Text>
+        <Text style={[textStyles.labelLg, styles.label, { color: colors.onPrimary }]}>
+          {primaryLabel}
+        </Text>
       </TouchableOpacity>
     </View>
   )
@@ -68,9 +77,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
   },
+  // PRD-5 BR-1 (v1.0.4): lets a label wrap instead of overflowing — hoisted out of the JSX
+  // so it doesn't trip `no-inline-styles`.
+  label: { flexShrink: 1 },
   primary: {
     alignItems: "center",
     backgroundColor: colors.primary,
@@ -78,7 +91,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 52,
     justifyContent: "center",
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
 })

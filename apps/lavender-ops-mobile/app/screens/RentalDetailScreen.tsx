@@ -1,19 +1,18 @@
 import { useState, useCallback } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
   Alert,
   Linking,
-  TextInput,
 } from "react-native"
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { EditActionBar } from "@/components/form/EditActionBar"
 import { FuelGauge } from "@/components/form/FuelGauge"
 import { PhotoRow } from "@/components/form/PhotoRow"
@@ -865,7 +864,12 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
             activeOpacity={0.85}
           >
             <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Rental Permanen</Text>
+            {/* PRD-5 BR-1 (v1.0.4): `styles.btnLabel` (`flexShrink: 1`) lets the label wrap
+                instead of overflowing; `hardDeleteBtn` is `minHeight` so the button grows to
+                hold it. Hoisted (not inline) so it doesn't trip `no-inline-styles`. */}
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.error }]}>
+              Hapus Rental Permanen
+            </Text>
           </TouchableOpacity>
         )}
 
@@ -880,7 +884,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
             onPress={() => navigation.navigate("Pengembalian", { rentalId: rental.id })}
             activeOpacity={0.8}
           >
-            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onPrimary }]}>
               Proses Pengembalian
             </Text>
             <MaterialIcons name="arrow-forward" size={20} color={colors.onPrimary} />
@@ -893,7 +897,9 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
         <View style={[styles.bottomBar, { paddingBottom: barPadding }]}>
           <TouchableOpacity style={styles.btnKembali} onPress={handleBack} activeOpacity={0.8}>
             <MaterialIcons name="home" size={20} color={colors.onPrimary} />
-            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Kembali ke Beranda</Text>
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onPrimary }]}>
+              Kembali ke Beranda
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -987,17 +993,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 56,
     justifyContent: "center",
+    minHeight: 56,
+    paddingVertical: spacing.sm,
   },
+  // PRD-5 BR-1 (v1.0.4): lets a bottom-bar/hard-delete button label wrap instead of
+  // overflowing — hoisted out of the JSX so it doesn't trip `no-inline-styles`.
+  btnLabel: { flexShrink: 1 },
   btnProses: {
     alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 12,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 56,
     justifyContent: "center",
+    minHeight: 56,
+    paddingVertical: spacing.sm,
   },
   callButton: {
     alignItems: "center",
@@ -1051,9 +1062,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
     marginTop: spacing.sm,
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
   infoRow: {
     alignItems: "center",
@@ -1118,9 +1130,14 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     padding: spacing.base,
   },
+  // PRD-5 AC-9 (v1.0.4): "Sudah dibayar:"/"Sisa:" sit directly across from rupiah amounts —
+  // same `space-between`-with-no-`gap` anti-pattern as the flagship AC-1 defect. `flexWrap` +
+  // `gap` let the amount drop to its own line instead of relying on leftover slack.
   paySummaryRow: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
   },
   paymentIcon: {

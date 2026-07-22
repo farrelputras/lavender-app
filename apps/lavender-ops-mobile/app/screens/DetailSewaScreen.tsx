@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { SewaBaruScreenProps, AppStackParamList } from "@/navigators/navigationTypes"
@@ -446,9 +445,8 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                   {userSummary ? initialsFromName(userSummary.name) : "?"}
                 </Text>
               </View>
-              <Text style={[textStyles.bodyMd, styles.contextName]} numberOfLines={1}>
-                {userDisplayName}
-              </Text>
+              {/* PRD-5 BR-1 (v1.0.4): identifying value, wraps instead of truncating. */}
+              <Text style={[textStyles.bodyMd, styles.contextName]}>{userDisplayName}</Text>
               <TouchableOpacity
                 onPress={() => navigation.navigate("PilihUser")}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -469,10 +467,8 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
                 />
               </View>
               <View style={{ flex: 1 }}>
-                <Text
-                  style={[textStyles.bodyMd, { color: colors.onSurface, fontWeight: "500" }]}
-                  numberOfLines={1}
-                >
+                {/* PRD-5 BR-1 (v1.0.4): identifying value, wraps instead of truncating. */}
+                <Text style={[textStyles.bodyMd, { color: colors.onSurface, fontWeight: "500" }]}>
                   {vehicle?.name ?? "..."}
                 </Text>
                 {vehicle && (
@@ -1010,7 +1006,9 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
           activeOpacity={0.8}
         >
           <MaterialIcons name="close" size={20} color={colors.onSurfaceVariant} />
-          <Text style={[textStyles.labelLg, { color: colors.onSurfaceVariant }]}>Batal</Text>
+          <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onSurfaceVariant }]}>
+            Batal
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btnSimpan, saving && { opacity: 0.7 }]}
@@ -1023,7 +1021,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
           ) : (
             <MaterialIcons name="check-circle" size={20} color={colors.onPrimary} />
           )}
-          <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Simpan Rental</Text>
+          {/* PRD-5 BR-1 (v1.0.4): "Simpan Rental" — the highest-consequence control in the app
+              (PRD-4 AC-1). `styles.btnLabel` (`flexShrink: 1`) lets it wrap instead of
+              overflowing; `btnSimpan` below is `minHeight` so the button grows to hold it. */}
+          <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onPrimary }]}>
+            Simpan Rental
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -1334,11 +1337,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
+  // PRD-5 AC-9 (v1.0.4): "Total" sits directly across from the rupiah total — same
+  // `space-between`-with-no-`gap` anti-pattern as the flagship AC-1 defect. `flexWrap` +
+  // `gap` let it drop to its own line instead of relying on leftover slack.
   totalRow: {
     alignItems: "center",
     borderTopColor: colors.outlineVariant,
     borderTopWidth: 1,
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
     marginTop: spacing.md,
     paddingTop: spacing.md,
@@ -1385,9 +1393,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     padding: spacing.base,
   },
+  // PRD-5 AC-9 (v1.0.4): same anti-pattern as `totalRow` above — a rupiah amount across
+  // from a label, no gap. Fixed the same way.
   paySummaryRow: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
   },
 
@@ -1419,8 +1431,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 52,
+    minHeight: 52,
     paddingHorizontal: spacing.base,
+    paddingVertical: spacing.sm,
   },
   btnSimpan: {
     alignItems: "center",
@@ -1429,7 +1442,12 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 52,
     justifyContent: "center",
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
+  // PRD-5 BR-1 (v1.0.4): lets a bottom-bar button label wrap instead of overflowing —
+  // hoisted out of the JSX so it doesn't trip `no-inline-styles` (a literal mixed into an
+  // inline style object IS flagged, unlike a bare MemberExpression).
+  btnLabel: { flexShrink: 1 },
 })

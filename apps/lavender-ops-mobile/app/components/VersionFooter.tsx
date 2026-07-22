@@ -1,5 +1,4 @@
-// eslint-disable-next-line no-restricted-imports -- plain RN Text, no themed content here (same exception app/components/Text.tsx itself takes)
-import { View, Text, StyleSheet } from "react-native"
+import { View, PixelRatio, StyleSheet } from "react-native"
 // Named imports, not `import * as Updates` — Babel's namespace-import interop
 // (`_interopRequireWildcard`) snapshots plain data properties by value the first time the
 // module is required and caches that copy. Under jest, where the test mutates
@@ -7,7 +6,9 @@ import { View, Text, StyleSheet } from "react-native"
 // keep reading the stale first-seen values forever. Named imports compile to a direct
 // `_expoUpdates.updateId` property read at each usage site instead, so they see the mutation.
 import { createdAt, updateId } from "expo-updates"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { RELEASE } from "@/config/release"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatDateLong } from "@/utils/format"
@@ -23,8 +24,16 @@ import { formatDateLong } from "@/utils/format"
  * `RELEASE` is the JS constant (see app/config/release.ts — NOT app.json's version).
  * Beneath it, the actual update identity from expo-updates. On the bundle embedded in the
  * APK, `updateId` is null and we show "bawaan".
+ *
+ * v1.0.4 D-1b `[by-Farrel]`: a third line shows the device's reported `fontScale` and bottom
+ * safe-area inset — how we learn Mom's *real* text-scale setting from her next screenshot
+ * instead of inferring it from MIUI's "XL" label, and it simultaneously proves the inset is
+ * being read. Diagnostic only; remove in the next release.
  */
 export function VersionFooter() {
+  const insets = useSafeAreaInsets()
+  const fontScale = PixelRatio.getFontScale()
+
   const updateLine =
     updateId && createdAt
       ? `pembaruan ${updateId.slice(0, 7)} · ${formatDateLong(new Date(createdAt))}`
@@ -34,6 +43,9 @@ export function VersionFooter() {
     <View style={styles.container}>
       <Text style={styles.releaseText}>Lavender Ops · v{RELEASE}</Text>
       <Text style={styles.updateText}>{updateLine}</Text>
+      <Text style={styles.updateText}>
+        fontScale {fontScale} · inset {insets.bottom}
+      </Text>
     </View>
   )
 }

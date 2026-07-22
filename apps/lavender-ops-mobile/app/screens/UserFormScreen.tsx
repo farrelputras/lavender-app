@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, type Dispatch, type SetStateAction } from "react"
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -13,6 +11,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
 import { FieldCard } from "@/components/form/FieldCard"
 import { PhotoSlot } from "@/components/form/PhotoSlot"

@@ -1,10 +1,11 @@
 import { useState, useCallback, useMemo } from "react"
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
+import { View, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useNavigation, useFocusEffect } from "@react-navigation/native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { SearchField } from "@/components/form/SearchField"
 import { StatusPill } from "@/components/form/StatusPill"
 import type { AppStackParamList } from "@/navigators/navigationTypes"
@@ -40,16 +41,21 @@ function RentalCard({ r, onPress }: { r: RentalListItem; onPress: () => void }) 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardName} numberOfLines={1}>
-          {r.userName}
-        </Text>
+        {/* PRD-5 BR-1/BR-3 (v1.0.4): customer name and vehicle plate are both identifying
+            values Mom relies on — neither may be cut off, so both wrap instead of ellipsis. */}
+        <Text style={styles.cardName}>{r.userName}</Text>
         <StatusPill label={cfg.label} bg={cfg.bg} color={cfg.color} />
       </View>
-      <Text style={styles.cardVehicle} numberOfLines={1}>
+      <Text style={styles.cardVehicle}>
         {r.vehicleName} · {r.vehiclePlate}
       </Text>
       <View style={styles.divider} />
-      <View style={styles.cardFooter}>
+      {/* PRD-5 AC-1/AC-9 (v1.0.4): a date and a rupiah amount are two unrelated facts and must
+          never touch. `space-between` alone only works while there is leftover slack — RN's
+          default flexShrink is 0 (unlike web CSS's 1), so once the date text grows it butts
+          straight into Sisa. flexWrap + gap makes the row reflow onto its own line for Sisa
+          when it no longer fits, instead of relying on that slack. */}
+      <View style={styles.cardFooter} testID="rental-card-footer">
         <View style={styles.dateRow}>
           <MaterialIcons
             name="calendar-today"
@@ -263,10 +269,12 @@ const styles = StyleSheet.create({
   cardFooter: {
     alignItems: "center",
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
     justifyContent: "space-between",
   },
-  dateRow: { alignItems: "center", flexDirection: "row" },
-  dateText: { ...textStyles.bodyMd, color: colors.onSurfaceVariant },
-  sisaText: { ...textStyles.labelLg, color: colors.error },
-  lunasText: { ...textStyles.labelLg, color: colors.success },
+  dateRow: { alignItems: "center", flexDirection: "row", flexShrink: 1 },
+  dateText: { ...textStyles.bodyMd, color: colors.onSurfaceVariant, flexShrink: 1 },
+  sisaText: { ...textStyles.labelLg, color: colors.error, flexShrink: 0 },
+  lunasText: { ...textStyles.labelLg, color: colors.success, flexShrink: 0 },
 })

@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -12,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text } from "@/components/AppText"
 import { StatusPill } from "@/components/form/StatusPill"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -231,7 +231,12 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
             activeOpacity={0.85}
           >
             <MaterialIcons name="add" size={20} color={colors.onPrimary} />
-            <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Tambah Pembayaran</Text>
+            {/* PRD-5 BR-1 (v1.0.4): `styles.btnLabel` (`flexShrink: 1`) lets the label wrap
+                instead of overflowing; the buttons above are `minHeight` so they grow to hold
+                it. Hoisted (not inline) so it doesn't trip `no-inline-styles`. */}
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onPrimary }]}>
+              Tambah Pembayaran
+            </Text>
           </TouchableOpacity>
         )}
 
@@ -242,7 +247,9 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
             activeOpacity={0.85}
           >
             <MaterialIcons name="delete-forever" size={20} color={colors.error} />
-            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus Hutang Permanen</Text>
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.error }]}>
+              Hapus Hutang Permanen
+            </Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -395,6 +402,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl,
   },
 
+  // PRD-5 BR-1 (v1.0.4): lets a button label wrap instead of overflowing — hoisted out of
+  // the JSX so it doesn't trip `no-inline-styles`.
+  btnLabel: { flexShrink: 1 },
+
   // Add button
   addBtn: {
     alignItems: "center",
@@ -402,9 +413,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
     marginTop: spacing.md,
+    minHeight: 52,
+    paddingVertical: spacing.sm,
     ...cardShadow,
   },
 
@@ -416,8 +428,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
     marginTop: spacing.md,
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
 })

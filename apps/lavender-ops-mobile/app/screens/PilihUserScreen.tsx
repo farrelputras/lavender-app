@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   FlatList,
   SectionList,
   ActivityIndicator,
@@ -13,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons"
 import { useFocusEffect } from "@react-navigation/native"
 import { SafeAreaView } from "react-native-safe-area-context"
 
+import { Text, TextInput } from "@/components/AppText"
 import { SearchField } from "@/components/form/SearchField"
 import type { SewaBaruScreenProps } from "@/navigators/navigationTypes"
 import { getUserSummaries } from "@/services/rentals"
@@ -51,7 +50,8 @@ function UserCard({ summary, onPress }: { summary: UserSummary; onPress: () => v
         </View>
 
         <View style={styles.userCardContent}>
-          <Text style={[textStyles.bodyLg, { color: colors.onSurface }]} numberOfLines={1}>
+          {/* PRD-5 BR-1 (v1.0.4): identifying value, wraps instead of truncating. */}
+          <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>
             {summary.nickname ? `${summary.name} (${summary.nickname})` : summary.name}
           </Text>
           <View style={styles.chipRow}>
