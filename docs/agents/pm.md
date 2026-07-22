@@ -98,5 +98,11 @@ bug (two copies drift, and the reader can't tell which is authoritative):
 ## Implementation outcome                ← filled at ship time
 ```
 
-Reference thin examples: `docs/releases/v1-0-3.md` (a full feature), `v1-0-4.md` (gated on a
-brainstorm), `v1-1.md` (a not-scheduled decision artifact).
+Reference thin examples: `docs/releases/v1-0-3.md` (a full feature), `v1-0-4.md` (two PRDs bundled on
+a shared delivery model, with a requirement the codebase cannot yet meet recorded as a scoped
+waiver), `pddikti-pending.md` (gated on a brainstorm), `v1-1.md` (a not-scheduled decision artifact).
+
+**A version number is not a reservation.** If a release holds a number but is blocked on something
+outside its own scope, and ready P0 work is queued behind it, take the number back and let the blocked
+one sit unnumbered until it is schedulable — then fix every pointer to it in the same pass. (Done
+2026-07-22: PDDIKTI held `v1.0.4` while gated on a brainstorm; PRD-4 + PRD-5 took it.)

@@ -3,8 +3,13 @@
 - **PRD:** 2 — refer to this as **PRD-2**.
 - **Status:** requirements **partially locked.** Purpose + architecture are decided; several flow
   decisions are open and belong to a dedicated `superpowers:brainstorming` session **before** planning.
-- **Target release:** v1.0.4 (`docs/releases/v1-0-4.md`). This PRD is the authoritative requirements;
-  the release plan refers to it.
+- **Target release:** **unnumbered backlog** — `docs/releases/pddikti-pending.md`. This PRD is the
+  authoritative requirements; the release plan refers to it.
+  > **Renumbered 2026-07-22 (PM, Farrel's call).** This held **v1.0.4** until then. It gave the number
+  > up because it is gated on an unresolved brainstorm and therefore not schedulable, while PRD-4 +
+  > PRD-5 are P0 and ready. **`v1.0.4` now means PRD-4 + PRD-5** — do not read any older reference to
+  > "v1.0.4" in this file or elsewhere as pointing at PDDIKTI. This release gets a number when its open
+  > questions resolve.
 - **Author:** Product · 2026-07-17
 - **Related:** PRD-3 (the "v1.1 replace Supabase" idea — **not** this; see the naming-trap note below).
 - **Resolved this session:** the lookup keys on **NIM** — Mom captures the NIM / it is legible on the
@@ -33,8 +38,10 @@ Verification is a **positive signal only** — its absence never blocks registra
 
 ## Decisions locked (do not relitigate)
 
-1. **Its own release (v1.0.4).** Not folded into v1.0.3, and **not** the "v1.1 replace Supabase" idea
-   despite stale `// v1.1 PDDikti` comments in the code — that label is a known **naming trap** (PRD-3).
+1. **Its own release.** Not folded into v1.0.3, not into v1.0.4 (PRD-4 + PRD-5), and **not** the
+   "v1.1 replace Supabase" idea despite stale `// v1.1 PDDikti` comments in the code — that label is a
+   known **naming trap** (PRD-3). *The decision locked here is "its own release"; the version number
+   attached to it is not part of the decision and was released on 2026-07-22 — see Target release.*
 2. **A Supabase Edge Function proxies PDDIKTI.** The device calls **our** Edge Function and never calls
    PDDIKTI directly, because every "PDDIKTI API" is unofficial and fragile; a break must be fixable
    server-side (`supabase functions deploy`) with no OTA/APK and no waiting for Mom to relaunch. This
