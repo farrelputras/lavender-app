@@ -12,6 +12,7 @@ import { getRentals } from "@/services/rentals"
 import type { RentalListItem } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatDateShort, formatRupiah } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type FilterTab = "ALL" | "ACTIVE" | "COMPLETED"
@@ -72,6 +73,9 @@ function RentalCard({ r, onPress }: { r: RentalListItem; onPress: () => void }) 
 
 export function RentalScreen() {
   const nav = useNavigation<Nav>()
+  // PRD-4 (v1.0.4): Rental sits inside MainNavigator's tab bar (AC-3) — extra list-end
+  // clearance beyond this screen's existing zero-inset padding.
+  const bottomSpace = useBottomSpace()
   const [items, setItems] = useState<RentalListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
@@ -148,7 +152,7 @@ export function RentalScreen() {
             onPress={() => nav.navigate("RentalDetail", { rentalId: item.id })}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 80 + bottomSpace }]}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
@@ -221,7 +225,8 @@ const styles = StyleSheet.create({
   tabTextActive: { color: colors.onPrimaryContainer },
 
   // List
-  listContent: { paddingBottom: 80 },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (80 base + useBottomSpace()).
+  listContent: {},
   emptyState: { alignItems: "center", padding: 24 },
 
   // Card

@@ -26,6 +26,7 @@ import {
 import type { HutangFull, Payment } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah, formatHeaderDate, formatTime } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 function methodLabel(p: Payment): string {
   switch (p.method) {
@@ -42,6 +43,9 @@ function methodLabel(p: Payment): string {
 
 export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"HutangDetail">) {
   const { hutangId } = route.params
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator) — the raw device inset, added to
+  // this screen's existing zero-inset scroll padding (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
   const [h, setH] = useState<HutangFull | null>(null)
   const [loading, setLoading] = useState(true)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -119,7 +123,9 @@ export function HutangDetailScreen({ route, navigation }: AppStackScreenProps<"H
         <Text style={styles.appBarTitle}>Detail Hutang</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: spacing.xxl + bottomSpace }]}
+      >
         {/* Hero Summary Card */}
         <View style={styles.heroCard}>
           {/* Status badge — absolute top-right */}
@@ -310,7 +316,8 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: { paddingBottom: spacing.xxl, paddingHorizontal: spacing.base, paddingTop: spacing.sm },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (spacing.xxl base + useBottomSpace()).
+  scroll: { paddingHorizontal: spacing.base, paddingTop: spacing.sm },
 
   // Hero card
   heroCard: {

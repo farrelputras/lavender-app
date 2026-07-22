@@ -37,6 +37,8 @@ import {
   computeReturnTotal,
 } from "@/utils/rentalMath"
 import { showToast } from "@/utils/showToast"
+import { useBottomBarPadding } from "@/utils/useBottomBarPadding"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -158,6 +160,12 @@ function Stepper({
 
 export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"Pengembalian">) {
   const { rentalId } = route.params
+
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator) — useBottomSpace() is the raw
+  // device inset. barPadding is for the pinned bottom bar; bottomSpace is the extra scroll
+  // clearance below it.
+  const barPadding = useBottomBarPadding()
+  const bottomSpace = useBottomSpace()
 
   const [rental, setRental] = useState<Rental | null>(null)
   const [user, setUser] = useState<UserSummary | null>(null)
@@ -970,11 +978,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
             </FieldCard>
           </View>
 
-          <View style={{ height: spacing.xxxl + 64 }} />
+          <View style={{ height: spacing.xxxl + 64 + bottomSpace }} />
         </ScrollView>
 
         {/* ── Sticky bottom CTA ──────────────────────────────────── */}
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { paddingBottom: barPadding }]}>
           <TouchableOpacity
             style={[styles.btnSelesai, saving && styles.btnDisabled]}
             onPress={handleSave}
@@ -1356,7 +1364,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.outlineVariant,
     borderTopWidth: 1,
     elevation: 4,
-    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
     paddingHorizontal: spacing.base,
     paddingTop: spacing.sm,
     shadowColor: "#000",

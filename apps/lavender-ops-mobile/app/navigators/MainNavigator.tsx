@@ -12,6 +12,7 @@ import { useAppTheme } from "@/theme/context"
 import type { ThemedStyle } from "@/theme/types"
 
 import type { MainTabParamList } from "./navigationTypes"
+import { TAB_BAR_BASE_HEIGHT } from "./tabBarMetrics"
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
@@ -27,7 +28,7 @@ export function MainNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarHideOnKeyboard: true,
-        tabBarStyle: themed([$tabBar, { height: bottom + 70 }]),
+        tabBarStyle: themed([$tabBar, { height: bottom + TAB_BAR_BASE_HEIGHT }]),
         tabBarActiveTintColor: colors.tint,
         tabBarInactiveTintColor: colors.tintInactive,
         tabBarLabelStyle: themed($tabBarLabel),

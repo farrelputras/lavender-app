@@ -21,6 +21,7 @@ import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, initialsFromName } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -95,6 +96,10 @@ function UserRow({ u, onPress }: { u: UserSummary; onPress: () => void }) {
 
 export function UserScreen() {
   const navigation = useNavigation<Nav>()
+  // PRD-4 (v1.0.4): User sits inside MainNavigator's tab bar (AC-3) — extra list-end clearance
+  // beyond this screen's existing zero-inset padding. Shared by both the FlatList and the
+  // SectionList below (only one renders at a time, per searchMode).
+  const bottomSpace = useBottomSpace()
   const [rows, setRows] = useState<UserSummary[]>([])
   const [query, setQuery] = useState("")
   const [searchMode, setSearchMode] = useState(false)
@@ -165,7 +170,7 @@ export function UserScreen() {
               onPress={() => navigation.navigate("UserDetail", { userId: item.id })}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 120 + bottomSpace }]}
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
@@ -191,7 +196,7 @@ export function UserScreen() {
             </View>
           )}
           stickySectionHeadersEnabled
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 120 + bottomSpace }]}
         />
       )}
 
@@ -267,7 +272,8 @@ const styles = StyleSheet.create({
   },
 
   // List
-  listContent: { paddingBottom: 120 },
+  // paddingBottom is set dynamically at both call sites — PRD-4, v1.0.4 (120 base + useBottomSpace()).
+  listContent: {},
 
   // Card
   card: {

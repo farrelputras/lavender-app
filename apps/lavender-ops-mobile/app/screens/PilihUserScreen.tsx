@@ -19,6 +19,7 @@ import { getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { formatRupiah, initialsFromName } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -109,6 +110,9 @@ function ListFooter({ onPress }: { onPress: () => void }) {
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 export function PilihUserScreen({ navigation, route }: SewaBaruScreenProps<"PilihUser">) {
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator, inside the Sewa Baru stack) — the
+  // raw device inset, added to this screen's existing zero-inset list padding (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
   const [summaries, setSummaries] = useState<UserSummary[]>([])
   const [query, setQuery] = useState("")
   const [isSearchMode, setIsSearchMode] = useState(false)
@@ -221,7 +225,10 @@ export function PilihUserScreen({ navigation, route }: SewaBaruScreenProps<"Pili
                 onPress={() => navigation.navigate("PilihKendaraan", { userId: item.id })}
               />
             )}
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[
+              styles.listContent,
+              { paddingBottom: spacing.xxxl + bottomSpace },
+            ]}
             ListFooterComponent={<ListFooter onPress={handleDaftarkanUserBaru} />}
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
@@ -250,7 +257,10 @@ export function PilihUserScreen({ navigation, route }: SewaBaruScreenProps<"Pili
               </View>
             )}
             stickySectionHeadersEnabled
-            contentContainerStyle={styles.listContent}
+            contentContainerStyle={[
+              styles.listContent,
+              { paddingBottom: spacing.xxxl + bottomSpace },
+            ]}
             ListFooterComponent={<ListFooter onPress={handleDaftarkanUserBaru} />}
             keyboardShouldPersistTaps="handled"
           />
@@ -328,8 +338,8 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
   },
+  // paddingBottom is set dynamically at both call sites — PRD-4, v1.0.4 (spacing.xxxl base + useBottomSpace()).
   listContent: {
-    paddingBottom: spacing.xxxl,
     paddingTop: spacing.xs,
   },
 

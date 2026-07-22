@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Platform,
   Alert,
   Linking,
   TextInput,
@@ -46,6 +45,8 @@ import {
 } from "@/utils/format"
 import { sumPayments, formatPaket, isOverdue, hoursLate } from "@/utils/rentalMath"
 import { showToast } from "@/utils/showToast"
+import { useBottomBarPadding } from "@/utils/useBottomBarPadding"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 import { uuidv4 } from "@/utils/uuid"
 
 import {
@@ -104,6 +105,14 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
 
   const { role } = useSession()
   const isAdmin = role === "admin"
+
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator) — useBottomSpace() is the raw
+  // device inset. barPadding is for the two pinned bottom CTAs (ACTIVE/COMPLETED, below);
+  // bottomSpace is the extra scroll clearance below them. EditActionBar (the inline-edit bar,
+  // used elsewhere in this screen) renders mid-scroll and is explicitly out of scope — Lead,
+  // 2026-07-22: adding inset padding there would inject a gap in the middle of a form.
+  const barPadding = useBottomBarPadding()
+  const bottomSpace = useBottomSpace()
 
   const [rental, setRental] = useState<Rental | null>(null)
   const [user, setUser] = useState<UserSummary | null>(null)
@@ -860,12 +869,12 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
           </TouchableOpacity>
         )}
 
-        <View style={{ height: spacing.xxxl + 64 }} />
+        <View style={{ height: spacing.xxxl + 64 + bottomSpace }} />
       </ScrollView>
 
       {/* Sticky bottom CTA — only for active rentals */}
       {rental.status === "ACTIVE" && (
-        <View style={styles.bottomBar}>
+        <View testID="active-bottom-bar" style={[styles.bottomBar, { paddingBottom: barPadding }]}>
           <TouchableOpacity
             style={styles.btnProses}
             onPress={() => navigation.navigate("Pengembalian", { rentalId: rental.id })}
@@ -881,7 +890,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
 
       {/* Sticky bottom CTA — completed rentals: back to home */}
       {rental.status === "COMPLETED" && (
-        <View style={styles.bottomBar}>
+        <View style={[styles.bottomBar, { paddingBottom: barPadding }]}>
           <TouchableOpacity style={styles.btnKembali} onPress={handleBack} activeOpacity={0.8}>
             <MaterialIcons name="home" size={20} color={colors.onPrimary} />
             <Text style={[textStyles.labelLg, { color: colors.onPrimary }]}>Kembali ke Beranda</Text>
@@ -971,7 +980,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.outlineVariant,
     borderTopWidth: 1,
     padding: spacing.base,
-    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
   },
   btnKembali: {
     alignItems: "center",

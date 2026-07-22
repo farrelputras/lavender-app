@@ -22,11 +22,15 @@ import { getUser, getUserSummary, softDeleteUser, hardDeleteUser } from "@/servi
 import type { User, UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah, toWaNumber } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"UserDetail">) {
   const { userId } = route.params
   const { role } = useSession()
   const isAdmin = role === "admin"
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator) — the raw device inset, added to
+  // this screen's existing zero-inset scroll padding (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
   const [user, setUser] = useState<User | null>(null)
   const [summary, setSummary] = useState<UserSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -140,7 +144,9 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: spacing.xxl + bottomSpace }]}
+      >
         {/* Profile Hero */}
         <View style={styles.hero}>
           <Text style={styles.heroName}>{displayName}</Text>
@@ -327,7 +333,8 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: { paddingBottom: spacing.xxl },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (spacing.xxl base + useBottomSpace()).
+  scroll: {},
 
   // Profile Hero
   hero: {

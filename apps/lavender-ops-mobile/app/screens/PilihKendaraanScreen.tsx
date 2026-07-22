@@ -18,6 +18,7 @@ import type { UserSummary, VehicleSummary, VehicleCategory } from "@/services/re
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { initialsFromName } from "@/utils/format"
 import { showToast } from "@/utils/showToast"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -88,6 +89,10 @@ function VehicleCard({ vehicle, onPress }: { vehicle: VehicleSummary; onPress: (
 
 export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<"PilihKendaraan">) {
   const { userId } = route.params
+
+  // PRD-4 (v1.0.4): no tab bar here (outside MainNavigator, inside the Sewa Baru stack) — the
+  // raw device inset, added to this screen's existing zero-inset grid padding (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
 
   const [userSummary, setUserSummary] = useState<UserSummary | null>(null)
   const [vehicles, setVehicles] = useState<VehicleSummary[]>([])
@@ -235,7 +240,7 @@ export function PilihKendaraanScreen({ navigation, route }: SewaBaruScreenProps<
           <VehicleCard vehicle={item} onPress={() => handleSelectVehicle(item)} />
         )}
         columnWrapperStyle={styles.gridRow}
-        contentContainerStyle={styles.gridContent}
+        contentContainerStyle={[styles.gridContent, { paddingBottom: spacing.xxxl + bottomSpace }]}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
@@ -372,8 +377,8 @@ const styles = StyleSheet.create({
   },
 
   // Grid
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (spacing.xxxl base + useBottomSpace()).
   gridContent: {
-    paddingBottom: spacing.xxxl,
     paddingHorizontal: spacing.base,
   },
   gridRow: {

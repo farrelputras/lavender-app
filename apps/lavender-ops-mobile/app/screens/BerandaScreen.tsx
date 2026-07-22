@@ -22,12 +22,16 @@ import { getDashboardSummary, getRentalsDueToday } from "@/services/rentals"
 import type { DashboardSummary, RentalDueToday } from "@/services/rentals/types"
 import { colors, textStyles, borderRadius, spacing, cardShadow } from "@/theme/tokens"
 import { formatHeaderDate, formatTime, formatRupiah } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 type BerandaNavProp = NativeStackNavigationProp<AppStackParamList>
 
 export function BerandaScreen() {
   const navigation = useNavigation<BerandaNavProp>()
   const { signOut } = useAuth()
+  // PRD-4 (v1.0.4): Beranda sits inside MainNavigator's tab bar (AC-3) — the extra clearance
+  // the last card needs beyond this screen's existing zero-inset spacer.
+  const bottomSpace = useBottomSpace()
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [rentalsDue, setRentalsDue] = useState<RentalDueToday[]>([])
   const [loading, setLoading] = useState(true)
@@ -264,7 +268,7 @@ export function BerandaScreen() {
 
         <VersionFooter />
 
-        <View style={styles.bottomPadding} />
+        <View style={[styles.bottomPadding, { height: 32 + bottomSpace }]} />
       </ScrollView>
     </SafeAreaView>
   )
@@ -396,6 +400,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   bottomPadding: {
-    height: 32,
+    // height is set dynamically at the call site — PRD-4, v1.0.4 (32 base + useBottomSpace()).
   },
 })

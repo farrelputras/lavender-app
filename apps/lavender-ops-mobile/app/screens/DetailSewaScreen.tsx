@@ -38,6 +38,8 @@ import {
   formatPaket,
 } from "@/utils/rentalMath"
 import { showToast } from "@/utils/showToast"
+import { useBottomBarPadding } from "@/utils/useBottomBarPadding"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 import { uuidv4 } from "@/utils/uuid"
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -126,6 +128,12 @@ function Stepper({
 
 export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"DetailSewa">) {
   const { userId, vehicleId } = route.params
+
+  // PRD-4 (v1.0.4): this screen has no tab bar (it's outside MainNavigator), so
+  // useBottomSpace() is the raw device inset. barPadding is for the pinned bottom bar
+  // (Simpan Rental / Batal — AC-1); bottomSpace is the extra scroll clearance below it.
+  const barPadding = useBottomBarPadding()
+  const bottomSpace = useBottomSpace()
 
   // ─── Data loading
   const [userSummary, setUserSummary] = useState<UserSummary | null>(null)
@@ -990,12 +998,12 @@ export function DetailSewaScreen({ navigation, route }: SewaBaruScreenProps<"Det
             />
           </View>
 
-          <View style={{ height: spacing.xxxl + 64 }} />
+          <View style={{ height: spacing.xxxl + 64 + bottomSpace }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
       {/* ── Sticky bottom bar ────────────────────────────────── */}
-      <View style={styles.bottomBar}>
+      <View style={[styles.bottomBar, { paddingBottom: barPadding }]}>
         <TouchableOpacity
           style={styles.btnBatal}
           onPress={() => navigation.goBack()}
@@ -1403,7 +1411,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.sm,
     padding: spacing.base,
-    paddingBottom: Platform.OS === "ios" ? spacing.xl : spacing.base,
   },
   btnBatal: {
     alignItems: "center",

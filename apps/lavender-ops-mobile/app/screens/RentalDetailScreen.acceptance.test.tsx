@@ -12,17 +12,30 @@
 //
 // Derived from PRD-1's acceptance criteria, not from the implementation.
 
+jest.mock("react-native-safe-area-context", () => ({
+  ...jest.requireActual("react-native-safe-area-context"),
+  useSafeAreaInsets: jest.fn(),
+}))
+
 import { within, fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import type { Rental, RentalStatus } from "@/services/rentals/types"
 
 import { RentalDetailScreen } from "./RentalDetailScreen"
+import { mockInsets, ZERO_INSETS } from "../../test/mockSafeAreaInsets"
 
 // This file's heaviest cases mount the full screen (many sections) twice (AC-1's close+reopen) or
 // wait through a real async handler chain (choosePhotoSource). Jest's 5000ms default per-test
 // timeout was observed to be occasionally too tight under load, independent of correctness — widen
 // it here rather than risk environment-flakiness false failures.
 jest.setTimeout(15000)
+
+// v1.0.4 (PRD-4): RentalDetailScreen now reads useBottomSpace() → useSafeAreaInsets() for its
+// two pinned bottom CTAs. Zero inset reproduces this suite's pre-v1.0.4 behavior exactly
+// (AC-5/BR-5).
+beforeEach(() => {
+  mockInsets(ZERO_INSETS)
+})
 
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (cb: () => void | (() => void)) => {

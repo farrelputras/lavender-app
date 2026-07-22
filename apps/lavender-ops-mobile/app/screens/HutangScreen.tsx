@@ -12,6 +12,7 @@ import { getHutangs } from "@/services/rentals"
 import type { HutangFull } from "@/services/rentals/types"
 import { colors, textStyles, spacing, cardShadow } from "@/theme/tokens"
 import { formatRupiah } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -60,6 +61,9 @@ function HutangCard({ h, onPress }: { h: HutangFull; onPress: () => void }) {
 
 export function HutangScreen() {
   const nav = useNavigation<Nav>()
+  // PRD-4 (v1.0.4): Hutang sits inside MainNavigator's tab bar (AC-3) — extra list-end
+  // clearance beyond this screen's existing zero-inset padding.
+  const bottomSpace = useBottomSpace()
   const [items, setItems] = useState<HutangFull[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState("")
@@ -114,7 +118,7 @@ export function HutangScreen() {
             onPress={() => nav.navigate("HutangDetail", { hutangId: item.id })}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 120 + bottomSpace }]}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
@@ -173,7 +177,8 @@ const styles = StyleSheet.create({
   },
 
   // List
-  listContent: { paddingBottom: 120 },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (120 base + useBottomSpace()).
+  listContent: {},
   emptyState: { alignItems: "center", padding: 24 },
 
   // Card

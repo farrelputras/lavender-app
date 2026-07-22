@@ -1,8 +1,34 @@
+jest.mock("react-native-safe-area-context", () => ({
+  ...jest.requireActual("react-native-safe-area-context"),
+  useSafeAreaInsets: jest.fn(),
+}))
+
+// LAVENDER ships Android-only (CLAUDE.md), but jest-expo's default preset resolves
+// `Platform.select` to its iOS implementation always (see
+// app/utils/useBottomBarPadding.test.tsx for the full explanation). Needed here because this
+// suite asserts on the pinned bottom bar's actual padding value, which comes from
+// useBottomBarPadding() → Platform.select({ ios: spacing.xl, default: spacing.base }).
+jest.mock("react-native/Libraries/Utilities/Platform.ios", () => ({
+  __esModule: true,
+  default: {
+    OS: "android",
+    select: (spec: Record<string, unknown>) => spec.android ?? spec.default,
+  },
+}))
+
 import { within, fireEvent, render, waitFor } from "@testing-library/react-native"
 
 import type { Rental, RentalStatus } from "@/services/rentals/types"
 
 import { RentalDetailScreen } from "./RentalDetailScreen"
+import { mockInsets, THREE_BUTTON_NAV_INSETS, ZERO_INSETS } from "../../test/mockSafeAreaInsets"
+
+// v1.0.4 (PRD-4): RentalDetailScreen now reads useBottomSpace() → useSafeAreaInsets() for its
+// two pinned bottom CTAs. Zero inset reproduces this suite's pre-v1.0.4 behavior exactly
+// (AC-5/BR-5).
+beforeEach(() => {
+  mockInsets(ZERO_INSETS)
+})
 
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (cb: () => void | (() => void)) => {
@@ -129,6 +155,27 @@ describe("edit affordance visibility", () => {
       }
     },
   )
+})
+
+// ─── Bottom-bar inset padding (PRD-4, v1.0.4) ──────────────────────────────────
+describe("pinned bottom CTA — inset-driven padding", () => {
+  it("matches the pre-v1.0.4 Android padding at zero inset — the no-regression guard", async () => {
+    mockInsets(ZERO_INSETS)
+    const { getByTestId } = await renderScreen(makeRental({ status: "ACTIVE" }))
+    const style = require("react-native").StyleSheet.flatten(
+      getByTestId("active-bottom-bar").props.style,
+    )
+    expect(style.paddingBottom).toBe(16) // spacing.base — unchanged from before v1.0.4
+  })
+
+  it("grows by exactly the device's reported inset when it is non-zero", async () => {
+    mockInsets(THREE_BUTTON_NAV_INSETS)
+    const { getByTestId } = await renderScreen(makeRental({ status: "ACTIVE" }))
+    const style = require("react-native").StyleSheet.flatten(
+      getByTestId("active-bottom-bar").props.style,
+    )
+    expect(style.paddingBottom).toBe(16 + THREE_BUTTON_NAV_INSETS.bottom)
+  })
 })
 
 // ─── Wholesale patch construction (RPC rewrites kondisiKeluar wholesale) ───────

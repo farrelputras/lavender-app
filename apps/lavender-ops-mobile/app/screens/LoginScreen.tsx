@@ -39,7 +39,11 @@ export function LoginScreen() {
   const canSubmit = email.trim().length > 0 && password.length > 0 && !submitting
 
   return (
-    <SafeAreaView style={styles.safe}>
+    // PRD-4 (v1.0.4): this was previously an un-set `edges` prop, which
+    // react-native-safe-area-context defaults to all four edges additive — Login already
+    // reserved the bottom system-nav inset, by accident. Made explicit here; no behavior change
+    // (AC-5/BR-5) — see the v1.0.4 handoff note.
+    <SafeAreaView style={styles.safe} edges={["top", "right", "bottom", "left"]}>
       <KeyboardAwareScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"

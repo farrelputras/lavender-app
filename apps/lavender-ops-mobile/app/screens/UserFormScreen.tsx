@@ -22,6 +22,7 @@ import { choosePhotoSource } from "@/services/photos/capture"
 import { createUser, getUser, updateUser } from "@/services/rentals"
 import type { PhotoInput } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 type SlotState =
   | { status: "none" }
@@ -46,6 +47,11 @@ const NONE: SlotState = { status: "none" }
 export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserForm">) {
   const mode = route.params.mode
   const userId = mode === "edit" ? route.params.userId : null
+
+  // PRD-4 (v1.0.4): the scroll content clears the pinned BottomActionBar, which itself now
+  // grows by this same amount (useBottomBarPadding) — the scroll must grow by exactly as much
+  // to keep clearing it, not by a second, separately-computed amount (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
 
   const [loading, setLoading] = useState(mode === "edit")
   const [saving, setSaving] = useState(false)
@@ -179,7 +185,9 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         <Text style={styles.appBarTitle}>{mode === "create" ? "User Baru" : "Edit User"}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 160 + bottomSpace }]}
+      >
         <SectionLabel>Identitas</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Nama Lengkap *</Text>
@@ -316,7 +324,8 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: { paddingBottom: 160 },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (160 base + useBottomSpace()).
+  scroll: {},
 
   // Field inside FieldCard
   fieldLabel: {

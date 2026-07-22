@@ -22,8 +22,13 @@ import { createManualHutang, getUserSummaries } from "@/services/rentals"
 import type { UserSummary } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 import { parseRupiahInput } from "@/utils/format"
+import { useBottomSpace } from "@/utils/useBottomSpace"
 
 export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm">) {
+  // PRD-4 (v1.0.4): the scroll content clears the pinned BottomActionBar, which itself now
+  // grows by this same amount (useBottomBarPadding) — the scroll must grow by exactly as much
+  // to keep clearing it, not by a second, separately-computed amount (AC-3/AC-5).
+  const bottomSpace = useBottomSpace()
   const [users, setUsers] = useState<UserSummary[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [query, setQuery] = useState("")
@@ -72,7 +77,10 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
         <Text style={styles.appBarTitle}>Hutang Baru</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 160 + bottomSpace }]}
+        keyboardShouldPersistTaps="handled"
+      >
         <SectionLabel>Pelanggan</SectionLabel>
 
         {/* Pelanggan card: search + user rows combined */}
@@ -171,7 +179,8 @@ const styles = StyleSheet.create({
   },
 
   // Scroll
-  scroll: { paddingBottom: 160 },
+  // paddingBottom is set dynamically at the call site — PRD-4, v1.0.4 (160 base + useBottomSpace()).
+  scroll: {},
 
   // Pelanggan section (custom card: search + list rows)
   pelangganCard: {
