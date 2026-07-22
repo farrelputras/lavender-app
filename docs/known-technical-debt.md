@@ -8,12 +8,22 @@ standing list that each release triages against.
 behind.** Nothing here is scheduled; if an item gets picked up, move it into that release's doc and
 strike it from this file when it ships.
 
+> **Struck items are kept as tombstones** only when a decision inside them must not be re-litigated
+> (see #5's 30s timeout). Otherwise a shipped item is removed outright.
+
 ---
 
-## 1. ~24 connectors still throw postgrest's raw error object
+## 1. 24 connectors still throw postgrest's raw error object
 
-- **Status:** open — **explicitly excluded from v1.0.2** (blast radius too wide for a polish release)
+- **Status:** open — **excluded from v1.0.2** (blast radius too wide for a polish release) and
+  **explicitly declined again in v1.0.3** (Farrel, scope discipline: it looked newly urgent precisely
+  *because* that release was standing in the error path — scope creep wearing a disguise).
+  **Priority raised in v1.0.3**: it now has a reachable user-visible symptom, which it did not have
+  before. The *count* did not grow; the *inconsistency* sharpened.
 - **First found:** v1.0.1, item 6
+- **Counted exactly 2026-07-21** (not "~"): **24** `throw error` sites in
+  `app/services/rentals/index.ts`, versus **5** that surface the real message —
+  `updateRental` (`:389`) and the four `hardDelete*` (`:564`, `:570`, `:576`, `:582`).
 
 The Supabase client is not configured with `.throwOnError()`, so `supabase.rpc()` and `.from()`
 return `error` as a **plain object** (`{message, details, hint, code}`), not an `Error`.
@@ -37,6 +47,33 @@ the moment one does, the operator sees a generic string instead of the reason.
 > ⚠️ **Never mock a Supabase failure as `new Error(...)` in tests.** Supabase never produces that
 > shape, so the test proves your belief about the library rather than its behaviour. This exact mock
 > hid the original bug through two green reviews. Mock the plain-object shape.
+> (A *`fetch`* rejection genuinely **is** an `Error` — know which layer you are mocking.)
+
+### What changed in v1.0.3
+
+1. **The inconsistency sharpened.** v1.0.3's new `updateRental` connector throws
+   `new Error(error.message)` by its own constraint. With the four `hardDelete*` connectors that makes
+   **5** connectors that surface the real reason against **24** that discard it. The same class of
+   failure now produces a real message on the edit-rental path and a generic one everywhere else —
+   non-uniformly wrong is harder to reason about than uniformly wrong.
+2. **#5 gave it a live symptom.** v1.0.3's new fetch timeout raises a real `Error` with a clear
+   Indonesian message. On the 24 raw-throw paths that message is discarded; and on
+   `PengembalianScreen` the toast is a hardcoded `"Gagal menyimpan pengembalian"` regardless
+   (`PengembalianScreen.tsx:330`). Mom's most frequent handover save therefore fails honestly but
+   **anonymously** — she is told it failed, never that her connection is the reason, which is the one
+   thing she could act on.
+
+   > **Lead to confirm the exact hop** before planning a fix: whether a `fetch` rejection is *thrown*
+   > by `supabase-js` or returned as an `error` object determines whether the fix belongs at the
+   > connector, the screen, or both. Do not plan from this paragraph alone.
+
+**New constraint on the root fix:** enabling `.throwOnError()` now interacts with `fetchWithTimeout`
+in the same file. The two must be reviewed together, not sequentially.
+
+**Scoping note:** this is a client-wide error-behaviour change touching every connector. It does
+**not** belong as a ride-along in a release whose review surface is elsewhere — it was correctly kept
+out of both v1.0.2 and v1.0.3. It wants a small release of its own, or a seat in a release already
+opening the client.
 
 ---
 
@@ -135,24 +172,40 @@ which has no math surface.
 
 ---
 
-## 5. Offline saves hang forever
+## 5. ~~Offline saves hang forever~~ — CLOSED in v1.0.3 (2026-07-21)
 
-- **Status:** **scheduled into v1.0.3** (2026-07-18, PM) as a ride-along beside PRD-1 — the new
-  handover save inherits this hang, and #5 completes PRD-1 BR-7's offline case. **Strike this item when
-  v1.0.3 ships.** (Was: excluded from v1.0.2 — client-config change; blast radius comparable to #1.)
+- **Status:** ✅ **struck.** A 30s `AbortController` timeout on the Supabase client's `fetch`
+  (`app/services/supabase/client.ts`) shipped in v1.0.3. Every call through the client is now bounded:
+  an unreachable save **fails** instead of hanging. Proven by a test simulating a never-resolving
+  request, plus a no-regression pass over the existing rental / user / hutang paths.
 - **First found:** noted alongside #2 in v1.0.1; stated separately here on 2026-07-12
+- **Kept as a tombstone, not deleted**, because of the two notes below. Do not re-open the item; do
+  not re-litigate the number.
 
-React Native's `fetch` **never times out.** With no connection, a save doesn't fail — it simply never
-returns. Mom taps "Simpan", and the app sits there indefinitely with no error, no timeout, and no
-indication anything is wrong.
+React Native's `fetch` never times out — with no connection a save simply never returned. Mom tapped
+"Simpan" and the app sat there indefinitely with no error and no indication anything was wrong.
 
-For a tool used daily on mobile data this is a genuine honesty failure, and arguably more important
-than #2 (which is admin-only). It is listed separately because the fix is different: a timeout /
-abort wrapper on the Supabase client's `fetch` in `app/services/supabase/client.ts`, plus a decision
-about what the UI does when it fires.
+### Do not tighten the 30s without reading this (Farrel, D-3 — v1.0.3 deviation 5)
 
-Worth pairing with #1 — both are changes to the same client, both change error behaviour
-everywhere at once, and both want one careful review rather than two.
+The wrapper sits under **every** Supabase call, **including storage photo uploads**. It is a
+wall-clock cap on the whole request, not a stall detector. A tighter value would abort a
+slow-but-succeeding multi-photo upload on mobile data — killing work that was going to complete,
+which for Mom is worse than the hang it replaced. 30s is the compromise, chosen knowingly.
+
+**Residual to watch (not currently actionable):** the converse also holds — a genuinely slow upload
+that would have finished at 40s is now killed at 30. Nobody has reported this. **If Mom ever reports
+photos failing at handover, this is the first suspect**, and the honest fix is a per-operation budget
+(uploads longer than RPCs) or an inactivity-based abort, not a bigger single constant.
+
+### What #5 did *not* deliver — see #1
+
+The timeout raises a real `Error` carrying a clear Indonesian message. **That message reaches Mom on
+only a minority of paths.** 24 connectors still throw the raw postgrest object (#1), and some screens
+toast a hardcoded string regardless — `PengembalianScreen.tsx:330` shows
+`"Gagal menyimpan pengembalian"` on the return save, which is the save she taps most at handovers.
+
+So the honest post-v1.0.3 statement is: **saves now fail fast everywhere; only some of them tell her
+why.** The remainder is #1's, and #5 is what made #1 user-visible for the first time.
 
 ---
 
@@ -189,13 +242,39 @@ Underneath the phantom noise, `master` carries genuine lint errors — `react-na
 `react-native/no-color-literals`, `react-native/sort-styles`. All pre-existing; none introduced by
 v1.0.2.
 
-### The gate this forces (v1.0.2 decision, 2026-07-15)
+### The gate this forces (v1.0.2 decision, 2026-07-15 · revised 2026-07-21 after v1.0.3)
 
 Because "lint green" is unreachable without (a)'s deliberate renormalization, the release gate is
 **"real (non-`prettier`) lint errors must not increase vs `master`"**, with `compile` and `test`
 staying fully green. Counts from the v1.0.2 execution session (not re-counted since): `master` ~164
 real → branch ~157 real — extracting `showToast` removed several `split-platform-components` errors,
 and **zero new real errors were introduced**.
+
+**Revision (2026-07-21).** v1.0.3 breached this gate, knowingly. The breach exposed that the gate was
+not enforceable as written, so it is restated as a **budget with a ledger**:
+
+1. **An increase is permitted only if it is not silent.** It requires (a) a named reason, (b) Farrel's
+   explicit acceptance, (c) a row in the breach ledger below, and (d) a visible ⚠️ line in the release
+   doc's gates section rather than an unqualified ✅. v1.0.3 satisfied all four.
+2. **The baseline must be a measured number, not `~157`.** The next release that runs this gate MUST
+   re-count on `master` and record the exact figure and the command used. A "must not increase" gate
+   measured against an un-recounted approximation cannot be passed or failed rigorously — which is
+   precisely why breaching it was cheap.
+3. **The budget needs a ceiling** (⚠️ *number still owed by Farrel*). When cumulative accepted
+   increases cross it, the deliberate `.gitattributes` renormalization + real-error cleanup gets
+   scheduled as its own task. Without a ceiling the budget is a slow leak with a paper trail.
+
+> **Why this matters more than the +1 suggests.** v1.0.3 held the line on two expensive scope
+> questions and let the cheap one through without a ledger. Cheap breaches are the ones that
+> accumulate, precisely because each one individually is obviously not worth arguing about.
+
+### Breach ledger
+
+| Release | File | Rule | Δ real | Accepted by | Reason | Repaid? |
+|---|---|---|---|---|---|---|
+| v1.0.3 | `app/screens/RentalDetailScreen.tsx` | `no-restricted-imports` (raw `TextInput`) | **+1** | Farrel | Consistent with how both rental-math screens already do it; wrapping it would have introduced a component change into a release already carrying two unplanned server migrations. | No — open |
+
+Cumulative accepted increase since the gate was defined: **+1**.
 
 ---
 
@@ -224,6 +303,95 @@ underneath; until then the folder is inert.
 
 **Decision (Farrel, this session):** leave it. When v1.1 starts, either delete `services/api` + drop
 `apisauce` and build the client fresh, or repurpose the folder as that client. No action before then.
+
+---
+
+## 8. The `bensinKotak` write-boundary guard checks presence, not range
+
+- **Status:** open — **defence-in-depth gap, not a live bug.** Not reachable through the UI.
+- **First found:** v1.0.3 execution, 2026-07-21 (open thread carried out of the release)
+- **Severity:** low today; the *field* it guards is high-consequence, which is why it is written down.
+
+v1.0.3 closed a real hole: `(patch->…->>'bensinKotak')::int` yields NULL for **both** an absent key
+and a JSON `null`, and `translators.ts:28` then read it back as `?? 4` — **silently substituting 4
+kotak** for a value that was never sent. The new guard RAISEs instead of writing NULL.
+
+**It only checks `IS NULL`.** A value of `-5` or `9999` still writes straight through.
+
+- **Not reachable via the UI:** the edit control is a Stepper clamped 0–8 (`max = 8`, *derived* from
+  `DetailSewaScreen`'s `Math.min(8, …)` — the control that created the value in the first place).
+- **Reachable by anything that isn't that UI:** a future screen, a script, a hand-built patch, or a
+  connector change that stops clamping. The server is the last boundary and it is currently only
+  half-closed.
+- **Why the field matters even though the gap doesn't yet:** `bensinKotak` is the **baseline for the
+  fuel adjustment at return**. An out-of-range value does not produce a display glitch; it produces a
+  wrong number on a customer's bill.
+
+**Do not "fix" `translators.ts`'s `?? 4` fallback** — it is the correct defensive default for legacy
+rows. The fix belongs at the write boundary, where the guard already is.
+
+Fix shape (a server-side range check alongside the existing guard) is a **Lead** call, not specified
+here. Note for whoever takes it: the 0–8 range currently lives in more than one place (the Stepper's
+clamp, `DetailSewaScreen`'s `Math.min`, and the reader's `?? 4` default) — the coupling should be
+acknowledged even if it is not consolidated. Cheapest folded into a release already opening a
+migration; **do not** open a migration solely for this.
+
+---
+
+## 9. `CREATE OR REPLACE` body drift is unguarded for every RPC but one
+
+- **Status:** open — **this class has already cost this project a real money defect once.** Partially
+  mitigated in v1.0.3 (one function).
+- **First found:** as a realized defect, v1.0.3 execution 2026-07-21; the drift itself shipped in `0015`.
+- **Severity:** **high** — not because it is likely, but because its realized instance was invisible,
+  long-lived, and financial.
+
+Postgres has no partial edit of a function. **Every** change to an RPC rewrites the entire body, so
+every migration touching a function is a full-body rewrite whose diff nobody sees unless someone
+deliberately produces one. Reviewing the *new* body reads as correct; only old-vs-new reveals what was
+dropped.
+
+### The realized instance (keep this; it is the whole argument)
+
+- `0014` added `AND deleted_at IS NULL` to `rpc_close_rental`'s payment sum, **deliberately**, with a
+  comment saying so.
+- `0015` `CREATE OR REPLACE`d the whole function to add **one `tujuan` line**, and silently dropped the
+  filter. `0015`'s own header claims it only adds `tujuan`.
+- Live from `0015` until 2026-07-21: the app screen showed the correct `sisa`, and the server would
+  write a smaller hutang — or, when the deleted payment covered the bill, **none at all**. Nothing
+  self-heals it; `recompute_rental_hutang` filters correctly but only runs if an admin later edits a
+  payment on that rental.
+- It was found **by accident**, while machine-diffing bodies for an unrelated security migration.
+
+> **Realized damage: none.** A read-only audit on 2026-07-21 (after the fix) found **0 completed
+> rentals, 0 payments, 0 hutang** in production — Mom had not yet entered real rentals, so the defect
+> never fired against real money. This is luck, not a control, and does not lower the severity: the
+> same latency window would have been catastrophic three months later.
+
+### What exists today
+
+- **One** body-invariance guard test, for `rpc_close_rental`
+  (`apps/lavender-ops-mobile/test/closeRentalBodyInvariance.test.ts`). It is **index-aligned**, after a
+  near-miss: the first version used a set-difference diff, which is order-blind — **hoisting a
+  statement changes the money and produced an empty diff.** It was then verified non-vacuous by
+  mutation (reverting the auth guard fails 2 tests; a pure reorder fails 1; dropping the filter fails
+  3). Any future guard of this kind must be order-sensitive and mutation-verified, or it is decorative.
+- Nothing at all for the other ~10 `SECURITY DEFINER` functions.
+
+### The gap
+
+There is no general control. The next `CREATE OR REPLACE` on any other RPC has exactly the protection
+`0015` had: a header comment and a reviewer reading the new body.
+
+**Interim rule — costs nothing, adopt immediately:**
+
+> Any migration that `CREATE OR REPLACE`s an existing function must (a) state in its header **every**
+> behavioural line it changes, and (b) be reviewed by diffing the **previous body against the new
+> one**, never by reading the new body alone. A header that claims less than the diff shows is a
+> **blocking** review finding.
+
+The durable mechanism (snapshotting deployed bodies, generalized guard tests, a migration template
+check — or something else) is a **Lead** call and is not specified here.
 
 ---
 

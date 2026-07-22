@@ -3,7 +3,29 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Status: v1.0.2 shipped ✅ · v1.0.3 scoped (needs design)
+## Current Status: v1.0.3 shipped ✅ · next release = PRD-4 + PRD-5 (proposed, needs Farrel's call)
+
+**v1.0.3 shipped 2026-07-21** (channel `preview`, runtime `1.0.0`, update group `6adbb879`, no APK /
+no `version` bump) — **PRD-1: edit an active rental**, plus a debt #5 ride-along (30s fetch timeout).
+Scope grew **twice** mid-execution, both with Farrel's explicit approval:
+
+1. **Auth-gate hardening across 10 `SECURITY DEFINER` RPCs** — `auth.uid() IN (…)` returns **NULL**,
+   not `false`, when unauthenticated, so `IF NOT …` never fired. Also: `GRANT` was decorative
+   project-wide, because Postgres grants `EXECUTE` to `PUBLIC` by default and **no `REVOKE` existed
+   anywhere in the project**.
+2. **A money regression fix** — `rpc_close_rental` was summing payments *without* excluding
+   soft-deleted ones. `0014` added that filter deliberately; `0015` dropped it while replacing the
+   whole body to add one `tujuan` line. Live from `0015` until 2026-07-21, but a post-fix audit found
+   **zero realized damage** (no completed rentals existed yet).
+
+3 migrations applied, 3 verification scripts run against production, live smoke test on Mom's account,
+32 suites / 174 tests. Spec: `docs/releases/v1-0-3.md` · full execution record: `docs/reports/v1-0-3.md`.
+
+> ⚠️ **`CREATE OR REPLACE` has no partial edit.** Changing one line of a Postgres function restates the
+> **entire** body, and nothing in the tooling diffs it against what is deployed. That is exactly how the
+> `deleted_at` bug shipped. Debt **#9** carries the interim rule: any migration replacing a function
+> must list **every** behavioural line it changes in its header, and be reviewed by diffing old body
+> against new — never by reading the new body alone.
 
 **v1.0.1 shipped OTA 2026-07-12** (channel `preview`, no APK / no `version` bump) — completed-rental
 "Kembali ke Beranda" bar, no payment/tarif pre-fill, pinch-to-zoom `PhotoViewer`, and admin-only
@@ -47,7 +69,8 @@ change). Only the single `product` consult had been proven before that.
 |---|---|
 | `docs/feedback-and-improvements.md` | **Closed history** — v1.0 Phase 7 + v1.0.1 only |
 | `docs/releases/v1-0-2.md` | ✅ Shipped OTA 2026-07-15 (polish + honesty). |
-| `docs/releases/v1-0-3.md` | Scoping note — editing an active rental (needs its own design) |
+| `docs/releases/v1-0-3.md` | ✅ Shipped 2026-07-21 — edit active rental + auth hardening + money fix. |
+| `docs/prd/` | PRD-1 ✅ shipped (amended A-1) · PRD-2 PDDIKTI · PRD-3 v1.1 backend · **PRD-4 + PRD-5 = proposed next release** |
 | `docs/releases/v1-1.md` | Undesigned — replacing Supabase with a bespoke backend |
 | `docs/known-technical-debt.md` | Standing debt register, triaged per release |
 
