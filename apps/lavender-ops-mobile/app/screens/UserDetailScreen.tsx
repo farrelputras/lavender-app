@@ -261,11 +261,18 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
             activeOpacity={0.85}
           >
             <FontAwesome name="whatsapp" size={22} color="#FFFFFF" />
-            <Text style={[textStyles.labelLg, { color: "#FFFFFF" }]}>WhatsApp</Text>
+            {/* PRD-5 BR-1 (v1.0.4): `styles.btnLabel` (`flexShrink: 1`) lets the label wrap
+                instead of overflowing; the buttons below are `minHeight` so they grow to hold
+                it. Hoisted (not inline) so it doesn't trip `no-inline-styles`. */}
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: "#FFFFFF" }]}>
+              WhatsApp
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.85}>
             <MaterialIcons name="delete" size={20} color={colors.error} />
-            <Text style={[textStyles.labelLg, { color: colors.error }]}>Hapus User</Text>
+            <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.error }]}>
+              Hapus User
+            </Text>
           </TouchableOpacity>
           {isAdmin && (
             <TouchableOpacity
@@ -274,7 +281,9 @@ export function UserDetailScreen({ route, navigation }: AppStackScreenProps<"Use
               activeOpacity={0.85}
             >
               <MaterialIcons name="delete-forever" size={20} color={colors.onError} />
-              <Text style={[textStyles.labelLg, { color: colors.onError }]}>Hapus Permanen</Text>
+              <Text style={[textStyles.labelLg, styles.btnLabel, { color: colors.onError }]}>
+                Hapus Permanen
+              </Text>
             </TouchableOpacity>
           )}
         </View>
@@ -404,14 +413,18 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     paddingHorizontal: spacing.base,
   },
+  // PRD-5 BR-1 (v1.0.4): lets a button label wrap instead of overflowing — hoisted out of
+  // the JSX so it doesn't trip `no-inline-styles`.
+  btnLabel: { flexShrink: 1 },
   whatsappBtn: {
     alignItems: "center",
     backgroundColor: "#25D366",
     borderRadius: 999,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
   deleteBtn: {
     alignItems: "center",
@@ -420,8 +433,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
   hardDeleteBtn: {
     alignItems: "center",
@@ -429,7 +443,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
     justifyContent: "center",
+    minHeight: 52,
+    paddingVertical: spacing.sm,
   },
 })

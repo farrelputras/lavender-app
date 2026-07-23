@@ -41,7 +41,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.sm,
-    height: 52,
+    // PRD-5 BR-1 (v1.0.4): was a fixed `height` pinning the row around a scalable TextInput —
+    // `minHeight` lets the row grow with the input at larger text scale. `alignItems: "center"`
+    // (above) already does the vertical centring, so no `paddingVertical` addition is needed.
+    minHeight: 52,
     paddingHorizontal: spacing.md,
   },
 })

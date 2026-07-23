@@ -62,7 +62,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 24,
     flexDirection: "row",
-    height: 48,
+    // PRD-5 BR-1 (v1.0.4): was a fixed `height` pinning the row around a scalable TextInput —
+    // `minHeight` lets the pill grow with the input at larger text scale. `alignItems: "center"`
+    // (above) already does the vertical centring, so no `paddingVertical` addition is needed.
+    minHeight: 48,
     paddingHorizontal: spacing.md,
     ...cardShadow,
   },
