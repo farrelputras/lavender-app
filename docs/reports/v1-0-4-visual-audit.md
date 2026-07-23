@@ -92,7 +92,7 @@ Android's native window resize. Whether the new inset padding produces a floatin
 
 | # | Screen | What to check |
 |---|---|---|
-| **H1** | **BerandaScreen**, scrolled to the bottom | Confirm a line reading **`fontScale X · inset Y`** renders below the version number. **Record both numbers.** `MAX_FONT_SCALE = 1.5` is a deliberate over-cap, **not a measurement** — this line is the only thing that tells us whether Mom's real MIUI "XL" sits below, at, or above it, and whether her 3-button inset matches the `48px` assumed throughout testing. **Ask Mom for this screenshot after she relaunches.** If her real scale exceeds 1.5, the cap is wrong. |
+| **H1** | **BerandaScreen**, scrolled to the bottom | ✅ **MEASURED on Mom's Poco M3, 2026-07-23:** `fontScale = 1.3999999…` (≈**1.4**) · `inset = 47.27px` · 3-button nav respected. **Both assumptions confirmed:** her real MIUI "XL" (1.4) sits **below** `MAX_FONT_SCALE = 1.5` — the cap is adequate and never shrinks her text — and the runtime inset (47.27) matches the `48px` assumed throughout testing, proving PRD-4 reads a real device inset (BR-3). This closes the release's one LOW-confidence assumption. |
 
 ## I · Every remaining screen — general pass plus the named specific
 
