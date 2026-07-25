@@ -275,6 +275,99 @@ function pressSave(utils: RenderResult) {
   fireEvent.press(utils.getByText(/Selesaikan/))
 }
 
+// ─── Dispatch ②b helpers — text-entry, row removal, the picker, PembayaranSheet edit/delete ──
+
+/** KM Kembali. INDEX FALLBACK: fixed index 2, valid ONLY on a fresh render (Tujuan 0, Harga 1,
+ * KM 2, Subtotal 3, ...Catatan last) — see `getSubtotalInput`. */
+function getKmInput(utils: RenderResult) {
+  return allTextInputs(utils)[2]
+}
+
+/** Tujuan. INDEX FALLBACK: fixed index 0, valid ONLY on a fresh render — see `getSubtotalInput`. */
+function getTujuanInput(utils: RenderResult) {
+  return allTextInputs(utils)[0]
+}
+
+/** Catatan (main, not the PembayaranSheet's own Catatan). INDEX FALLBACK: always the LAST
+ * TextInput on a fresh render with no extra-fee/discount/payment rows added and the sheet
+ * closed — see `getSubtotalInput`. */
+function getNotesInput(utils: RenderResult) {
+  const inputs = allTextInputs(utils)
+  return inputs[inputs.length - 1]
+}
+
+/**
+ * Presses one extra-fee row's own trash icon.
+ * STRUCTURAL FALLBACK: walks up from that row's description TextInput (found via its live
+ * `value`, i.e. `getByDisplayValue`) to the nearest ancestor matching `styles.extraFeeRow`'s
+ * signature (`flexDirection: "row"`, `alignItems: "center"`, a defined `gap`, no
+ * `justifyContent`). `styles.terlambatWarning` shares the same 3 keys but is never encountered
+ * here — it lives in a different section of the tree (Waktu Sewa, not Rincian Biaya) and is
+ * therefore never an ANCESTOR of this specific starting node, only a sibling elsewhere. Exactly
+ * one `TouchableOpacity` lives inside an `extraFeeRow` — the trash icon.
+ */
+function removeExtraFeeRowByDescription(utils: RenderResult, description: string) {
+  const descInput = utils.getByDisplayValue(description)
+  const row = findAncestorWhere(
+    descInput,
+    (flat) =>
+      flat.flexDirection === "row" &&
+      flat.alignItems === "center" &&
+      flat.gap !== undefined &&
+      flat.justifyContent === undefined,
+  )
+  if (!row) throw new Error(`extra-fee row (styles.extraFeeRow) for "${description}" not found`)
+  const { within } = require("@testing-library/react-native")
+  const trash = within(row).UNSAFE_getAllByType(require("react-native").TouchableOpacity)[0]
+  fireEvent.press(trash)
+}
+
+/**
+ * Presses the Diskon row's own trash icon (adjacent to `addDiscountRow`).
+ * STRUCTURAL FALLBACK: walks up from the discount amount TextInput to the nearest ancestor
+ * matching `styles.infoRow`'s signature (`flexDirection: "row"`, `alignItems: "center"`,
+ * `minHeight: 40`) — the Diskon row itself; Subtotal Sewa's own `infoRow` is a SIBLING, not an
+ * ancestor, of this specific input, so it is never encountered. The amount field's own wrapper
+ * (`amountInputRow`) uses `height: 40`, a distinct key from `minHeight`, so it does not
+ * false-match on the way up.
+ */
+function removeDiscountRow(utils: RenderResult, discountInput: any) {
+  const row = findAncestorWhere(
+    discountInput,
+    (flat) => flat.flexDirection === "row" && flat.alignItems === "center" && flat.minHeight === 40,
+  )
+  if (!row) throw new Error("Diskon row (styles.infoRow) not found")
+  const { within } = require("@testing-library/react-native")
+  const trash = within(row).UNSAFE_getAllByType(require("react-native").TouchableOpacity)[0]
+  fireEvent.press(trash)
+}
+
+/**
+ * Opens the "Edit" affordance on an EXISTING (already-persisted) payment row, identified by its
+ * displayed rupiah amount.
+ * STRUCTURAL FALLBACK: `getAllByText` (not `getByText`) because the same figure can legitimately
+ * appear elsewhere too (Total Tagihan, Sisa, "Sudah dibayar:"). Each candidate is walked up
+ * looking for the nearest ancestor matching `styles.paymentRow`'s signature (`flexDirection:
+ * "row"`, `borderBottomWidth: 1`) — none of Total Tagihan/Sisa/"Sudah dibayar:"'s own containers
+ * carry `borderBottomWidth`, so only the genuine payment row matches. `within(row).getByText`
+ * then disambiguates from the Kembali row's OWN "Edit" control, which uses the identical string.
+ */
+function openExistingPaymentEdit(utils: RenderResult, amountLabel: string) {
+  const { within } = require("@testing-library/react-native")
+  const candidates = utils.getAllByText(amountLabel)
+  for (const candidate of candidates) {
+    const row = findAncestorWhere(
+      candidate,
+      (flat) => flat.flexDirection === "row" && flat.borderBottomWidth === 1,
+    )
+    if (row) {
+      fireEvent.press(within(row).getByText("Edit"))
+      return
+    }
+  }
+  throw new Error(`payment row for "${amountLabel}" (styles.paymentRow) not found`)
+}
+
 // ─── (b) Sisa — the inline clamp at PengembalianScreen.tsx:242 ────────────
 
 describe("Sisa — inline composition (Math.max(0, totalTagihan - totalPaid))", () => {
@@ -514,5 +607,328 @@ describe("fuel suggestion 'Terapkan' — appends an extra-fee line (debt #12, NO
     expect(addColor).toBe(colors.warningContainer)
     expect(subtractColor).toBe(colors.warningContainer)
     expect(addColor).toBe(subtractColor) // pins "unconditional": identical regardless of direction
+  })
+})
+
+// ─── (2b·1) Text entry into the fields ⑤ will box, proven through to the payload ───
+
+describe("text entry into ⑤'s boxed fields — KM Kembali / Tujuan / Catatan, pinned to the payload", () => {
+  it("KM Kembali: a real numeric entry reaches the payload", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getKmInput(utils), "1500")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.kondisiKembali.km).toBe(1500)
+  })
+
+  it("KM Kembali: '0' is a real value, not treated as empty — the code checks string truthiness, not numeric truthiness", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getKmInput(utils), "0")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.kondisiKembali.km).toBe(0) // not null
+  })
+
+  it("KM Kembali: non-numeric characters never reach state — the field's own onChangeText strips them before parseInt ever runs", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getKmInput(utils), "abc")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.kondisiKembali.km).toBeNull()
+  })
+
+  it("KM Kembali: digits interspersed with letters keep only the digits ('12a3b4' -> 1234)", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getKmInput(utils), "12a3b4")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.kondisiKembali.km).toBe(1234)
+  })
+
+  it("Tujuan: whitespace-padded input is trimmed before it reaches the payload", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getTujuanInput(utils), "  Kos Barat  ")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.tujuan).toBe("Kos Barat")
+  })
+
+  it("Tujuan: whitespace-only input trims to an empty string, not preserved as whitespace", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getTujuanInput(utils), "   ")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.tujuan).toBe("")
+  })
+
+  it("Catatan: whitespace-padded input is trimmed before it reaches the payload", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getNotesInput(utils), "  Catatan penting  ")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.notes).toBe("Catatan penting")
+  })
+
+  it("Catatan: whitespace-only input trims to an empty string", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getNotesInput(utils), "   ")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.notes).toBe("")
+  })
+})
+
+// ─── (2b·2) Extra-fee and discount row removal ─────────────────────────────
+
+describe("extra-fee and discount row removal", () => {
+  it("removing one of two extra-fee rows leaves only the other, and Total Tagihan drops correspondingly", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+
+    // Row 1 — same mid-tree insertion rule as `addExtraFeeRow`'s own docstring.
+    let before = allTextInputs(utils).length
+    fireEvent.press(utils.getByText("Tambah Biaya"))
+    let inputs = allTextInputs(utils)
+    fireEvent.changeText(inputs[before - 1], "Fee A")
+    fireEvent.changeText(inputs[before], "1000")
+
+    // Row 2 — same rule, now relative to the tree state AFTER row 1 was inserted.
+    before = allTextInputs(utils).length
+    fireEvent.press(utils.getByText("Tambah Biaya"))
+    inputs = allTextInputs(utils)
+    fireEvent.changeText(inputs[before - 1], "Fee B")
+    fireEvent.changeText(inputs[before], "2000")
+
+    expect(utils.getByDisplayValue("Fee A")).toBeDefined()
+    expect(utils.getByDisplayValue("Fee B")).toBeDefined()
+    // 40.000 + 1.000 + 2.000, shown twice (Total Tagihan and Sisa share the figure, unpaid).
+    expect(utils.getAllByText("Rp 43.000").length).toBeGreaterThanOrEqual(2)
+
+    removeExtraFeeRowByDescription(utils, "Fee A")
+
+    expect(utils.queryByDisplayValue("Fee A")).toBeNull()
+    expect(utils.getByDisplayValue("Fee B")).toBeDefined()
+    // Total Tagihan reflects only the surviving Fee B line (40.000 + 2.000).
+    expect(utils.getAllByText("Rp 42.000").length).toBeGreaterThanOrEqual(2)
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.extraFees).toEqual([{ description: "Fee B", amount: 2000 }])
+  })
+
+  it("removing the discount row clears it from the payload and restores Total Tagihan", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    const discountInput = addDiscountRow(utils)
+    fireEvent.changeText(discountInput, "5000")
+    // 40.000 - 5.000, shown twice (Total Tagihan and Sisa share the figure, unpaid).
+    expect(utils.getAllByText("Rp 35.000").length).toBeGreaterThanOrEqual(2)
+
+    removeDiscountRow(utils, discountInput)
+
+    // The row is gone entirely — the "+ Diskon" add-button reappears (its own text is "Diskon").
+    expect(utils.getByText("Diskon")).toBeDefined()
+    expect(utils.getAllByText("Rp 40.000").length).toBeGreaterThanOrEqual(2) // back to the full bill
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.discount).toBe(0)
+  })
+})
+
+// ─── (2b·3) returnedAt — the Kembali picker interaction (D-2) ─────────────
+
+describe("returnedAt — the Kembali picker interaction (D-2: gets the box, keeps its inlineEditBtn, no interaction change)", () => {
+  it("pressing the inline Edit control opens the Android picker, and a chosen value reaches the payload", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+
+    // Kembali's own "Edit" is first in JSX order (Waktu Sewa is the screen's first section) —
+    // getAllByText, not getByText, so this stays correct even when a payment row (which also
+    // renders an "Edit" button, same string) exists elsewhere on screen.
+    fireEvent.press(utils.getAllByText("Edit")[0])
+
+    // SURPRISING FINDING (flagged separately in the report): under this jest config,
+    // `@react-native-community/datetimepicker`'s default export resolves to its **iOS**
+    // implementation regardless of the Platform.ios mock used throughout this suite — that mock
+    // only overrides `Platform.OS`'s runtime *value*; Metro/jest's platform-suffixed *file*
+    // resolution (which picks `.ios.js` vs `.android.js`) is a separate mechanism it does not
+    // touch. This is what makes the interaction testable at all: the iOS implementation is a
+    // real renderable component, whereas the Android one (`datetimepicker.android.js`) returns
+    // `null` and opens an imperative native dialog with no JS-visible element to drive.
+    // PengembalianScreen's OWN `Platform.OS === "android"` JSX guard still reads the mocked
+    // value correctly and still renders the picker; only the library's internal module happens
+    // to be the iOS file underneath it.
+    const DateTimePicker = require("@react-native-community/datetimepicker").default
+
+    // Step 1 — the "date" dialog. handlePickerChange (PengembalianScreen.tsx) only reads
+    // getFullYear/getMonth/getDate from this Date.
+    let pickers = utils.UNSAFE_getAllByType(DateTimePicker)
+    expect(pickers[0].props.mode).toBe("date")
+    fireEvent(pickers[0], "change", {}, new Date(2026, 6, 10, 0, 0))
+
+    // Android auto-advances to a "time" dialog (same component instance, updated props) — this
+    // is PengembalianScreen's OWN Platform.OS branch (handlePickerChange), not the library's.
+    pickers = utils.UNSAFE_getAllByType(DateTimePicker)
+    expect(pickers[0].props.mode).toBe("time")
+    fireEvent(pickers[0], "change", {}, new Date(2000, 0, 1, 14, 30))
+
+    // The displayed Kembali row reflects the chosen value. `formatHeaderDate(returnedAt)} ·
+    // {formatTime(returnedAt)}` renders as ONE Text host node with three string children (date,
+    // the literal " · ", time) — getByText matches the concatenation, not the date/time pieces
+    // individually.
+    expect(utils.getByText("Jumat, 10 Juli 2026 · 14:30")).toBeDefined()
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    // Guard 1 / debt #16: the `new Date()` seed at screen-open is untouched by this test — this
+    // asserts the picker's OUTPUT, not the seed. Built the same way production code builds
+    // `combined` (local Y/M/D from step 1, local H/M from step 2), so this is an exact match,
+    // not a tolerant one.
+    expect(payload.returnedAt).toEqual(new Date(2026, 6, 10, 14, 30, 0, 0))
+  })
+})
+
+// ─── (2b·4) PembayaranSheet — existing-payment edit and delete ─────────────
+
+describe("PembayaranSheet — existing-payment edit and delete (④'s Jumlah is the BR-7 proof case)", () => {
+  it("method 'Lainnya': its description field (④'s third boxed input) carries through to newPayments", async () => {
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+
+    // Same delta-index rule as `addPayment`: count BEFORE opening the sheet.
+    const before = allTextInputs(utils).length
+    fireEvent.press(utils.getByText("Tambah Pembayaran"))
+    fireEvent.changeText(allTextInputs(utils)[before], "40000") // Jumlah
+
+    // Selecting "Lainnya" inserts ONE new TextInput (the method description) BETWEEN Jumlah and
+    // the sheet's own Catatan field — a mid-sheet insertion, the same shape as the extra-fee/
+    // discount rows on the main screen (see `addExtraFeeRow`'s docstring), not an
+    // appended-at-the-end one. Verified: after this press, the method-description input sits
+    // immediately after Jumlah, at `before + 1`.
+    fireEvent.press(utils.getByText("Lainnya"))
+    const methodDescInput = allTextInputs(utils)[before + 1]
+    fireEvent.changeText(methodDescInput, "DANA")
+
+    fireEvent.press(utils.getByText("Simpan"))
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.newPayments).toEqual([
+      {
+        amount: 40000,
+        method: "LAINNYA",
+        methodDescription: "DANA",
+        paidAt: expect.any(Date),
+        notes: undefined,
+      },
+    ])
+  })
+
+  it("editing an existing payment's amount calls updatePayment, updates Sisa, and leaves the close payload's newPayments empty", async () => {
+    const paidAt = new Date("2026-07-05T00:00:00Z")
+    const rental = makeRental({
+      tarif: 40000,
+      payments: [{ id: "p1", amount: 25000, method: "CASH", paidAt }],
+    })
+    mockUpdatePayment.mockResolvedValue(
+      makeRental({
+        tarif: 40000,
+        payments: [{ id: "p1", amount: 40000, method: "CASH", paidAt }],
+      }),
+    )
+    const utils = await renderScreen(rental)
+    // Sisa = 40.000 - 25.000 = 15.000, unpaid banner up front.
+    expect(utils.getByText("Jaminan ditahan — akan dibuat Hutang Rp 15.000")).toBeDefined()
+
+    // Same delta-index rule as `addPayment`: the sheet's inputs append at the very end of the
+    // tree (the Modal is the last sibling) regardless of which control opened it — count BEFORE
+    // opening, exactly as `addPayment` does.
+    const before = allTextInputs(utils).length
+    openExistingPaymentEdit(utils, "Rp 25.000")
+    expect(utils.getByText("Edit Pembayaran")).toBeDefined() // confirms EDIT mode, not "Tambah"
+
+    const jumlahInput = allTextInputs(utils)[before]
+    fireEvent.changeText(jumlahInput, "40000")
+    fireEvent.press(utils.getByText("Simpan"))
+
+    await waitFor(() => expect(mockUpdatePayment).toHaveBeenCalledTimes(1))
+    expect(mockUpdatePayment).toHaveBeenCalledWith("r1", "p1", {
+      amount: 40000,
+      method: "CASH",
+      methodDescription: undefined,
+      paidAt,
+      notes: undefined,
+    })
+
+    // Sisa recomputes from the server's returned `rental` (setRental(updated)) — now paid off.
+    await waitFor(() => expect(utils.getByText("Jaminan bisa dikembalikan")).toBeDefined())
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    // The edit went through updatePayment directly — pendingPayments (newPayments) is untouched.
+    expect(payload.newPayments).toEqual([])
+  })
+
+  it("deleting an existing payment calls deletePayment, reverts Sisa to the auto-debt path, and the close payload reflects it", async () => {
+    const paidAt = new Date("2026-07-05T00:00:00Z")
+    const rental = makeRental({
+      tarif: 40000,
+      payments: [{ id: "p1", amount: 40000, method: "CASH", paidAt }],
+    })
+    mockDeletePayment.mockResolvedValue(makeRental({ tarif: 40000, payments: [] }))
+    const utils = await renderScreen(rental)
+    // Fully paid up front.
+    expect(utils.getByText("Jaminan bisa dikembalikan")).toBeDefined()
+
+    openExistingPaymentEdit(utils, "Rp 40.000")
+    expect(utils.getByText("Edit Pembayaran")).toBeDefined()
+
+    const { Alert } = require("react-native")
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {})
+    fireEvent.press(utils.getByText("Hapus Pembayaran"))
+
+    expect(alertSpy).toHaveBeenCalledTimes(1)
+    const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[]
+    const hapusButton = buttons.find((b) => b.text === "Hapus")
+    if (!hapusButton?.onPress) {
+      throw new Error("'Hapus' button (destructive) not found in Alert.alert's buttons")
+    }
+    const { act } = require("@testing-library/react-native")
+    act(() => hapusButton.onPress!())
+
+    await waitFor(() => expect(mockDeletePayment).toHaveBeenCalledTimes(1))
+    expect(mockDeletePayment).toHaveBeenCalledWith("r1", "p1")
+
+    // Sisa reverts to the full bill — the auto-debt banner returns.
+    await waitFor(() =>
+      expect(utils.getByText("Jaminan ditahan — akan dibuat Hutang Rp 40.000")).toBeDefined(),
+    )
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    // The delete went through deletePayment directly — pendingPayments (newPayments) is
+    // untouched; the server, not this payload, is now responsible for the auto-debt.
+    expect(payload.newPayments).toEqual([])
+
+    alertSpy.mockRestore()
   })
 })
