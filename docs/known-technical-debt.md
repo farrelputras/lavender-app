@@ -114,7 +114,12 @@ delete the stub and its route type. Leaving it half-present is the current cost.
 
 ## 4. The Phase-0 shared form library is barely used by the two rental screens
 
-- **Status:** open — **deliberately excluded from v1.0.2.** Needs its own release and its own tests.
+- **Status:** open — **fence partially opened: scheduled into v1.0.5** (`docs/releases/v1-0-5.md`,
+  scoped 2026-07-25). PRD-8 **D-5** migrates `PengembalianScreen` onto the shared **input-bearing**
+  primitives only, behind BR-12's characterisation tests and a `rental-math-reviewer` pass — i.e. this
+  item's own conditions, met rather than waived. **Everything else here stays open**: `DetailSewaScreen`
+  entirely (PRD-8 **D-6**), and on `PengembalianScreen` the local `SectionLabel`, `FuelGauge`, `Stepper`
+  and bottom action bar. Do not read v1.0.5 as closing this item.
 - **First found:** v1.0.2 UI audit, 2026-07-12
 - **Severity:** this is the **root cause** of the recurring "minor UI inconsistency" feedback.
 
@@ -525,8 +530,13 @@ Either way it must not depend on Lead happening to notice.
 
 ## 15. `DetailSewaScreen` and `PengembalianScreen` have zero automated coverage
 
-- **Status:** open — **pre-existing, not a v1.0.4 regression.** Both screens were fenced *do not open*
-  in v1.0.4, so that release could not have addressed it.
+- **Status:** open — **half of it is scheduled into v1.0.5** (`docs/releases/v1-0-5.md`, scoped
+  2026-07-25). PRD-8 **BR-12** makes a `PengembalianScreen` characterisation suite a *precondition* of
+  the D-5 migration, not a ride-along — so that screen gets its first-ever coverage. **`DetailSewaScreen`
+  remains at zero**, which means *Simpan Rental* and tariff composition stay uncovered. Partially
+  closed on ship; **not struck**.
+  Pre-existing, not a v1.0.4 regression — both screens were fenced *do not open* in v1.0.4, so that
+  release could not have addressed it.
 - **First found:** stated plainly in v1.0.4 (2026-07-22); the condition itself is far older.
 - **Severity:** **high** — the two highest-consequence screens in the app are the two with no tests.
 
@@ -540,6 +550,47 @@ not ceremonial**.
 
 This is also the strongest argument for giving debt #4 its own release: the characterisation tests that
 item requires *before* any component moves are the same tests missing here.
+
+---
+
+## 16. `returnedAt` defaults to a confident guess, and cannot be corrected after close
+
+- **Status:** open — **recorded, deliberately not scoped** (Farrel, 2026-07-25). Explicitly a non-goal
+  of PRD-6; see that PRD's §Recorded, not scoped.
+  ⚠️ **v1.0.5 styles this exact row and must not touch its value.** PRD-8 OQ-2 puts the *Kembali*
+  date/time row in scope for the field-box treatment; `docs/releases/v1-0-5.md` guard 1 forbids
+  re-seeding `returnedAt`. Styling the row is OTA-safe; fixing the default needs an RPC and a
+  permission-matrix extension, which that release is forbidden to open (PRD-8 BR-9). **A prettier
+  wrapper around a confident wrong answer is not progress on this item.**
+- **First found:** 2026-07-25, while verifying PRD-6's problem statement. **One rental is already
+  affected** and was corrected by hand.
+- **Severity:** **medium-high** — it is the only known defect in the app that has produced *wrong
+  persisted data* with **no in-app path to fix it**.
+
+`PengembalianScreen.tsx:175` seeds the return time with `useState<Date>(() => new Date())` — the moment
+the screen opens, not the moment the vehicle came back. The *Kembali* row (`:422-436`) then renders a
+fully-formatted, entirely plausible date and time. Mom accepted it. **Nothing marks the value as a
+guess**, and a guess about the past is not the same kind of default as a guess about the present.
+
+**This is a third failure mode, distinct from PRD-6 and PRD-8, and the remedies of both make it worse.**
+The row is *not* unmarked — it carries an explicit `inlineEditBtn` (16px icon + `labelLg` "Edit",
+`:432-435`), making it more prominent than any control PRD-6 indicts. A louder, better-marked field
+still displays a confident wrong answer. The defect is in the **value**, not the affordance.
+
+**Second half — there is no way back.** `returned_at` is written only by `rpc_close_rental`
+(`20260721150806_close_rental_exclude_deleted_payments.sql:84`) and appears in **no** edit path
+afterwards. PRD-1's permission matrix does not list it at all: exit condition is ✋ no one on
+COMPLETED, notes are admin-only, return time is simply absent. Correcting it needs direct database
+access. **Fixing this half requires an RPC and a matrix extension** — which is why it was kept out of
+presentation-only, OTA-safe PRD-6.
+
+**Money reach, stated precisely:** `isLate` / `jamLambat` (`:244-245`) feed only the *Terlambat* warning
+banner (`:492-499`); late fees are entered by hand as `extraFees`. So a wrong `returnedAt` **misinforms**
+and corrupts `formatActualDuration` plus the permanent record of when the vehicle returned — it does
+**not** silently recompute a charge. Do not argue it as if it were the fuel-baseline hazard.
+
+⚠️ `PengembalianScreen` is also debt **#15** — zero automated coverage. Any fix here is verified by
+reading and by device unless coverage is added first.
 
 ---
 

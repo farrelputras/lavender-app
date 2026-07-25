@@ -9,9 +9,25 @@
   behaviour deliberately contradicts this PRD's original text.
 - **Target release:** v1.0.3 (`docs/releases/v1-0-3.md`). This PRD is the authoritative **requirements**;
   the release plan refers to it, not the other way around.
+- **⚠️ BR-2 IS SUPERSEDED BY PRD-6 (2026-07-25) — do not restore the section-level Edit buttons.**
+  BR-2 mandated per-section, in-place editing on `RentalDetailScreen`. In use, Mom reached for the
+  *Kondisi Keluar* edit when she meant to run *Proses Pengembalian*.
+  `docs/prd/PRD-6-edit-must-be-unmistakable.md` replaces that interaction.
+  **Everything else in PRD-1 stands**: the permission matrix, the server-side gate, and Amendment A-1
+  are all still authoritative. PRD-6 moves controls; it grants and revokes nothing.
+  > **Corrected 2026-07-25 (PRD-6 §Correction C-1).** An earlier version of this pointer said the
+  > mis-navigation *moved the fuel baseline*. It did not — the affected rental's defect was its
+  > `waktu kembali`, which no PRD-1 control can reach. The baseline hazard is real in the code and
+  > unrealized in the data. Do not cite this pointer as evidence that AC-6 was ever breached.
+- **⚠️ AC-1 / AC-2 / AC-3 / AC-8 are executed through testIDs PRD-6 deletes.** They run via
+  `kondisi-edit-btn` and `notes-edit-btn`. Two of the negative assertions
+  (`RentalDetailScreen.acceptance.test.tsx:365-366`, `:381-382`) assert those testIDs are **null** —
+  so once the buttons are gone they **pass vacuously** and the permission matrix stops being tested
+  with nothing turning red. PRD-6 scope item 6 owns re-anchoring them. The list below stays ticked;
+  it is the *contract*, and only its *execution* changes.
 - **Author:** Product · 2026-07-17. **Amended by Product · 2026-07-21** (A-1; OQ-1 and OQ-2 closed;
-  acceptance list marked verified).
-- **Related:** PRD-2 (independent — do **not** fold together).
+  acceptance list marked verified). **BR-2 superseded 2026-07-25** (PRD-6).
+- **Related:** PRD-2 (independent — do **not** fold together) · **PRD-6** (supersedes BR-2).
 
 ## Amendment A-1 — the exit-photo set may not be emptied by Mom (2026-07-21)
 
