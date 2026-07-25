@@ -3,7 +3,30 @@
 Internal vehicle-rental operations tool for Farrel's mom's business.
 Users: Mom (primary) + Farrel (admin). Not on the Play Store — APK sideloaded.
 
-## Current Status: v1.0.3 shipped ✅ · next release = PRD-4 + PRD-5 (proposed, needs Farrel's call)
+## Current Status: v1.0.4 published ⏳ — awaiting Mom's sign-off · v1.0.3 shipped ✅
+
+**v1.0.4 published OTA 2026-07-23** (channel `preview`, runtime `1.0.0`, update group `ba4e2219`, no APK /
+no `version` bump; merged to `master` 2026-07-25) — **"the app fits Mom's phone"**: **PRD-4** reserves the
+Android system-nav inset app-wide, **PRD-5** clamps text scale at **1.5×** and reflows what clipped.
+50 suites / 237 tests. Spec: `docs/releases/v1-0-4.md` · execution record: `docs/reports/v1-0-4.md`.
+
+> ⏳ **Not ✅ shipped yet, deliberately.** Both PRDs' AC-8 need Mom's own phone. The *mechanisms* are
+> device-validated — real inset **47.27px**, her `fontScale` **≈1.4** (below the 1.5 cap, so the clamp
+> never fights her), 3-button nav respected — but the **per-screen visual rows and Mom's own confirmation
+> are still owed**: `docs/reports/v1-0-4-visual-audit.md`. Don't claim "shipped" until those land.
+
+**Two things v1.0.4 leaves for whoever goes next:**
+
+1. **Remove the `fontScale` diagnostic footer.** D-1b specified it as throwaway; it did its job (it turned
+   `MAX_FONT_SCALE = 1.5` from a guess into a measurement) and it is **on Mom's screen right now**.
+2. **`DetailSewaScreen` / `PengembalianScreen` still have zero automated coverage** (debt **#15**).
+   *Simpan Rental* lives in the first one, so **PRD-4 AC-1's automated coverage is zero** — a read-only
+   fence check and Farrel's device walk-through were all that stood behind the flagship criterion.
+
+> ⚠️ **When a requirement rests on a screenshot, open the screenshot.** PRD-4's third problem-statement
+> bullet (Beranda "0 pelanggan" clipped by the tab bar) was **not a defect** — a ScrollView fold at scroll
+> offset ≈ 0. Four agents and Lead reasoned about it for a whole release from *prose descriptions of an
+> image nobody had opened*. Withdrawn in PRD-4 **Amendment A-1**; AC-3 narrows but still stands.
 
 **v1.0.3 shipped 2026-07-21** (channel `preview`, runtime `1.0.0`, update group `6adbb879`, no APK /
 no `version` bump) — **PRD-1: edit an active rental**, plus a debt #5 ride-along (30s fetch timeout).
@@ -70,7 +93,8 @@ change). Only the single `product` consult had been proven before that.
 | `docs/feedback-and-improvements.md` | **Closed history** — v1.0 Phase 7 + v1.0.1 only |
 | `docs/releases/v1-0-2.md` | ✅ Shipped OTA 2026-07-15 (polish + honesty). |
 | `docs/releases/v1-0-3.md` | ✅ Shipped 2026-07-21 — edit active rental + auth hardening + money fix. |
-| `docs/prd/` | PRD-1 ✅ shipped (amended A-1) · PRD-2 PDDIKTI · PRD-3 v1.1 backend · **PRD-4 + PRD-5 = proposed next release** |
+| `docs/releases/v1-0-4.md` | ⏳ Published OTA 2026-07-23 — system-nav inset + text-scale clamp. **Awaiting Mom's sign-off** (`docs/reports/v1-0-4-visual-audit.md`). |
+| `docs/prd/` | PRD-1 ✅ shipped (amended A-1) · PRD-2 PDDIKTI · PRD-3 v1.1 backend · PRD-4 ⏳ delivered v1.0.4 (**amended A-1**) · PRD-5 ⏳ delivered v1.0.4 |
 | `docs/releases/v1-1.md` | Undesigned — replacing Supabase with a bespoke backend |
 | `docs/known-technical-debt.md` | Standing debt register, triaged per release |
 

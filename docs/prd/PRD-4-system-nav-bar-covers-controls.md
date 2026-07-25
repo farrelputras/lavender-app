@@ -1,13 +1,81 @@
 # PRD-4 — Android system navigation bar covers the app's controls
 
 - **PRD:** 4 — refer to this as **PRD-4**.
-- **Status:** ready to plan. Requirements are complete; no open question blocks the build.
-- **Target release:** *not set by Product* — PM decides where this lands (`/pm`). It is JS/layout-only,
-  so it is OTA-eligible with no `app.json` `version` bump.
-- **Author:** Product · 2026-07-21
+- **Status:** ⏳ **DELIVERED in v1.0.4, sign-off outstanding.** Published OTA 2026-07-23 (channel
+  `preview`, runtime `1.0.0`, update group `ba4e2219-c86a-4ccc-aca3-514492d0b043`). The core mechanism is
+  **device-validated on Mom's Poco M3** — the app read a real runtime inset of **47.27px** in her
+  3-button mode, confirming BR-3. **Not yet ✅ shipped:** AC-8's remaining per-screen visual rows and
+  Mom's own confirmation are still owed (`docs/reports/v1-0-4-visual-audit.md`). The AC checkboxes below
+  are left unticked on purpose — the authoritative per-AC verdicts are in `docs/reports/v1-0-4.md`.
+- **⚠️ AMENDED 2026-07-25 — the third problem-statement bullet was a misattribution.** Beranda's clipped
+  "0 pelanggan" was **never a PRD-4 defect**. Read **§Amendment A-1** before citing that screenshot as
+  evidence for anything. **AC-3 itself still stands** — it narrows, it does not weaken.
+- **Target release:** **v1.0.4** (`docs/releases/v1-0-4.md`), shipped together with PRD-5. This PRD is the
+  authoritative **requirements**; the release plan refers to it, not the other way around.
+- **Author:** Product · 2026-07-21. **Amended 2026-07-25** (A-1 — see its provenance table; the
+  correction is evidentiary, and no requirement was rewritten).
 - **Priority:** **urgent — functional.** Mom's primary action button is physically obstructed.
 - **Related:** PRD-5 (same reporting session, same device, **different root cause** — do not merge).
   Both were surfaced by Mom's Poco M3 screenshots in `docs/mom-ss/`.
+
+## Amendment A-1 — Beranda's "0 pelanggan" is a scroll fold, not a clip (2026-07-25)
+
+> **This amendment removes a piece of *evidence*, not a requirement.** The defect PRD-4 describes is
+> real, urgent, and was confirmed on two of the three screenshots. The third screenshot never showed it.
+> **AC-3 and user flow 3 remain in force.**
+
+| | |
+|---|---|
+| Found | 2026-07-22, during v1.0.4 execution, by a narrow read-only diagnostic dispatched with one instruction: **look at the pixels first** |
+| Decided | the finding was accepted by Lead and Farrel; no fix was owed by anyone |
+| Recorded here | 2026-07-25 by **PM**, discharging the "Product owes PRD-4 an amendment" item logged in `docs/reports/v1-0-4.md` |
+
+**What the screenshot actually shows.** `docs/mom-ss/sewa-baru-text-too-big.jpeg` is captured at **scroll
+offset ≈ 0** — the entire non-sticky header ("Halo!", the date, both quick-action buttons, the whole
+"Harus Kembali Hari Ini" section) is rendered, which is only possible if the ScrollView **has not been
+scrolled at all**. The descenders of the two "g"s in "0 pelanggan" are sliced exactly where the card's
+white background meets the tab bar's pale gray-blue, with **no card border anywhere near the cut** —
+meaning the card's real bottom edge is simply further down, off-screen. Below the cut, the tab bar icons
+are fully legible and the system nav icons are unobstructed.
+
+**That is a ScrollView viewport edge. It is a fold, not a clip.**
+
+**The comparison is what makes it conclusive.** The other two screenshots show what an overlay actually
+looks like: in `android-nav-blocking-on-sewa-baru-screen.jpeg` the recents and back icons are drawn
+*literally on top of* the "Simpan Rental" glyphs; in `…-pilih-kendaraan-screen.jpeg` the nav row sits
+flush against the bottom card row with no reserved gap. **Neither pattern appears in the Beranda image.**
+
+**Why Beranda structurally cannot have this defect.** The tab navigator root is
+`flexDirection: 'column'`, the screens container is `{flex: 1, overflow: 'hidden'}`, and the tab bar
+renders as the **next sibling in normal flex flow** — not absolute, not a portal, not z-stacked.
+`MainNavigator.tsx`'s `$tabBar` carries no `position: "absolute"`. **Non-overlap is a flexbox
+guarantee.** The tab bar also already folds `insets.bottom` into its own height, which is why
+`edgeToEdgeEnabled: true` causes the overlap on *non-tabbed* screens (the two real screenshots) and not
+on this one. The scoping note under §Problem statement was right all along.
+
+**Superseded text**, preserved so a future reader can trace the change:
+
+> ~~`docs/mom-ss/sewa-baru-text-too-big.jpeg` — Beranda. The last summary card's line ("0 pelanggan") is
+> clipped by the tab bar; the list cannot scroll far enough to reveal it.~~ — superseded 2026-07-25.
+> Both halves were wrong: it is not clipped *by the tab bar*, and "cannot scroll far enough" is not
+> demonstrated by a frame in which scrolling was never attempted.
+
+**Consequences, stated so nothing is quietly worked around:**
+
+1. **AC-3 narrows but does not weaken.** It still binds on every non-tabbed screen, where the overlap is
+   real and photographed. What changes is that **Beranda cannot be used as evidence for or against it**.
+2. **No fix was owed.** v1.0.4's Beranda change (extending the trailing spacer *after* `<VersionFooter />`
+   so the true last item clears the tab bar) is a real, separate BR-2/AC-3 improvement and was kept — but
+   it is **orthogonal** to this symptom. "0 pelanggan" is in the 2nd of 4 stat cards, nowhere near the
+   trailing spacer.
+3. **One honest residual went onto the visual-audit checklist:** on Mom's device at her font scale,
+   scroll Beranda to the very bottom and confirm all four stat cards plus the footer are reachable. The
+   code says they are; a static image cannot prove it.
+
+> **The lesson this cost.** Four agents and Lead reasoned about this defect for an entire release from
+> **prose descriptions of an image nobody had opened.** The description was Product's good-faith reading
+> of a real screenshot, it was wrong, and it propagated unchallenged through discovery and planning.
+> **When a requirement rests on an image, open the image.**
 
 ## Summary
 
@@ -25,8 +93,11 @@ Mom reported that "android navigation blocks the buttons." Her screenshots confi
   directly across them. The bottom portion of both buttons is under system furniture.
 - `docs/mom-ss/android-nav-blocking-on-pilih-kendaraan-screen.jpeg` — the vehicle grid. The bottom row
   of vehicle cards runs underneath the nav bar and is cut off.
-- `docs/mom-ss/sewa-baru-text-too-big.jpeg` — Beranda. The last summary card's line ("0 pelanggan") is
-  clipped by the tab bar; the list cannot scroll far enough to reveal it.
+- ~~`docs/mom-ss/sewa-baru-text-too-big.jpeg` — Beranda. The last summary card's line ("0 pelanggan") is
+  clipped by the tab bar; the list cannot scroll far enough to reveal it.~~
+  **⚠️ WITHDRAWN 2026-07-25 — see §Amendment A-1.** Proven on the pixels to be a ScrollView fold at
+  scroll offset ≈ 0, not an overlap. Beranda never had this defect. The two bullets above are the real,
+  confirmed evidence; this one is not.
 
 **Why this is urgent and not cosmetic.** *Simpan Rental* is the commit point of the entire rental-entry
 flow. A tap that lands in the covered strip goes to the Android system, not to the app — from Mom's
@@ -95,7 +166,9 @@ the nav bar is translucent or gesture-slim.
 2. **Pick a vehicle from the bottom of the grid.** Mom scrolls the *Pilih Kendaraan* grid to the end →
    the last row of vehicle cards is fully visible and tappable.
 3. **Read the bottom of Beranda.** Mom scrolls Beranda to the end → the final summary card, including
-   its last line, is fully readable above the tab bar.
+   its last line, is fully readable above the tab bar. *(Still required. Note per §Amendment A-1 that
+   this flow was never shown to be broken — the screenshot cited for it was an unscrolled frame. It is
+   now the visual-audit residual: scroll to the very bottom on Mom's device and confirm.)*
 4. **Return a vehicle / record a payment / add a user.** Every other screen with a pinned bottom bar
    behaves as in flow 1.
 

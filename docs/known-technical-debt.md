@@ -170,6 +170,23 @@ especially given the copies have already drifted apart. This wants:
 v1.0.2 takes only the one safe piece: extracting the 6 duplicate `showToast` copies (v1.0.2 item 5),
 which has no math surface.
 
+### What v1.0.4 added to this item (2026-07-23)
+
+**The drift now spans the bottom-bar primitive too.** v1.0.4's PRD-5 work defined `btnLabel`
+(`{ flexShrink: 1 }`) independently in **three** places — `DetailSewaScreen`, `PengembalianScreen`,
+**and** `UserDetailScreen` — because all three carry a *local* bottom action bar rather than importing
+the shared `components/form/BottomActionBar.tsx`. In the same release those same three bars each grew
+their own copy of the system-inset logic (PRD-4).
+
+That was the correct call for a P0 layout fix — the two rental-math screens were fenced *do not open* —
+but it means this item's table above now understates the problem: the duplication reaches the one
+primitive whose whole purpose was to stop it. **All three resolve when the local bars migrate onto the
+shared `BottomActionBar`**, which is this item's own fenced, `rental-math-reviewer`-gated release, not
+a ride-along.
+
+See also **#15** — those two screens have zero automated coverage, which is exactly why this migration
+needs characterisation tests first.
+
 ---
 
 ## 5. ~~Offline saves hang forever~~ — CLOSED in v1.0.3 (2026-07-21)
@@ -392,6 +409,137 @@ There is no general control. The next `CREATE OR REPLACE` on any other RPC has e
 
 The durable mechanism (snapshotting deployed bodies, generalized guard tests, a migration template
 check — or something else) is a **Lead** call and is not specified here.
+
+---
+
+## 10. Two parallel theme systems — `theme/tokens.ts` vs `theme/typography.ts`
+
+- **Status:** open — **explicitly logged out of v1.0.4** (discovery finding F-3). Resolving "which theme
+  system is canonical" inside a P0 layout fix is debt #4's mistake wearing new clothes.
+- **First found:** v1.0.4 discovery pass, 2026-07-22
+- **Severity:** low — no defect and no money surface. This is a *decision that has never been made*.
+
+`theme/tokens.ts` (what the screens import) and `theme/typography.ts` (the Ignite side) each define
+**the same 8-entry M3 type scale, with the same numbers**, independently. Neither is wrong. But there is
+no canonical lane, so every future "change type in one place" has two places it could land — and nothing
+keeps the two in agreement.
+
+Related, from the same pass (**F-4**): text *sizing* is actually well disciplined — only **1 of 88**
+inline styles sets `fontSize` (`PilihKendaraanScreen.tsx:67`). What is undisciplined is the **import
+path**: three screens hand-inline `fontFamily` + `fontSize: 40` instead of spreading
+`textStyles.displayLg` (`HutangScreen.tsx:158`, `UserScreen.tsx:235`, `RentalScreen.tsx:182`).
+
+**Fix shape:** pick one canonical scale, re-point the other at it, in a dedicated pass.
+
+---
+
+## 11. `Platform.select()` cannot be tested by reassigning `Platform.OS`
+
+- **Status:** open as a **standing trap note.** Nothing to fix in product code — recorded so the
+  diagnosis is not paid for a second time.
+- **First found:** v1.0.4, dispatch ② (2026-07-22), at real cost.
+- **Severity:** none to users; **high nuisance** — it silently lets an "Android" assertion pass against
+  iOS behaviour.
+
+jest-expo's preset sets `haste.defaultPlatform: 'ios'`, so the suite loads **`Platform.ios.js`**, whose
+`select` is hardcoded to prefer `spec.ios` and **never reads `.OS` at all.** Dispatch is by *file
+identity*, not runtime value — so assigning `Platform.OS = "android"` in a test changes nothing.
+
+The only mock that works targets the platform-suffixed submodule by name:
+
+```js
+jest.mock("react-native/Libraries/Utilities/Platform.ios", () => ({
+  __esModule: true,
+  default: { OS: "android", select: (spec) => spec.android ?? spec.default },
+}))
+```
+
+> ⚠️ **Do not** mock the whole package via `{...jest.requireActual("react-native"), Platform: …}`.
+> Confirmed **by real failure**: spreading forces every lazy getter on RN's `index.js` to evaluate
+> eagerly, and `DevMenu` throws under jest.
+
+Invisible until v1.0.4 because no earlier test depended on `Platform.select` output. Note the wider
+point: LAVENDER ships **Android-only**, so every `Platform.OS === "ios"` branch in the app is dead in
+production as well as under test — including `KeyboardAvoidingView`'s `behavior` in both rental screens,
+which is `undefined` on Android and therefore a no-op (F-7).
+
+---
+
+## 12. Two `docs/02` §6 ↔ rental-math divergences — which is wrong, the code or the spec?
+
+- **Status:** open — **deliberately not taken into v1.0.4.** The rental-math freeze bound, both are
+  cosmetic-or-equivalent, and neither is live harm.
+- **First found:** v1.0.4 fence check, 2026-07-22. **Byte-identical to the v1.0.1-era code**, so outside
+  v1.0.4's blame.
+- **Severity:** **zero money impact today** — but it sits on the one document the project declares must
+  be correct.
+
+`docs/02` §6 is the authority that says this math must not be wrong, and a spec that disagrees with
+shipped code is the condition under which someone eventually "fixes" the wrong one. **Both divergences
+are in `PengembalianScreen`:**
+
+| | What the code does | What `docs/02` §6 says | Money impact |
+|---|---|---|---|
+| 1 | `applyFuelSuggestion()` (`:306-313`) appends an extra fee line item `{description: "Bensin"}` | modify **Subtotal Sewa** — *"satu arah ke subtotal, **bukan baris terpisah**"* (`docs/02:124`), *"Menekan tombol mengubah nilai Subtotal Sewa"* (`:130`) | **None.** `computeReturnTotal` sums extras, so the total is arithmetically identical |
+| 2 | the fuel-suggestion row renders `warningContainer`/`onWarningContainer` (amber) **unconditionally** (`:663-669`; styles `:1229,1237-1238`) | green when fuel is returned **in excess** (reduce), amber only when **short** (`:127-128`) | **None** — colour only |
+
+> **State the question in this direction:** *which is wrong, the code or §6?* The code has been live and
+> correct-in-total since v1.0.1; §6 may simply record an earlier intent. **Do not assume the code is the
+> defect** and "fix" it into a real change to money.
+
+---
+
+## 13. `git diff` is blind to untracked files — and this project's new test files are untracked
+
+- **Status:** the **specific instance is closed** (v1.0.4's `test(v1.0.4)` commit tracked all 14 files).
+  Kept as a **standing note**, because the trap recurs for every newly-authored test file.
+- **First found:** v1.0.4 execution, 2026-07-22 — hit **three separate times** in one release.
+- **Severity:** process only — but it defeats scope-and-cleanliness proofs, which is how an unreviewed
+  change ships.
+
+`git diff` reports **nothing** for a file git has never tracked; it does not warn, it returns empty.
+Three separate scope/cleanliness proofs in v1.0.4 had to fall back to file mtimes or the session's own
+edit record, because the test files under review were untracked and `git diff` reported them clean.
+
+**Check `git status --short` (or `git add -N` first) before trusting a `git diff` as a scope proof** —
+especially when the work under review *creates* files, which every test-authoring dispatch does.
+
+---
+
+## 14. The `tester` role cannot persist its own artifacts
+
+- **Status:** open — **agent-workflow debt, not code.** The fix lands in `docs/agents/`, not in the app.
+- **First found:** v1.0.4, dispatch ⑤ (2026-07-22)
+- **Severity:** medium for the delivery process — the release's *main* artifact nearly evaporated.
+
+The `tester` subagent cannot write `.md`. So v1.0.4's visual-audit checklist — which the release report
+itself calls the release's main artifact, because almost every AC in both PRDs is visual and
+device-conditional and jest cannot see pixels — existed **only inside a returned agent message** until
+Lead persisted it by hand to `docs/reports/v1-0-4-visual-audit.md`.
+
+**Two candidate fixes, pick one:** name the landing path in the tester brief/playbook, or make "persist
+any subagent artifact that exists only in a returned message" an explicit, non-optional Lead step.
+Either way it must not depend on Lead happening to notice.
+
+---
+
+## 15. `DetailSewaScreen` and `PengembalianScreen` have zero automated coverage
+
+- **Status:** open — **pre-existing, not a v1.0.4 regression.** Both screens were fenced *do not open*
+  in v1.0.4, so that release could not have addressed it.
+- **First found:** stated plainly in v1.0.4 (2026-07-22); the condition itself is far older.
+- **Severity:** **high** — the two highest-consequence screens in the app are the two with no tests.
+
+The app's two biggest files (48KB / 50KB) have **no test of any kind** — not unit, not acceptance, not
+smoke. Per debt #4 they are also the app's tariff-composition and fuel-adjustment/auto-debt code.
+
+**What this cost v1.0.4 concretely:** *Simpan Rental* lives in `DetailSewaScreen`, so **PRD-4 AC-1's
+automated coverage is exactly zero.** Everything standing behind the release's flagship criterion was a
+read-only `rental-math-reviewer` fence check plus Farrel's device walk-through — both **load-bearing,
+not ceremonial**.
+
+This is also the strongest argument for giving debt #4 its own release: the characterisation tests that
+item requires *before* any component moves are the same tests missing here.
 
 ---
 

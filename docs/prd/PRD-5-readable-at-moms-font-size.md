@@ -1,9 +1,18 @@
 # PRD-5 — The app must stay readable at Mom's font size
 
 - **PRD:** 5 — refer to this as **PRD-5**.
-- **Status:** ready to plan. Two open questions are **cosmetic calibration**, not blockers (see below).
-- **Target release:** *not set by Product* — PM decides where this lands (`/pm`). It is JS/layout-only,
-  so it is OTA-eligible with no `app.json` `version` bump.
+- **Status:** ⏳ **DELIVERED in v1.0.4, sign-off outstanding.** Published OTA 2026-07-23 (channel
+  `preview`, runtime `1.0.0`, update group `ba4e2219-c86a-4ccc-aca3-514492d0b043`). **OQ-1 is closed by
+  measurement, not argument:** the shipped diagnostic footer read Mom's actual `fontScale` as
+  **≈1.4** on her Poco M3 — *below* the implemented `MAX_FONT_SCALE = 1.5`, so the clamp never engages
+  for her and the layouts (swept to 1.5) carry real headroom above her setting. **Not yet ✅ shipped:**
+  AC-8's remaining per-screen visual rows and Mom's own confirmation that the rental list reads
+  unambiguously (`docs/reports/v1-0-4-visual-audit.md`). AC checkboxes are left unticked on purpose —
+  authoritative per-AC verdicts are in `docs/reports/v1-0-4.md`.
+- **⚠️ Carried into the next release:** the diagnostic footer that produced the `fontScale` reading was
+  specified as temporary (D-1b) and **must be removed** — it is on Mom's screen right now.
+- **Target release:** **v1.0.4** (`docs/releases/v1-0-4.md`), shipped together with PRD-4. This PRD is the
+  authoritative **requirements**; the release plan refers to it, not the other way around.
 - **Author:** Product · 2026-07-21
 - **Priority:** **urgent — information integrity.** Two separate numbers are currently rendered touching
   each other on the rental list. Cosmetically-reported, but it corrupts how Mom reads money.
