@@ -32,7 +32,8 @@ jest.mock("react-native/Libraries/Utilities/Platform.ios", () => ({
 import { fireEvent, render, waitFor, type RenderResult } from "@testing-library/react-native"
 
 import type { Rental, UserSummary, Vehicle } from "@/services/rentals/types"
-import { colors } from "@/theme/tokens"
+import { colors, spacing } from "@/theme/tokens"
+import { hoursLate } from "@/utils/rentalMath"
 
 // Relative path (not the "@/screens/..." alias) deliberately — this test file sits beside
 // PengembalianScreen.tsx, and the alias would land it in the same import/order group as the
@@ -72,6 +73,16 @@ jest.mock("@/utils/showToast", () => ({
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
+// ③'s Tier-1 finding #2: `bensinKotak: 4`, `tujuan: ""`, `notes: ""` here COLLIDE with
+// PengembalianScreen's own `useState` defaults (`:181,202,205` — `4`, `""`, `""`), which means a
+// migration that silently dropped the `:221-224` hydration effect would render byte-identical to
+// today and every existing assertion would still pass. `totalBill`/`rate24h` (below, in
+// `makeVehicle`) also collided with `tarif` (all `40000`), which mattered less for "did hydration
+// run at all" but meant a hydration WIRED TO THE WRONG FIELD (e.g. `rawSubtotal` rebound to
+// `totalBill`) was equally invisible. `tarif` itself stays `40000` — changing it would ripple into
+// nearly every rupiah assertion in this file; PengembalianScreen never reads `totalBill` or any
+// `vehicle.rate*` field (verified: `grep -n "totalBill\|rate24h\|rate6h\|rate12h" PengembalianScreen.tsx`
+// matches nothing), so moving only those two off `40000` closes the ambiguity with zero cascade.
 function makeRental(overrides: Partial<Rental> = {}): Rental {
   return {
     id: "r1",
@@ -84,14 +95,14 @@ function makeRental(overrides: Partial<Rental> = {}): Rental {
     tarif: 40000,
     addOn: { description: "", amount: 0 },
     discount: 0,
-    totalBill: 40000,
+    totalBill: 999999, // deliberately NOT 40000 — see the collision note above
     totalPaid: 0,
     payments: [],
     jaminan: { items: ["KTP"] },
-    kondisiKeluar: { bensinKotak: 4, km: 1000, photos: [] },
+    kondisiKeluar: { bensinKotak: 6, km: 1000, photos: [] }, // NOT 4 — see the collision note above
     kondisiKembali: null,
-    notes: "",
-    tujuan: "",
+    notes: "catatan awal", // NOT "" — see the collision note above
+    tujuan: "Kos Barat", // NOT "" — see the collision note above
     paketHari: 1,
     paketJam: 0,
     ...overrides,
@@ -126,7 +137,7 @@ function makeVehicle(overrides: Partial<Vehicle> = {}): Vehicle {
     category: "MOTOR",
     rate6h: 20000,
     rate12h: 30000,
-    rate24h: 40000,
+    rate24h: 45000, // deliberately NOT 40000 (== tarif) — see makeRental's collision note
     available: false,
     gps: null,
     imei: null,
@@ -146,6 +157,12 @@ beforeEach(() => {
   mockDeletePayment.mockReset()
   mockChoosePhotoSource.mockReset()
   mockShowToast.mockReset()
+  // ③ Tier-2 #7: `navigation` is a module-scope object (below) so its call log otherwise
+  // accumulates across all tests in this file — any future `toHaveBeenCalledTimes` assertion on
+  // it would get a silently wrong answer with no clue why.
+  navigation.navigate.mockReset()
+  navigation.goBack.mockReset()
+  navigation.replace.mockReset()
 })
 
 // ─── Mount + drive helpers ──────────────────────────────────────────────────
@@ -220,19 +237,67 @@ function findAncestorWhere(start: any, predicate: (flat: Record<string, any>) =>
 }
 
 /**
- * Presses "Tambah Biaya" and returns the two new TextInputs it adds (description, amount).
- * INDEX FALLBACK: extraFees.map renders inside the Rincian Biaya card, which sits BEFORE the
- * Catatan section in JSX — so the two new TextInputs are inserted in the *middle* of the tree,
- * not appended at the end. Verified empirically (a debug spike dumped the placeholder list
- * before/after pressing "Tambah Biaya"): with N inputs before the press, the new pair lands at
- * indices [N-1, N], displacing Catatan (previously the last, at N-1) to N+1. `addPayment`'s
- * delta-at-the-end technique does NOT apply here for that reason.
+ * Every extra-fee row container currently in the tree, in JSX/array order (oldest first).
+ * STRUCTURAL FALLBACK: same `styles.extraFeeRow` signature `getExtraFeeRowByDescription` uses,
+ * applied tree-wide via `UNSAFE_getAllByType(View)` rather than an ancestor walk from one known
+ * starting node — there is no description text to anchor to for a row that was just added and is
+ * still blank. Because this is a whole-tree scan (not scoped to one node's ancestors), it CAN
+ * encounter styles that are IDENTICAL to `extraFeeRow`'s, not just similar: the Jaminan-banner
+ * icon row's inline style (`{flexDirection:"row",alignItems:"center",gap:spacing.sm}` at :919) is
+ * a byte-for-byte match, and — being lower in the tree, in the "Status Jaminan" section which
+ * renders after Rincian Biaya — was winning the "take the last match" search outright (found
+ * empirically: the resulting node had zero TextInput descendants). A style filter alone cannot
+ * distinguish two identically-styled containers; a CONTENT filter (exactly 2 TextInput
+ * descendants — description + amount) can, and is what actually makes a row an extraFeeRow.
+ */
+function allExtraFeeRows(utils: RenderResult): any[] {
+  const { View, StyleSheet, TextInput } = require("react-native")
+  const { within } = require("@testing-library/react-native")
+  return utils.UNSAFE_getAllByType(View).filter((v: any) => {
+    const flat = StyleSheet.flatten(v.props.style) ?? {}
+    if (
+      flat.flexDirection !== "row" ||
+      flat.alignItems !== "center" ||
+      flat.gap === undefined ||
+      flat.justifyContent !== undefined ||
+      flat.backgroundColor !== undefined
+    ) {
+      return false
+    }
+    try {
+      return within(v).UNSAFE_getAllByType(TextInput).length === 2
+    } catch {
+      return false // UNSAFE_getAllByType throws when it finds zero, e.g. the Jaminan icon row
+    }
+  })
+}
+
+/**
+ * Presses "Tambah Biaya" and returns the two new TextInputs (description, amount) for the row it
+ * added.
+ *
+ * ③ Tier-1 #3 fix — NOT located by a fixed/delta TextInput index. Verified empirically: JSX order
+ * inside Rincian Biaya (PengembalianScreen.tsx) is Subtotal (:643) -> fuel suggestion (:663) ->
+ * `extraFees.map` (:695) -> Diskon (:728), with Catatan last. So when a Diskon row ALREADY
+ * exists, a newly-added extra-fee row inserts BEFORE the Diskon row, not immediately before
+ * Catatan — the previous fixed-offset-from-the-end formula (`[before-1, before]`) silently
+ * returned `[Amount, Diskon]` instead of `[Desc, Amount]` in that case (confirmed by dumping the
+ * TextInput placeholder list before/after pressing "Tambah Biaya" with a Diskon row already
+ * present — the new pair landed at indices [before-2, before-1], not [before-1, before]).
+ *
+ * Fix: find every extraFeeRow-shaped container and take the LAST one. New fees are always
+ * appended to the END of the `extraFees` array (`setExtraFees(prev => [...prev, ...])`), so the
+ * newest row is always the last `extraFeeRow` in the tree, regardless of whether a Diskon row (or
+ * anything else) exists elsewhere on screen — this holds however many rows already exist, in
+ * whatever order they were added.
  */
 function addExtraFeeRow(utils: RenderResult): [any, any] {
-  const before = allTextInputs(utils).length
   fireEvent.press(utils.getByText("Tambah Biaya"))
-  const inputs = allTextInputs(utils)
-  return [inputs[before - 1], inputs[before]]
+  const rows = allExtraFeeRows(utils)
+  const newest = rows[rows.length - 1]
+  const { within } = require("@testing-library/react-native")
+  const [desc, amount] = within(newest).UNSAFE_getAllByType(require("react-native").TextInput)
+  return [desc, amount]
 }
 
 /**
@@ -275,7 +340,69 @@ function pressSave(utils: RenderResult) {
   fireEvent.press(utils.getByText(/Selesaikan/))
 }
 
+/**
+ * Reads the value Text SPECIFICALLY inside the row labelled `rowLabel` — "Subtotal Sewa",
+ * "Diskon", or "Total Tagihan" (the three rows sharing `styles.infoRow`; "Sisa:" uses a
+ * DIFFERENT style, `paySummaryRow` — see `getSisaLabelColor` for that one). Scoped via
+ * `findAncestorWhere` to `infoRow`'s signature (`alignItems: "center"`, `flexDirection: "row"`,
+ * `minHeight: 40`) — the row's own container, the nearest such ancestor of `rowLabel`'s own text
+ * node (all three rows use the SAME style, but each is a SIBLING, not an ancestor, of the others'
+ * text).
+ *
+ * ③ Tier-2 #12: `getAllByText("Rp X").length >= 2` (used elsewhere in this file for the common
+ * case of "Total Tagihan and Sisa happen to show the same figure") proves "this string appears
+ * twice SOMEWHERE", not "the row labelled `rowLabel` shows X" — a migration that, say, dropped
+ * Total Tagihan's OWN value while Sisa's rendered fine could still pass a `>= 2` check as long as
+ * two matches happened to survive some other way. This reads the SPECIFIC row.
+ */
+function getRowValue(utils: RenderResult, rowLabel: string): string {
+  const row = findAncestorWhere(
+    utils.getByText(rowLabel),
+    (flat) => flat.alignItems === "center" && flat.flexDirection === "row" && flat.minHeight === 40,
+  )
+  if (!row) throw new Error(`row for "${rowLabel}" (styles.infoRow) not found`)
+  const { within } = require("@testing-library/react-native")
+  const { Text } = require("react-native")
+  const texts = within(row).UNSAFE_getAllByType(Text)
+  // [0] = the label itself (`rowLabel`), [1] = its value.
+  return texts[1].props.children
+}
+
+/** Reads the "Sisa:" label's OWN text colour (PengembalianScreen.tsx:890-897) — no ancestor walk
+ * needed, the colour lives on the same node this locates (by its literal, unambiguous text). */
+function getSisaLabelColor(utils: RenderResult): string {
+  const { StyleSheet } = require("react-native")
+  return StyleSheet.flatten(utils.getByText("Sisa:").props.style).color
+}
+
+/**
+ * Reads the Jaminan banner's OWN `backgroundColor` (PengembalianScreen.tsx:913-917).
+ * STRUCTURAL FALLBACK: walks up from the banner's own sentence text (content differs by state,
+ * so the caller supplies it) to the nearest ancestor matching `styles.jaminanBanner`'s signature
+ * (`borderRadius: 12`, a defined `gap`, a defined `padding`). Not located via the inline
+ * `{flexDirection:"row",alignItems:"center",gap:spacing.sm}` icon row one level in — ③ Tier-1
+ * #3's investigation found that EXACT style object is also used, byte-for-byte, by
+ * `styles.extraFeeRow` elsewhere on screen; `borderRadius: 12` + a defined `padding` is unique to
+ * `jaminanBanner` among ITS OWN ancestors (`styles.card` also has `borderRadius`, but `16`, not
+ * `12`).
+ */
+function getJaminanBannerColor(utils: RenderResult, bannerText: string): string {
+  const { StyleSheet } = require("react-native")
+  const row = findAncestorWhere(
+    utils.getByText(bannerText),
+    (flat) => flat.borderRadius === 12 && flat.gap !== undefined && flat.padding !== undefined,
+  )
+  if (!row) throw new Error(`Jaminan banner (styles.jaminanBanner) for "${bannerText}" not found`)
+  return StyleSheet.flatten(row.props.style).backgroundColor
+}
+
 // ─── Dispatch ②b helpers — text-entry, row removal, the picker, PembayaranSheet edit/delete ──
+
+/** Harga bensin / kotak. INDEX FALLBACK: fixed index 1, valid ONLY on a fresh render — see
+ * `getSubtotalInput`. */
+function getHargaInput(utils: RenderResult) {
+  return allTextInputs(utils)[1]
+}
 
 /** KM Kembali. INDEX FALLBACK: fixed index 2, valid ONLY on a fresh render (Tujuan 0, Harga 1,
  * KM 2, Subtotal 3, ...Catatan last) — see `getSubtotalInput`. */
@@ -297,16 +424,15 @@ function getNotesInput(utils: RenderResult) {
 }
 
 /**
- * Presses one extra-fee row's own trash icon.
- * STRUCTURAL FALLBACK: walks up from that row's description TextInput (found via its live
- * `value`, i.e. `getByDisplayValue`) to the nearest ancestor matching `styles.extraFeeRow`'s
- * signature (`flexDirection: "row"`, `alignItems: "center"`, a defined `gap`, no
- * `justifyContent`). `styles.terlambatWarning` shares the same 3 keys but is never encountered
- * here — it lives in a different section of the tree (Waktu Sewa, not Rincian Biaya) and is
- * therefore never an ANCESTOR of this specific starting node, only a sibling elsewhere. Exactly
- * one `TouchableOpacity` lives inside an `extraFeeRow` — the trash icon.
+ * Locates one extra-fee row's own container by its live description `value`.
+ * STRUCTURAL FALLBACK: walks up from the description TextInput (found via `getByDisplayValue`)
+ * to the nearest ancestor matching `styles.extraFeeRow`'s signature (`flexDirection: "row"`,
+ * `alignItems: "center"`, a defined `gap`, no `justifyContent`). `styles.terlambatWarning` shares
+ * the same 3 keys but is never encountered here — it lives in a different section of the tree
+ * (Waktu Sewa, not Rincian Biaya) and is therefore never an ANCESTOR of this specific starting
+ * node, only a sibling elsewhere.
  */
-function removeExtraFeeRowByDescription(utils: RenderResult, description: string) {
+function getExtraFeeRowByDescription(utils: RenderResult, description: string) {
   const descInput = utils.getByDisplayValue(description)
   const row = findAncestorWhere(
     descInput,
@@ -317,6 +443,13 @@ function removeExtraFeeRowByDescription(utils: RenderResult, description: string
       flat.justifyContent === undefined,
   )
   if (!row) throw new Error(`extra-fee row (styles.extraFeeRow) for "${description}" not found`)
+  return row
+}
+
+/** Presses one extra-fee row's own trash icon (see `getExtraFeeRowByDescription`). Exactly one
+ * `TouchableOpacity` lives inside an `extraFeeRow` — the trash icon. */
+function removeExtraFeeRowByDescription(utils: RenderResult, description: string) {
+  const row = getExtraFeeRowByDescription(utils, description)
   const { within } = require("@testing-library/react-native")
   const trash = within(row).UNSAFE_getAllByType(require("react-native").TouchableOpacity)[0]
   fireEvent.press(trash)
@@ -380,6 +513,12 @@ describe("Sisa — inline composition (Math.max(0, totalTagihan - totalPaid))", 
     expect(utils.getByText("Jaminan ditahan — akan dibuat Hutang Rp 40.000")).toBeDefined()
     expect(utils.getByText("Hutang otomatis dibuat saat pengembalian disimpan.")).toBeDefined()
     expect(utils.getByText("Selesaikan & Buat Hutang")).toBeDefined()
+    // ③ Tier-2 #8: §6 mandates a colour distinction at Sisa > 0, not just different text — a
+    // migration that rendered the SAME colour in both states would pass a text-only suite.
+    expect(getSisaLabelColor(utils)).toBe(colors.error)
+    expect(getJaminanBannerColor(utils, "Jaminan ditahan — akan dibuat Hutang Rp 40.000")).toBe(
+      colors.warningContainer,
+    )
   })
 
   it("sisa = 0 once payments cover the bill exactly: shows the paid-off banner and CTA", async () => {
@@ -388,6 +527,10 @@ describe("Sisa — inline composition (Math.max(0, totalTagihan - totalPaid))", 
     await waitFor(() => expect(utils.getByText("Jaminan bisa dikembalikan")).toBeDefined())
     expect(utils.getByText("Selesaikan Pengembalian")).toBeDefined()
     expect(utils.queryByText(/Buat Hutang/)).toBeNull()
+    // ③ Tier-2 #8: the OTHER half of the colour pin — green at Sisa = 0, not the same amber/error
+    // as the > 0 case above.
+    expect(getSisaLabelColor(utils)).toBe(colors.onSuccessContainer)
+    expect(getJaminanBannerColor(utils, "Jaminan bisa dikembalikan")).toBe(colors.successContainer)
   })
 
   it("clamps at 0, never negative, when existing payments already exceed the bill", async () => {
@@ -412,8 +555,16 @@ describe("Sisa — inline composition (Math.max(0, totalTagihan - totalPaid))", 
 // ─── (b) closeRental payload — pin the arguments, not just the pixels (D-4) ─
 
 describe("closeRental payload — pinned scenarios", () => {
-  it("sisa = 0 (fully paid): pins the full CloseRentalInput, including newPayments", async () => {
+  it("sisa = 0 (fully paid): pins the full CloseRentalInput, including newPayments and the four hydrated fields", async () => {
     const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    // ③ Tier-1 #11 (midnight-rollover flake): captured immediately before `addPayment` — that is
+    // the exact moment PembayaranSheet's `useState(todayMidnight)` lazy initializer runs in
+    // production, so this and the production value are computed within the same synchronous
+    // window rather than being compared across the whole test's duration (which could
+    // legitimately straddle a real local-midnight rollover and fail for a reason that has
+    // nothing to do with a regression).
+    const expectedPaidAt = new Date()
+    expectedPaidAt.setHours(0, 0, 0, 0)
     addPayment(utils, 40000)
     await waitFor(() => expect(utils.getByText("Jaminan bisa dikembalikan")).toBeDefined())
 
@@ -425,12 +576,16 @@ describe("closeRental payload — pinned scenarios", () => {
     expect(rentalId).toBe("r1")
     expect(payload).toEqual({
       returnedAt: expect.any(Date),
-      kondisiKembali: { bensinKotak: 4, km: null, photos: [] },
+      // ③ Tier-1 #2: bensinKotak/tujuan/notes below are the fixture's OWN distinguishing values
+      // (`6`/"Kos Barat"/"catatan awal", not the `useState` defaults `4`/""/"") — this full-object
+      // match is what proves PengembalianScreen.tsx:221-224's hydration effect actually ran,
+      // rather than the screen having coincidentally rendered its untouched defaults.
+      kondisiKembali: { bensinKotak: 6, km: null, photos: [] },
       subtotalSewa: 40000,
       extraFees: [],
       discount: 0,
-      tujuan: "",
-      notes: "",
+      tujuan: "Kos Barat",
+      notes: "catatan awal",
       newPayments: [
         {
           amount: 40000,
@@ -446,9 +601,12 @@ describe("closeRental payload — pinned scenarios", () => {
     expect(Math.abs(payload.returnedAt.getTime() - beforeSave)).toBeLessThan(5000)
     // PembayaranSheet's paidAt is `todayMidnight()` — deterministic given "now", so an exact
     // match is possible (not just tolerant).
-    const expectedPaidAt = new Date()
-    expectedPaidAt.setHours(0, 0, 0, 0)
     expect(payload.newPayments[0].paidAt).toEqual(expectedPaidAt)
+    // ③ Tier-2 #7: §6's final clause — navigation.replace is the only pin on it.
+    expect(navigation.replace).toHaveBeenCalledWith("RentalDetail", {
+      rentalId: "r1",
+      justClosed: true,
+    })
   })
 
   it("sisa > 0 (auto-debt path): pins the payload with newPayments empty — the server creates the hutang", async () => {
@@ -462,15 +620,20 @@ describe("closeRental payload — pinned scenarios", () => {
     expect(rentalId).toBe("r1")
     expect(payload).toEqual({
       returnedAt: expect.any(Date),
-      kondisiKembali: { bensinKotak: 4, km: null, photos: [] },
+      // Same hydration proof as the fully-paid test above (③ Tier-1 #2).
+      kondisiKembali: { bensinKotak: 6, km: null, photos: [] },
       subtotalSewa: 40000,
       extraFees: [],
       discount: 0,
-      tujuan: "",
-      notes: "",
+      tujuan: "Kos Barat",
+      notes: "catatan awal",
       newPayments: [],
     })
     expect(Math.abs(payload.returnedAt.getTime() - beforeSave)).toBeLessThan(5000)
+    expect(navigation.replace).toHaveBeenCalledWith("RentalDetail", {
+      rentalId: "r1",
+      justClosed: true,
+    })
   })
 
   it("extra fee present: pins description + amount in extraFees, subtotal untouched", async () => {
@@ -507,6 +670,10 @@ describe("closeRental payload — pinned scenarios", () => {
     // proof-of-concept that a render-level test can pin the argument handed to closeRental.
     const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
     fireEvent.changeText(getSubtotalInput(utils), "100000")
+    // ③ Tier-1 #6: a dropped/mis-bound `value={displayRupiah(rawSubtotal)}` (PengembalianScreen.tsx
+    // :651) is invisible to a payload-only assertion, because `fireEvent.changeText` drives state
+    // directly regardless of what the field DISPLAYS. This reads the field back.
+    expect(utils.getByDisplayValue("100.000")).toBeDefined()
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
@@ -517,29 +684,83 @@ describe("closeRental payload — pinned scenarios", () => {
     expect(payload.extraFees).toEqual([])
     expect(payload.discount).toBe(0)
   })
+
+  it("combined: one discount + one extra fee + one payment, all in a single save, pinned as a full payload", async () => {
+    // ③ Tier-1 #4: excluded originally on the reasoning that "the composition IS
+    // computeReturnTotal, already pinned pure" — true for the ARITHMETIC, not for the
+    // CONSTRUCTION of the closeRental arguments, which is exactly what the ⑤/④ migrations touch.
+    // Also the only test in this file where `alreadyPaid + pendingPaid`
+    // (PengembalianScreen.tsx:241) has BOTH operands non-zero — every other test exercises it
+    // with one side at 0, so a regression from `+` to e.g. `Math.max(...)` would pass everywhere
+    // else. Discount is added BEFORE the extra fee deliberately — that ordering is exactly what
+    // exposed the `addExtraFeeRow` bug fixed under ③ Tier-1 #3; this test doubles as its
+    // regression guard.
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+
+    const discountInput = addDiscountRow(utils)
+    fireEvent.changeText(discountInput, "3000")
+
+    const [descInput, amountInput] = addExtraFeeRow(utils)
+    fireEvent.changeText(descInput, "Servis")
+    fireEvent.changeText(amountInput, "7000")
+
+    addPayment(utils, 20000)
+
+    // Total Tagihan = 40.000 + 7.000 - 3.000 = 44.000; Sisa = 44.000 - 20.000 = 24.000 (> 0).
+    expect(utils.getAllByText("Rp 44.000").length).toBeGreaterThanOrEqual(1)
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+
+    const [rentalId, payload] = mockCloseRental.mock.calls[0]
+    expect(rentalId).toBe("r1")
+    expect(payload).toEqual({
+      returnedAt: expect.any(Date),
+      kondisiKembali: { bensinKotak: 6, km: null, photos: [] },
+      subtotalSewa: 40000,
+      extraFees: [{ description: "Servis", amount: 7000 }],
+      discount: 3000,
+      tujuan: "Kos Barat",
+      notes: "catatan awal",
+      newPayments: [
+        {
+          amount: 20000,
+          method: "CASH",
+          methodDescription: undefined,
+          paidAt: expect.any(Date),
+          notes: undefined,
+        },
+      ],
+    })
+  })
 })
 
 // ─── (b) Fuel suggestion "Terapkan" — debt #12, preserved exactly as-is ────
 
 describe("fuel suggestion 'Terapkan' — appends an extra-fee line (debt #12, NOT a Subtotal edit)", () => {
   it("direction 'add' (less fuel returned): appends a positive 'Bensin' extra-fee line, Subtotal untouched", async () => {
-    const utils = await renderScreen(
-      makeRental({
-        tarif: 40000,
-        payments: [],
-        kondisiKeluar: { bensinKotak: 4, km: 1000, photos: [] },
-      }),
-    )
-    // rawHarga defaults to "5000" — press decrement once: bensinKembali 4 -> 3 (less than taken).
-    pressStepper(utils, 4, "dec")
+    // No explicit `kondisiKeluar` override — the fixture default (`bensinKotak: 6`) IS the
+    // collision-free baseline this test needs (③ Tier-1 #2); an explicit `bensinKotak: 4` here
+    // would coincidentally match PengembalianScreen.tsx:181's `useState(4)` default and so would
+    // NOT prove the hydration effect ran, even though the test would still pass either way.
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    // rawHarga defaults to "5000" — press decrement once: bensinKembali 6 -> 5 (less than taken).
+    pressStepper(utils, 6, "dec")
 
     fireEvent.press(utils.getByText("Terapkan"))
 
-    // The extra-fee line appears with description "Bensin" pre-filled.
+    // The extra-fee line appears with description "Bensin" pre-filled, amount "5.000" — ③
+    // Tier-1 #6: pins the field's DISPLAYED value (PengembalianScreen.tsx:709), not just the
+    // state that later feeds the payload. Scoped to the row via `within` — "5.000" also matches
+    // the untouched "Harga bensin / kotak" field elsewhere on screen, so an unscoped
+    // `getByDisplayValue` would throw on an ambiguous match.
     expect(utils.getByDisplayValue("Bensin")).toBeDefined()
-    // Total Tagihan reflects the +5.000 line (40.000 + 5.000). "Rp 45.000" is shown twice (Total
-    // Tagihan AND Sisa share the figure — no payment made yet) — getAllByText, not getByText.
-    expect(utils.getAllByText("Rp 45.000").length).toBeGreaterThanOrEqual(2)
+    const { within } = require("@testing-library/react-native")
+    const bensinRow = getExtraFeeRowByDescription(utils, "Bensin")
+    expect(within(bensinRow).getByDisplayValue("5.000")).toBeDefined()
+    // Total Tagihan reflects the +5.000 line (40.000 + 5.000) — read from the row itself, not
+    // "some element somewhere shows this text" (③ Tier-2 #12).
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 45.000")
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
@@ -549,22 +770,19 @@ describe("fuel suggestion 'Terapkan' — appends an extra-fee line (debt #12, NO
   })
 
   it("direction 'subtract' (more fuel returned): appends a negative 'Bensin' extra-fee line, Subtotal untouched", async () => {
-    const utils = await renderScreen(
-      makeRental({
-        tarif: 40000,
-        payments: [],
-        kondisiKeluar: { bensinKotak: 4, km: 1000, photos: [] },
-      }),
-    )
-    // press increment once: bensinKembali 4 -> 5 (more than taken).
-    pressStepper(utils, 4, "inc")
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    // press increment once: bensinKembali 6 -> 7 (more than taken).
+    pressStepper(utils, 6, "inc")
 
     fireEvent.press(utils.getByText("Terapkan"))
 
     expect(utils.getByDisplayValue("Bensin")).toBeDefined()
-    // Total Tagihan reflects the -5.000 line (40.000 - 5.000). "Rp 35.000" is shown twice (Total
-    // Tagihan AND Sisa share the figure — no payment made yet) — getAllByText, not getByText.
-    expect(utils.getAllByText("Rp 35.000").length).toBeGreaterThanOrEqual(2)
+    // ③ Tier-1 #6: the negative line's DISPLAYED value — pins `displayRupiah`'s "−" (U+2212
+    // MINUS SIGN, not the ASCII hyphen U+002D) rendering, which is otherwise unpinned anywhere in
+    // this suite (only the payload's numeric -5000 was previously asserted).
+    expect(utils.getByDisplayValue("−5.000")).toBeDefined()
+    // Total Tagihan reflects the -5.000 line (40.000 - 5.000) — read from the row itself.
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 35.000")
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
@@ -573,29 +791,76 @@ describe("fuel suggestion 'Terapkan' — appends an extra-fee line (debt #12, NO
     expect(payload.extraFees).toEqual([{ description: "Bensin", amount: -5000 }])
   })
 
+  it("removing a Terapkan-created NEGATIVE 'Bensin' line (subtract direction) clears it and restores Total Tagihan", async () => {
+    // ③ Tier-2 #10: the existing removal tests only ever remove positive-amount rows; a sign
+    // bug in the recompute (e.g. `Math.abs` slipping into the removal path) would pass all of
+    // them and only show up removing a negative one.
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    pressStepper(utils, 6, "inc") // -> direction "subtract"
+    fireEvent.press(utils.getByText("Terapkan"))
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 35.000")
+
+    removeExtraFeeRowByDescription(utils, "Bensin")
+
+    expect(utils.queryByDisplayValue("Bensin")).toBeNull()
+    // Back to the untouched bill — not 45.000 (which a sign bug turning removal into addition
+    // would produce).
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 40.000")
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.extraFees).toEqual([])
+  })
+
+  it("editing Harga bensin/kotak changes the rate the fuel suggestion computes against", async () => {
+    // ③ Tier-1 #5: `rawHarga` (PengembalianScreen.tsx:232) stays at its initial "5000" in every
+    // OTHER test in this file — its `value`/`onChangeText` binding (⑤ boxes this field too)
+    // could be fully destroyed by the migration with a green suite throughout. This is the one
+    // test in the file that actually edits it.
+    const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+    fireEvent.changeText(getHargaInput(utils), "10000")
+    expect(utils.getByDisplayValue("10.000")).toBeDefined()
+
+    pressStepper(utils, 6, "dec") // -> direction "add", selisih 1 kotak
+    fireEvent.press(utils.getByText("Terapkan"))
+
+    // 1 kotak * the EDITED rate (10.000), not the stale default (5.000). Scoped via `within` —
+    // the Harga field ALSO still shows "10.000", so an unscoped query would be ambiguous.
+    const { within } = require("@testing-library/react-native")
+    const bensinRow = getExtraFeeRowByDescription(utils, "Bensin")
+    expect(within(bensinRow).getByDisplayValue("10.000")).toBeDefined()
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 50.000") // 40.000 + 10.000
+
+    pressSave(utils)
+    await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
+    const [, payload] = mockCloseRental.mock.calls[0]
+    expect(payload.extraFees).toEqual([{ description: "Bensin", amount: 10000 }])
+  })
+
   it("the fuel-suggestion row renders amber (colors.warningContainer) UNCONDITIONALLY — same color for both directions", async () => {
     const { StyleSheet } = require("react-native")
 
     async function suggestionRowBackground(direction: "inc" | "dec") {
-      const utils = await renderScreen(
-        makeRental({
-          tarif: 40000,
-          payments: [],
-          kondisiKeluar: { bensinKotak: 4, km: 1000, photos: [] },
-        }),
-      )
-      pressStepper(utils, 4, direction)
+      const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
+      pressStepper(utils, 6, direction)
       const terapkan = utils.getByText("Terapkan")
-      // STRUCTURAL FALLBACK: walk up from "Terapkan" to the nearest ancestor whose flattened
-      // style has `backgroundColor: colors.warningContainer` — that is `styles.fuelSuggestionRow`
-      // itself. `styles.terapkanBtn` (the button "Terapkan" sits directly inside) has its OWN
-      // backgroundColor (`tertiaryContainer`, a different value), so the walk correctly skips
-      // past it rather than matching prematurely; `styles.fuelSuggestionIcon` also uses
-      // `warningContainer` but is a sibling, not an ancestor, of "Terapkan", so it is never
-      // encountered walking upward.
+      // ③ Tier-1 #1 fix: the row is located WITHOUT reading `backgroundColor` at all — by
+      // `styles.fuelSuggestionRow`'s STRUCTURAL signature (`borderRadius: 12`, a defined `gap`,
+      // a defined `padding`, `flexDirection: "row"`). The original version selected the node BY
+      // the very property (`backgroundColor === colors.warningContainer`) it then asserted,
+      // making all three assertions true by construction — the only real signal was "the search
+      // succeeded", and its failure mode was a thrown Error, not an assertion diff. Walking up
+      // from "Terapkan": `styles.terapkanBtn` has `borderRadius: 8` (not 12), so the walk
+      // correctly skips past it; `styles.fuelSuggestionIcon` also has `borderRadius: 18` and is
+      // a sibling of "Terapkan" besides, so it is never even encountered walking upward.
       const row = findAncestorWhere(
         terapkan,
-        (flat) => flat.backgroundColor === colors.warningContainer,
+        (flat) =>
+          flat.borderRadius === 12 &&
+          flat.flexDirection === "row" &&
+          flat.gap === spacing.sm &&
+          flat.padding === spacing.sm,
       )
       if (!row) throw new Error("fuel suggestion row (styles.fuelSuggestionRow) not found")
       return StyleSheet.flatten(row.props.style).backgroundColor
@@ -604,6 +869,9 @@ describe("fuel suggestion 'Terapkan' — appends an extra-fee line (debt #12, NO
     const addColor = await suggestionRowBackground("dec") // direction "add"
     const subtractColor = await suggestionRowBackground("inc") // direction "subtract"
 
+    // These three are now genuine assertions — the row was found independently of its colour,
+    // so a migration that turned it any OTHER colour (or dropped `warningContainer` from just one
+    // direction) would show up as a real value mismatch here, not a thrown "not found".
     expect(addColor).toBe(colors.warningContainer)
     expect(subtractColor).toBe(colors.warningContainer)
     expect(addColor).toBe(subtractColor) // pins "unconditional": identical regardless of direction
@@ -700,31 +968,28 @@ describe("extra-fee and discount row removal", () => {
   it("removing one of two extra-fee rows leaves only the other, and Total Tagihan drops correspondingly", async () => {
     const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
 
-    // Row 1 — same mid-tree insertion rule as `addExtraFeeRow`'s own docstring.
-    let before = allTextInputs(utils).length
-    fireEvent.press(utils.getByText("Tambah Biaya"))
-    let inputs = allTextInputs(utils)
-    fireEvent.changeText(inputs[before - 1], "Fee A")
-    fireEvent.changeText(inputs[before], "1000")
+    // `addExtraFeeRow` always returns the NEWEST row's own [desc, amount] pair, regardless of how
+    // many rows already exist (③ Tier-1 #3 fix) — safe to call twice in a row like this.
+    const [descA, amountA] = addExtraFeeRow(utils)
+    fireEvent.changeText(descA, "Fee A")
+    fireEvent.changeText(amountA, "1000")
 
-    // Row 2 — same rule, now relative to the tree state AFTER row 1 was inserted.
-    before = allTextInputs(utils).length
-    fireEvent.press(utils.getByText("Tambah Biaya"))
-    inputs = allTextInputs(utils)
-    fireEvent.changeText(inputs[before - 1], "Fee B")
-    fireEvent.changeText(inputs[before], "2000")
+    const [descB, amountB] = addExtraFeeRow(utils)
+    fireEvent.changeText(descB, "Fee B")
+    fireEvent.changeText(amountB, "2000")
 
     expect(utils.getByDisplayValue("Fee A")).toBeDefined()
     expect(utils.getByDisplayValue("Fee B")).toBeDefined()
-    // 40.000 + 1.000 + 2.000, shown twice (Total Tagihan and Sisa share the figure, unpaid).
-    expect(utils.getAllByText("Rp 43.000").length).toBeGreaterThanOrEqual(2)
+    // 40.000 + 1.000 + 2.000 — read from the row itself, not "some element somewhere shows this
+    // text" (③ Tier-2 #12).
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 43.000")
 
     removeExtraFeeRowByDescription(utils, "Fee A")
 
     expect(utils.queryByDisplayValue("Fee A")).toBeNull()
     expect(utils.getByDisplayValue("Fee B")).toBeDefined()
     // Total Tagihan reflects only the surviving Fee B line (40.000 + 2.000).
-    expect(utils.getAllByText("Rp 42.000").length).toBeGreaterThanOrEqual(2)
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 42.000")
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
@@ -736,14 +1001,19 @@ describe("extra-fee and discount row removal", () => {
     const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
     const discountInput = addDiscountRow(utils)
     fireEvent.changeText(discountInput, "5000")
-    // 40.000 - 5.000, shown twice (Total Tagihan and Sisa share the figure, unpaid).
-    expect(utils.getAllByText("Rp 35.000").length).toBeGreaterThanOrEqual(2)
+    // 40.000 - 5.000 — read from the row itself.
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 35.000")
+    const inputCountWithDiscount = allTextInputs(utils).length
 
     removeDiscountRow(utils, discountInput)
 
-    // The row is gone entirely — the "+ Diskon" add-button reappears (its own text is "Diskon").
-    expect(utils.getByText("Diskon")).toBeDefined()
-    expect(utils.getAllByText("Rp 40.000").length).toBeGreaterThanOrEqual(2) // back to the full bill
+    // ③ Tier-2 #12: `getByText("Diskon")` alone can never fail here — that literal string is the
+    // TEXT on both the row's own label (when showing) AND the "+ Diskon" add-button (when the
+    // row is removed), so it matches either way. The genuine structural proof that the ROW
+    // itself (not just some "Diskon" text somewhere) is gone: exactly one fewer TextInput in the
+    // tree than while the row existed.
+    expect(allTextInputs(utils).length).toBe(inputCountWithDiscount - 1)
+    expect(getRowValue(utils, "Total Tagihan")).toBe("Rp 40.000") // back to the full bill
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
@@ -793,6 +1063,19 @@ describe("returnedAt — the Kembali picker interaction (D-2: gets the box, keep
     // the literal " · ", time) — getByText matches the concatenation, not the date/time pieces
     // individually.
     expect(utils.getByText("Jumat, 10 Juli 2026 · 14:30")).toBeDefined()
+
+    // ③ Tier-2 #9: the Terlambat caption is on screen in every test in this file (returnedAt,
+    // wall-clock-seeded, is always well past the fixture's fixed `dueAt` by the time a test
+    // runs) but was asserted nowhere — §6 makes it the only lateness signal; losing it means Mom
+    // under-charges. Computed via the same pure `hoursLate` (already pinned independently in
+    // rentalMath.test.ts) against the exact Date this test just picked, rather than a hardcoded
+    // hour count — hardcoding it would be timezone-dependent (the picker's local Y/M/D/H/M
+    // convert to a UTC instant that shifts with whatever TZ the test runs under, same class of
+    // issue as the debt #16 note elsewhere in this file).
+    const dueAt = new Date("2026-07-02T00:00:00Z")
+    const chosenReturnedAt = new Date(2026, 6, 10, 14, 30, 0, 0)
+    const expectedJamLambat = hoursLate(dueAt, chosenReturnedAt)
+    expect(utils.getByText(`Terlambat ${expectedJamLambat} jam dari estimasi`)).toBeDefined()
 
     pressSave(utils)
     await waitFor(() => expect(mockCloseRental).toHaveBeenCalledTimes(1))
