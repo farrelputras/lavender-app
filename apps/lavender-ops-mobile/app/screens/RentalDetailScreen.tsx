@@ -301,6 +301,13 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
   const vehicleIcon: "two-wheeler" | "directions-car" =
     vehicle?.category === "MOBIL" ? "directions-car" : "two-wheeler"
   const overdue = isOverdue(rental)
+  // v1.0.5 dispatch 8 (P1 fix): a COMPLETED rental with a captured returnedAt must show the
+  // ACTUAL return under "Dikembalikan" — never the originally-planned dueAt (the bug this
+  // fixes). Any other case — ACTIVE/CANCELLED, or a legacy COMPLETED row with no returnedAt —
+  // keeps today's exact "Kembali" / dueAt output, byte-for-byte unchanged.
+  const showActualReturn = rental.status === "COMPLETED" && rental.returnedAt != null
+  const kembaliLabel = showActualReturn ? "Dikembalikan" : "Kembali"
+  const kembaliDate = showActualReturn ? (rental.returnedAt as Date) : rental.dueAt
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -419,9 +426,11 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
               </Text>
             </View>
             <View style={styles.waktuDivider} />
-            {/* Kembali */}
+            {/* Kembali / Dikembalikan */}
             <View style={styles.waktuRow}>
-              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kembali</Text>
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                {kembaliLabel}
+              </Text>
               <Text
                 style={[
                   textStyles.bodyMd,
@@ -430,7 +439,7 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
                   },
                 ]}
               >
-                {formatHeaderDate(rental.dueAt)} · {formatTime(rental.dueAt)}
+                {formatHeaderDate(kembaliDate)} · {formatTime(kembaliDate)}
               </Text>
             </View>
             <View style={styles.waktuDivider} />

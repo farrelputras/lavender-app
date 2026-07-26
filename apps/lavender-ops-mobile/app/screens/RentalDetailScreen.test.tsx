@@ -406,3 +406,60 @@ describe("cancel discards edit-session changes", () => {
     expect(mockUpdateRental).not.toHaveBeenCalled()
   })
 })
+
+// ─── v1.0.5 dispatch 8 — Waktu Sewa "Kembali" row must show the ACTUAL return, not the
+// planned one, once a rental is COMPLETED. This bug survived 8 dispatches and 284 green tests
+// because every prior test stopped at the screen boundary that captures returnedAt — none
+// checked what RentalDetailScreen does with it. See docs/reports/v1-0-5.md dispatch 8.
+describe("Waktu Sewa — Kembali/Dikembalikan row (v1.0.5 dispatch 8)", () => {
+  it("COMPLETED with a returnedAt that differs from dueAt: shows the ACTUAL value under 'Dikembalikan', never the planned dueAt", async () => {
+    const dueAt = new Date("2026-07-02T00:00:00Z")
+    const returnedAt = new Date("2026-07-03T05:30:00Z") // deliberately different from dueAt
+    const rental = makeRental({ status: "COMPLETED", dueAt, returnedAt })
+    const { getByText, queryByText } = await renderScreen(rental)
+
+    const { formatHeaderDate, formatTime } = require("@/utils/format")
+
+    // The actual value renders...
+    expect(getByText("Dikembalikan")).toBeDefined()
+    expect(
+      getByText(`${formatHeaderDate(returnedAt)} · ${formatTime(returnedAt)}`),
+    ).toBeDefined()
+
+    // ...and the planned value does NOT appear anywhere the actual value belongs.
+    expect(queryByText(`${formatHeaderDate(dueAt)} · ${formatTime(dueAt)}`)).toBeNull()
+    expect(queryByText("Kembali")).toBeNull()
+  })
+
+  it("ACTIVE (negative assertion): 'Kembali' label + dueAt, error color when overdue, Terlambat banner — all unchanged", async () => {
+    // A dueAt guaranteed to be in the past relative to whenever this test actually runs.
+    const dueAt = new Date(Date.now() - 26 * 60 * 60 * 1000)
+    const rental = makeRental({ status: "ACTIVE", dueAt, returnedAt: null })
+    const { getByText, queryByText } = await renderScreen(rental)
+
+    const { formatHeaderDate, formatTime } = require("@/utils/format")
+    const { hoursLate } = require("@/utils/rentalMath")
+
+    expect(getByText("Kembali")).toBeDefined()
+    expect(queryByText("Dikembalikan")).toBeNull()
+    const valueNode = getByText(`${formatHeaderDate(dueAt)} · ${formatTime(dueAt)}`)
+    expect(valueNode).toBeDefined()
+    const flattenedStyle = require("react-native").StyleSheet.flatten(valueNode.props.style)
+    expect(flattenedStyle.color).toBe(require("@/theme/tokens").colors.error)
+
+    expect(getByText(`Terlambat ${hoursLate(dueAt)} jam`)).toBeDefined()
+  })
+
+  it("COMPLETED with returnedAt === null (unreachable-through-the-UI legacy row): falls back to the dueAt value under 'Kembali', never blank or Invalid Date", async () => {
+    const dueAt = new Date("2026-07-02T00:00:00Z")
+    const rental = makeRental({ status: "COMPLETED", dueAt, returnedAt: null })
+    const { getByText, queryByText } = await renderScreen(rental)
+
+    const { formatHeaderDate, formatTime } = require("@/utils/format")
+
+    expect(getByText("Kembali")).toBeDefined()
+    expect(queryByText("Dikembalikan")).toBeNull()
+    expect(getByText(`${formatHeaderDate(dueAt)} · ${formatTime(dueAt)}`)).toBeDefined()
+    expect(queryByText(/invalid date/i)).toBeNull()
+  })
+})

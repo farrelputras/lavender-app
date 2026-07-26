@@ -382,3 +382,30 @@ describe("AC-8: CANCELLED rental exposes no exit-condition/note edit affordance"
     expect(queryByTestId("notes-edit-btn")).toBeNull()
   })
 })
+
+// ─── v1.0.5 dispatch 8 — a COMPLETED rental with a REAL (non-null) returnedAt ──────────────
+// Every fixture in this acceptance file up to this point carries `returnedAt: null` (see the
+// base `makeRental()` above). A null value sails straight over the fixed path without ever
+// exercising it — this is the fixture the brief explicitly required so the acceptance layer
+// does not silently believe a null case is "coverage" of the real one.
+describe("Waktu Sewa: a genuinely-captured returnedAt is what a COMPLETED rental shows (v1.0.5 dispatch 8)", () => {
+  it("shows the actual returnedAt (distinct from the originally-planned dueAt), across a fresh mount", async () => {
+    const dueAt = new Date("2026-07-02T00:00:00Z") // originally planned, from the sewa baru flow
+    const returnedAt = new Date("2026-07-02T09:15:00Z") // what Mom actually entered on Pengembalian
+    const rental = makeRental({ status: "COMPLETED", dueAt, returnedAt })
+    await renderScreen(rental)
+
+    // Fresh mount (a real re-navigation into RentalDetail), same as AC-1/BR-8 above — the actual
+    // value must be what a brand-new screen instance shows too, not just in-place state.
+    mockGetRental.mockResolvedValueOnce(rental)
+    const { getByText, queryByText } = render(
+      <RentalDetailScreen navigation={navigation} route={{ params: { rentalId: "r1" } } as any} />,
+    )
+    await waitFor(() => expect(getByText("Detail Rental")).toBeDefined())
+
+    const { formatHeaderDate, formatTime } = require("@/utils/format")
+    expect(getByText("Dikembalikan")).toBeDefined()
+    expect(getByText(`${formatHeaderDate(returnedAt)} · ${formatTime(returnedAt)}`)).toBeDefined()
+    expect(queryByText(`${formatHeaderDate(dueAt)} · ${formatTime(dueAt)}`)).toBeNull()
+  })
+})
