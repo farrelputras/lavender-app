@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Text, TextInput } from "@/components/AppText"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
+import { FieldBox } from "@/components/form/FieldBox"
 import { FieldCard } from "@/components/form/FieldCard"
 import { RupiahInput } from "@/components/form/RupiahInput"
 import { SearchField } from "@/components/form/SearchField"
@@ -135,14 +136,16 @@ export function HutangFormScreen({ navigation }: AppStackScreenProps<"HutangForm
         <SectionLabel>Catatan</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Catatan</Text>
-          <TextInput
-            style={[styles.input, styles.multiline]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="(opsional)"
-            placeholderTextColor={colors.outlineVariant}
-            multiline
-          />
+          <FieldBox>
+            <TextInput
+              style={[styles.input, styles.multiline]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="(opsional)"
+              placeholderTextColor={colors.outlineVariant}
+              multiline
+            />
+          </FieldBox>
         </FieldCard>
       </ScrollView>
 

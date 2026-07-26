@@ -1,4 +1,4 @@
-import { View, PixelRatio, StyleSheet } from "react-native"
+import { View, StyleSheet } from "react-native"
 // Named imports, not `import * as Updates` — Babel's namespace-import interop
 // (`_interopRequireWildcard`) snapshots plain data properties by value the first time the
 // module is required and caches that copy. Under jest, where the test mutates
@@ -6,7 +6,6 @@ import { View, PixelRatio, StyleSheet } from "react-native"
 // keep reading the stale first-seen values forever. Named imports compile to a direct
 // `_expoUpdates.updateId` property read at each usage site instead, so they see the mutation.
 import { createdAt, updateId } from "expo-updates"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 import { Text } from "@/components/AppText"
 import { RELEASE } from "@/config/release"
@@ -25,15 +24,12 @@ import { formatDateLong } from "@/utils/format"
  * Beneath it, the actual update identity from expo-updates. On the bundle embedded in the
  * APK, `updateId` is null and we show "bawaan".
  *
- * v1.0.4 D-1b `[by-Farrel]`: a third line shows the device's reported `fontScale` and bottom
- * safe-area inset — how we learn Mom's *real* text-scale setting from her next screenshot
- * instead of inferring it from MIUI's "XL" label, and it simultaneously proves the inset is
- * being read. Diagnostic only; remove in the next release.
+ * v1.0.4 D-1b shipped a third diagnostic line here (device `fontScale` + bottom safe-area
+ * inset), specified as throwaway from the start. It did its job — Mom's real values were
+ * measured 2026-07-23 (`fontScale` ≈ 1.4, inset 47.27px; see
+ * docs/reports/v1-0-4-visual-audit.md row H1) — and the line is removed in v1.0.5.
  */
 export function VersionFooter() {
-  const insets = useSafeAreaInsets()
-  const fontScale = PixelRatio.getFontScale()
-
   const updateLine =
     updateId && createdAt
       ? `pembaruan ${updateId.slice(0, 7)} · ${formatDateLong(new Date(createdAt))}`
@@ -43,9 +39,6 @@ export function VersionFooter() {
     <View style={styles.container}>
       <Text style={styles.releaseText}>Lavender Ops · v{RELEASE}</Text>
       <Text style={styles.updateText}>{updateLine}</Text>
-      <Text style={styles.updateText}>
-        fontScale {fontScale} · inset {insets.bottom}
-      </Text>
     </View>
   )
 }

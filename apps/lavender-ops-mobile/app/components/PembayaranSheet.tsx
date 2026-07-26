@@ -14,6 +14,7 @@ import { MaterialIcons } from "@expo/vector-icons"
 import DateTimePicker from "@react-native-community/datetimepicker"
 
 import { Text, TextInput } from "@/components/AppText"
+import { FieldBox } from "@/components/form/FieldBox"
 import { Payment, PaymentMethod } from "@/services/rentals/types"
 import { colors, textStyles, spacing } from "@/theme/tokens"
 
@@ -191,28 +192,30 @@ export default function PembayaranSheet({
               <Text style={styles.fieldLabel}>
                 Jumlah <Text style={{ color: colors.error }}>*</Text>
               </Text>
-              <View style={[styles.rupiahInput, amountError && styles.inputError]}>
-                <Text
-                  style={[
-                    textStyles.headlineSm,
-                    { color: colors.onSurfaceVariant, marginRight: 8 },
-                  ]}
-                >
-                  Rp
-                </Text>
-                <TextInput
-                  style={[textStyles.headlineMd, styles.rupiahField]}
-                  keyboardType="numeric"
-                  placeholder="0"
-                  placeholderTextColor={colors.onSurfaceVariant}
-                  value={displayValue}
-                  onChangeText={(t) => {
-                    setAmountError(false)
-                    setRawDigits(t.replace(/\D/g, ""))
-                  }}
-                  returnKeyType="done"
-                />
-              </View>
+              <FieldBox style={amountError ? styles.inputError : undefined}>
+                <View style={styles.rupiahInput}>
+                  <Text
+                    style={[
+                      textStyles.headlineSm,
+                      { color: colors.onSurfaceVariant, marginRight: 8 },
+                    ]}
+                  >
+                    Rp
+                  </Text>
+                  <TextInput
+                    style={[textStyles.headlineMd, styles.rupiahField]}
+                    keyboardType="numeric"
+                    placeholder="0"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    value={displayValue}
+                    onChangeText={(t) => {
+                      setAmountError(false)
+                      setRawDigits(t.replace(/\D/g, ""))
+                    }}
+                    returnKeyType="done"
+                  />
+                </View>
+              </FieldBox>
               {amountError && (
                 <Text style={[textStyles.labelMd, { color: colors.error, marginTop: 4 }]}>
                   Jumlah harus lebih dari 0
@@ -245,13 +248,15 @@ export default function PembayaranSheet({
                 ))}
               </View>
               {method === "LAINNYA" && (
-                <TextInput
-                  style={[textStyles.bodyMd, styles.textInput, { marginTop: spacing.sm }]}
-                  placeholder="Contoh: DANA, Gopay, Voucher"
-                  placeholderTextColor={colors.onSurfaceVariant}
-                  value={methodDesc}
-                  onChangeText={setMethodDesc}
-                />
+                <FieldBox style={styles.methodDescBox}>
+                  <TextInput
+                    style={[textStyles.bodyMd, styles.textInput]}
+                    placeholder="Contoh: DANA, Gopay, Voucher"
+                    placeholderTextColor={colors.onSurfaceVariant}
+                    value={methodDesc}
+                    onChangeText={setMethodDesc}
+                  />
+                </FieldBox>
               )}
             </View>
 
@@ -291,19 +296,17 @@ export default function PembayaranSheet({
                   (opsional)
                 </Text>
               </Text>
-              <TextInput
-                style={[
-                  textStyles.bodyMd,
-                  styles.textInput,
-                  { minHeight: 80, textAlignVertical: "top" },
-                ]}
-                placeholder="Catatan tambahan..."
-                placeholderTextColor={colors.onSurfaceVariant}
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={3}
-              />
+              <FieldBox>
+                <TextInput
+                  style={[textStyles.bodyMd, styles.textInput, styles.notesInput]}
+                  placeholder="Catatan tambahan..."
+                  placeholderTextColor={colors.onSurfaceVariant}
+                  value={notes}
+                  onChangeText={setNotes}
+                  multiline
+                  numberOfLines={3}
+                />
+              </FieldBox>
             </View>
           </ScrollView>
 
@@ -403,6 +406,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingHorizontal: 16,
   },
+  // PRD-8 (v1.0.5): applied to the FieldBox (not this row) via its `style` prop when the
+  // amount is invalid — composition, not a second box declaration (BR-6).
   inputError: {
     borderColor: colors.error,
   },
@@ -419,25 +424,34 @@ const styles = StyleSheet.create({
   methodChipActive: {
     backgroundColor: colors.primary,
   },
+  // PRD-8 (v1.0.5): replaces the old inline `{ marginTop: spacing.sm }` on the "Lainnya"
+  // description TextInput — now applied to its FieldBox instead, since the box (not the bare
+  // input) is the row that needs the gap from the method chips above it.
+  methodDescBox: {
+    marginTop: spacing.sm,
+  },
   methodRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  // PRD-8 (v1.0.5): replaces the old inline `{ minHeight: 80, textAlignVertical: "top" }` on
+  // the Catatan TextInput — FieldBox now owns the box's own minHeight (52); this is purely the
+  // multiline sizing hint for the input itself.
+  notesInput: {
+    minHeight: 80,
+    textAlignVertical: "top",
   },
   rupiahField: {
     color: colors.onSurface,
     flex: 1,
     padding: 0,
   },
+  // PRD-8 (v1.0.5): border/fill/radius/minHeight moved to FieldBox (BR-6, AC-6 — one
+  // declaration site). This is now pure inner-row layout for the "Rp" label + amount input.
   rupiahInput: {
     alignItems: "center",
-    backgroundColor: colors.surfaceContainerLow,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderWidth: 1,
     flexDirection: "row",
-    height: 64,
-    paddingHorizontal: 16,
   },
   sheet: {
     backgroundColor: colors.surfaceContainerLowest,
@@ -450,13 +464,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
   },
+  // PRD-8 (v1.0.5): border/fill/radius moved to FieldBox (BR-6). `padding: 0` because the box
+  // now owns the field's padding — matches `RupiahInput`'s own `field` style convention.
   textInput: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderWidth: 1,
     color: colors.onSurface,
-    paddingHorizontal: 16,
-    paddingVertical: spacing.sm,
+    padding: 0,
   },
 })

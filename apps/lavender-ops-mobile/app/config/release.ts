@@ -15,4 +15,4 @@
  *
  * ⚠️ Hand-maintained. Bump it before every `pnpm ota:publish`. Nothing enforces this.
  */
-export const RELEASE = "1.0.4"
+export const RELEASE = "1.0.5"

@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Text, TextInput } from "@/components/AppText"
 import { BottomActionBar } from "@/components/form/BottomActionBar"
+import { FieldBox } from "@/components/form/FieldBox"
 import { FieldCard } from "@/components/form/FieldCard"
 import { PhotoSlot } from "@/components/form/PhotoSlot"
 import { SectionLabel } from "@/components/form/SectionLabel"
@@ -190,32 +191,38 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         <SectionLabel>Identitas</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Nama Lengkap *</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder="Masukkan nama lengkap"
-            placeholderTextColor={colors.outlineVariant}
-          />
+          <FieldBox>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Masukkan nama lengkap"
+              placeholderTextColor={colors.outlineVariant}
+            />
+          </FieldBox>
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>Panggilan</Text>
-          <TextInput
-            style={styles.input}
-            value={nickname}
-            onChangeText={setNickname}
-            placeholder="Masukkan nama panggilan"
-            placeholderTextColor={colors.outlineVariant}
-          />
+          <FieldBox>
+            <TextInput
+              style={styles.input}
+              value={nickname}
+              onChangeText={setNickname}
+              placeholder="Masukkan nama panggilan"
+              placeholderTextColor={colors.outlineVariant}
+            />
+          </FieldBox>
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>No. HP *</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder="Contoh: 08123456789"
-            placeholderTextColor={colors.outlineVariant}
-            keyboardType="phone-pad"
-          />
+          <FieldBox>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="Contoh: 08123456789"
+              placeholderTextColor={colors.outlineVariant}
+              keyboardType="phone-pad"
+            />
+          </FieldBox>
         </FieldCard>
 
         <SectionLabel>Status</SectionLabel>
@@ -233,33 +240,39 @@ export function UserFormScreen({ route, navigation }: AppStackScreenProps<"UserF
         <SectionLabel>Kontak &amp; Catatan</SectionLabel>
         <FieldCard>
           <Text style={styles.fieldLabel}>Alamat</Text>
-          <TextInput
-            style={[styles.input, styles.multiline]}
-            value={alamat}
-            onChangeText={setAlamat}
-            placeholder="Masukkan alamat lengkap"
-            placeholderTextColor={colors.outlineVariant}
-            multiline
-          />
+          <FieldBox>
+            <TextInput
+              style={[styles.input, styles.multiline]}
+              value={alamat}
+              onChangeText={setAlamat}
+              placeholder="Masukkan alamat lengkap"
+              placeholderTextColor={colors.outlineVariant}
+              multiline
+            />
+          </FieldBox>
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>Kontak Darurat</Text>
-          <TextInput
-            style={styles.input}
-            value={kontakDarurat}
-            onChangeText={setKontakDarurat}
-            placeholder="Nama / No. HP"
-            placeholderTextColor={colors.outlineVariant}
-          />
+          <FieldBox>
+            <TextInput
+              style={styles.input}
+              value={kontakDarurat}
+              onChangeText={setKontakDarurat}
+              placeholder="Nama / No. HP"
+              placeholderTextColor={colors.outlineVariant}
+            />
+          </FieldBox>
           <View style={styles.divider} />
           <Text style={styles.fieldLabel}>Catatan</Text>
-          <TextInput
-            style={[styles.input, styles.multiline]}
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Tambahkan catatan jika ada"
-            placeholderTextColor={colors.outlineVariant}
-            multiline
-          />
+          <FieldBox>
+            <TextInput
+              style={[styles.input, styles.multiline]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Tambahkan catatan jika ada"
+              placeholderTextColor={colors.outlineVariant}
+              multiline
+            />
+          </FieldBox>
         </FieldCard>
 
         <SectionLabel>Foto</SectionLabel>
