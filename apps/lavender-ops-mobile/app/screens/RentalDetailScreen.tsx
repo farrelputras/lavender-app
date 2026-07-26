@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Text, TextInput } from "@/components/AppText"
 import { EditActionBar } from "@/components/form/EditActionBar"
+import { FieldBox } from "@/components/form/FieldBox"
 import { FuelGauge } from "@/components/form/FuelGauge"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import { PhotoViewer } from "@/components/form/PhotoViewer"
@@ -517,16 +518,18 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
 
                 <View style={styles.infoRow}>
                   <Text style={[textStyles.labelMd, styles.infoRowLabel]}>KM</Text>
-                  <TextInput
-                    testID="kondisi-km-input"
-                    style={[textStyles.bodyMd, styles.kmEditInput]}
-                    keyboardType="numeric"
-                    placeholder="Opsional"
-                    placeholderTextColor={colors.outline}
-                    value={editKm}
-                    onChangeText={setEditKm}
-                    returnKeyType="done"
-                  />
+                  <FieldBox style={styles.kmEditBox}>
+                    <TextInput
+                      testID="kondisi-km-input"
+                      style={[textStyles.bodyMd, styles.kmEditInput]}
+                      keyboardType="numeric"
+                      placeholder="Opsional"
+                      placeholderTextColor={colors.outline}
+                      value={editKm}
+                      onChangeText={setEditKm}
+                      returnKeyType="done"
+                    />
+                  </FieldBox>
                 </View>
 
                 <View style={styles.rowDivider} />
@@ -792,16 +795,14 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
             Tujuan
           </Text>
           <View style={styles.card}>
-            <View style={styles.insetBlock}>
-              <Text
-                style={[
-                  textStyles.bodyMd,
-                  { color: rental.tujuan ? colors.onSurface : colors.onSurfaceVariant },
-                ]}
-              >
-                {rental.tujuan || "Tidak ada tujuan."}
-              </Text>
-            </View>
+            <Text
+              style={[
+                textStyles.bodyMd,
+                { color: rental.tujuan ? colors.onSurface : colors.onSurfaceVariant },
+              ]}
+            >
+              {rental.tujuan || "Tidak ada tujuan."}
+            </Text>
           </View>
         </View>
 
@@ -824,17 +825,19 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
           <View style={styles.card}>
             {notesEditing ? (
               <>
-                <TextInput
-                  testID="notes-input"
-                  style={[textStyles.bodyMd, styles.notesInput]}
-                  multiline
-                  numberOfLines={3}
-                  textAlignVertical="top"
-                  placeholder="Catatan tambahan jika ada"
-                  placeholderTextColor={colors.outline}
-                  value={editNotes}
-                  onChangeText={setEditNotes}
-                />
+                <FieldBox>
+                  <TextInput
+                    testID="notes-input"
+                    style={[textStyles.bodyMd, styles.notesInput]}
+                    multiline
+                    numberOfLines={3}
+                    textAlignVertical="top"
+                    placeholder="Catatan tambahan jika ada"
+                    placeholderTextColor={colors.outline}
+                    value={editNotes}
+                    onChangeText={setEditNotes}
+                  />
+                </FieldBox>
                 <EditActionBar
                   testID="notes-edit-bar"
                   saving={notesSaving}
@@ -843,16 +846,14 @@ export function RentalDetailScreen({ navigation, route }: AppStackScreenProps<"R
                 />
               </>
             ) : (
-              <View style={styles.insetBlock}>
-                <Text
-                  style={[
-                    textStyles.bodyMd,
-                    { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant },
-                  ]}
-                >
-                  {rental.notes || "Tidak ada catatan."}
-                </Text>
-              </View>
+              <Text
+                style={[
+                  textStyles.bodyMd,
+                  { color: rental.notes ? colors.onSurface : colors.onSurfaceVariant },
+                ]}
+              >
+                {rental.notes || "Tidak ada catatan."}
+              </Text>
             )}
           </View>
         </View>
@@ -1076,11 +1077,6 @@ const styles = StyleSheet.create({
     color: colors.onSurfaceVariant,
     flex: 1,
   },
-  insetBlock: {
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
-    padding: spacing.md,
-  },
   jaminanPill: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLow,
@@ -1097,10 +1093,13 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.sm,
   },
+  // PRD-8 (v1.0.5): the box's own minWidth — kept off `kmEditInput` itself now that FieldBox
+  // is the visible container (AC-4c).
+  kmEditBox: {
+    minWidth: 100,
+  },
   kmEditInput: {
     color: colors.onSurface,
-    minWidth: 100,
-    paddingVertical: 4,
     textAlign: "right",
   },
   methodBadge: {
@@ -1109,12 +1108,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
+  // PRD-8 (v1.0.5): border/fill/radius moved to FieldBox (BR-6, AC-6 — one declaration site).
+  // `minHeight: 80` is the multiline sizing hint for the input itself, taller than the box's
+  // own 52 floor, same pattern as `PembayaranSheet`'s own Catatan field.
   notesInput: {
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
     color: colors.onSurface,
     minHeight: 80,
-    padding: spacing.md,
   },
   paketChip: {
     alignSelf: "flex-start",
