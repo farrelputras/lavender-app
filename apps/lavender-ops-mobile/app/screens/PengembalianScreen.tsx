@@ -13,6 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker"
 import { SafeAreaView } from "react-native-safe-area-context"
 
 import { Text, TextInput } from "@/components/AppText"
+import { FieldBox } from "@/components/form/FieldBox"
 import { PhotoRow } from "@/components/form/PhotoRow"
 import PembayaranSheet from "@/components/PembayaranSheet"
 import type { AppStackScreenProps } from "@/navigators/navigationTypes"
@@ -78,10 +79,6 @@ function SectionLabel({ children }: { children: string }) {
       {children}
     </Text>
   )
-}
-
-function FieldCard({ children }: { children: React.ReactNode }) {
-  return <View style={styles.card}>{children}</View>
 }
 
 function FuelGauge({ value }: { value: number }) {
@@ -404,7 +401,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
           {/* ── 1. Waktu Sewa ──────────────────────────────────────── */}
           <View>
             <SectionLabel>Waktu Sewa</SectionLabel>
-            <FieldCard>
+            <View style={styles.card}>
               {/* Mulai (read-only) */}
               <View style={styles.timeRow}>
                 <View style={{ flex: 1 }}>
@@ -419,21 +416,26 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
               <View style={styles.rowDivider} />
 
-              {/* Kembali (editable — tap to open picker) */}
-              <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                    Kembali
-                  </Text>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
-                    {formatHeaderDate(returnedAt)} · {formatTime(returnedAt)}
-                  </Text>
-                </View>
-                <View style={styles.inlineEditBtn}>
-                  <MaterialIcons name="edit" size={16} color={colors.primary} />
-                  <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
-                </View>
-              </TouchableOpacity>
+              {/* Kembali (editable — tap to open picker). PRD-8 D-2: gets the box AND keeps its
+                  inlineEditBtn — the box says "changeable", the Edit control says "how" (a
+                  picker, not typing). FieldBox only wraps the SAME TouchableOpacity that already
+                  covered this whole row, so the tap target and interaction are unchanged. */}
+              <FieldBox>
+                <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
+                      Kembali
+                    </Text>
+                    <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
+                      {formatHeaderDate(returnedAt)} · {formatTime(returnedAt)}
+                    </Text>
+                  </View>
+                  <View style={styles.inlineEditBtn}>
+                    <MaterialIcons name="edit" size={16} color={colors.primary} />
+                    <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
+                  </View>
+                </TouchableOpacity>
+              </FieldBox>
 
               <View style={styles.rowDivider} />
 
@@ -476,7 +478,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                   </TouchableOpacity>
                 </View>
               )}
-            </FieldCard>
+            </View>
 
             {/* Android: picker outside the card */}
             {pickerActive && Platform.OS === "android" && (
@@ -502,21 +504,23 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
           {/* ── 1b. Tujuan (editable — can be corrected at return) ─── */}
           <View>
             <SectionLabel>Tujuan</SectionLabel>
-            <FieldCard>
-              <TextInput
-                style={[textStyles.bodyMd, { color: colors.onSurface, minHeight: 40 }]}
-                placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
-                placeholderTextColor={colors.outlineVariant}
-                value={tujuan}
-                onChangeText={setTujuan}
-              />
-            </FieldCard>
+            <View style={styles.card}>
+              <FieldBox>
+                <TextInput
+                  style={[textStyles.bodyMd, styles.tujuanInput]}
+                  placeholder="Contoh: Kos Barat, Pantai Kenjeran, dll."
+                  placeholderTextColor={colors.outlineVariant}
+                  value={tujuan}
+                  onChangeText={setTujuan}
+                />
+              </FieldBox>
+            </View>
           </View>
 
           {/* ── 2. Kondisi Kembali ─────────────────────────────────── */}
           <View>
             <SectionLabel>Kondisi Kembali</SectionLabel>
-            <FieldCard>
+            <View style={styles.card}>
               {/* Bensin stepper */}
               <View>
                 <Text
@@ -556,18 +560,20 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 >
                   Harga bensin / kotak
                 </Text>
-                <View style={styles.inputRow}>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
-                  <TextInput
-                    style={[textStyles.bodyMd, styles.inlineInput]}
-                    value={displayRupiah(rawHarga)}
-                    onChangeText={(t) => setRawHarga(t.replace(/\D/g, ""))}
-                    keyboardType="numeric"
-                    returnKeyType="done"
-                    placeholder="5.000"
-                    placeholderTextColor={colors.outlineVariant}
-                  />
-                </View>
+                <FieldBox>
+                  <View style={styles.inputRow}>
+                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                    <TextInput
+                      style={[textStyles.bodyMd, styles.inlineInput]}
+                      value={displayRupiah(rawHarga)}
+                      onChangeText={(t) => setRawHarga(t.replace(/\D/g, ""))}
+                      keyboardType="numeric"
+                      returnKeyType="done"
+                      placeholder="5.000"
+                      placeholderTextColor={colors.outlineVariant}
+                    />
+                  </View>
+                </FieldBox>
                 <Text
                   style={[
                     textStyles.labelMd,
@@ -590,20 +596,22 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 >
                   KM Kembali (opsional)
                 </Text>
-                <View style={styles.inputRow}>
-                  <TextInput
-                    style={[textStyles.bodyMd, styles.inlineInput]}
-                    value={kmKembali}
-                    onChangeText={(t) => setKmKembali(t.replace(/\D/g, ""))}
-                    keyboardType="numeric"
-                    returnKeyType="done"
-                    placeholder={
-                      rental.kondisiKeluar.km != null ? String(rental.kondisiKeluar.km + 1) : "—"
-                    }
-                    placeholderTextColor={colors.outlineVariant}
-                  />
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>km</Text>
-                </View>
+                <FieldBox>
+                  <View style={styles.inputRow}>
+                    <TextInput
+                      style={[textStyles.bodyMd, styles.inlineInput]}
+                      value={kmKembali}
+                      onChangeText={(t) => setKmKembali(t.replace(/\D/g, ""))}
+                      keyboardType="numeric"
+                      returnKeyType="done"
+                      placeholder={
+                        rental.kondisiKeluar.km != null ? String(rental.kondisiKeluar.km + 1) : "—"
+                      }
+                      placeholderTextColor={colors.outlineVariant}
+                    />
+                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>km</Text>
+                  </View>
+                </FieldBox>
                 <Text
                   style={[
                     textStyles.labelMd,
@@ -632,31 +640,33 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 }}
                 onRemove={(id) => setKembaliPhotos((prev) => prev.filter((p) => p.id !== id))}
               />
-            </FieldCard>
+            </View>
           </View>
 
           {/* ── 3. Rincian Biaya ───────────────────────────────────── */}
           <View>
             <SectionLabel>Rincian Biaya</SectionLabel>
-            <FieldCard>
+            <View style={styles.card}>
               {/* Subtotal Sewa (editable) */}
               <View style={styles.infoRow}>
                 <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
                   Subtotal Sewa
                 </Text>
-                <View style={styles.amountInputRow}>
-                  <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
-                  <TextInput
-                    style={[textStyles.bodyMd, styles.amountInput]}
-                    value={displayRupiah(rawSubtotal)}
-                    onChangeText={(t) => setRawSubtotal(t.replace(/\D/g, ""))}
-                    keyboardType="numeric"
-                    returnKeyType="done"
-                    textAlign="right"
-                    placeholder="0"
-                    placeholderTextColor={colors.outlineVariant}
-                  />
-                </View>
+                <FieldBox style={styles.amountBox}>
+                  <View style={styles.amountInputRow}>
+                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                    <TextInput
+                      style={[textStyles.bodyMd, styles.amountInput]}
+                      value={displayRupiah(rawSubtotal)}
+                      onChangeText={(t) => setRawSubtotal(t.replace(/\D/g, ""))}
+                      keyboardType="numeric"
+                      returnKeyType="done"
+                      textAlign="right"
+                      placeholder="0"
+                      placeholderTextColor={colors.outlineVariant}
+                    />
+                  </View>
+                </FieldBox>
               </View>
 
               {/* Fuel suggestion row */}
@@ -691,30 +701,35 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 </View>
               )}
 
-              {/* Extra fee rows */}
+              {/* Extra fee rows. PRD-8 D-3: the description is boxed, not underlined — AC-1's
+                  own wording ("every extra-fee description and amount") settles it. */}
               {extraFees.map((fee) => (
                 <View key={fee.id} style={styles.extraFeeRow}>
-                  <TextInput
-                    style={[textStyles.bodyMd, styles.extraFeeDesc]}
-                    value={fee.description}
-                    onChangeText={(t) => updateExtraFee(fee.id, "description", t)}
-                    placeholder="Deskripsi biaya..."
-                    placeholderTextColor={colors.outlineVariant}
-                    returnKeyType="next"
-                  />
-                  <View style={styles.amountInputRow}>
-                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                  <FieldBox style={styles.extraFeeDescBox}>
                     <TextInput
-                      style={[textStyles.bodyMd, styles.amountInput]}
-                      value={displayRupiah(fee.rawAmount)}
-                      onChangeText={(t) => updateExtraFee(fee.id, "rawAmount", t)}
-                      keyboardType="numeric"
-                      returnKeyType="done"
-                      textAlign="right"
-                      placeholder="0"
+                      style={[textStyles.bodyMd, styles.extraFeeDesc]}
+                      value={fee.description}
+                      onChangeText={(t) => updateExtraFee(fee.id, "description", t)}
+                      placeholder="Deskripsi biaya..."
                       placeholderTextColor={colors.outlineVariant}
+                      returnKeyType="next"
                     />
-                  </View>
+                  </FieldBox>
+                  <FieldBox style={styles.amountBox}>
+                    <View style={styles.amountInputRow}>
+                      <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                      <TextInput
+                        style={[textStyles.bodyMd, styles.amountInput]}
+                        value={displayRupiah(fee.rawAmount)}
+                        onChangeText={(t) => updateExtraFee(fee.id, "rawAmount", t)}
+                        keyboardType="numeric"
+                        returnKeyType="done"
+                        textAlign="right"
+                        placeholder="0"
+                        placeholderTextColor={colors.outlineVariant}
+                      />
+                    </View>
+                  </FieldBox>
                   <TouchableOpacity
                     onPress={() => removeExtraFee(fee.id)}
                     style={{ paddingLeft: spacing.sm }}
@@ -724,27 +739,31 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 </View>
               ))}
 
-              {/* Diskon row */}
+              {/* Diskon row. Not named in AC-1's flagship list, but it shares the amount-box
+                  style with Subtotal Sewa / extra-fee amounts (below) and is a Field under BR-4
+                  like any of them — flagged in the delivery report. */}
               {showDiscount && (
                 <View style={styles.infoRow}>
                   <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant, flex: 1 }]}>
                     Diskon
                   </Text>
-                  <View style={styles.amountInputRow}>
-                    <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
-                      − Rp
-                    </Text>
-                    <TextInput
-                      style={[textStyles.bodyMd, styles.amountInput]}
-                      value={displayRupiah(rawDiscount)}
-                      onChangeText={(t) => setRawDiscount(t.replace(/\D/g, ""))}
-                      keyboardType="numeric"
-                      returnKeyType="done"
-                      textAlign="right"
-                      placeholder="0"
-                      placeholderTextColor={colors.outlineVariant}
-                    />
-                  </View>
+                  <FieldBox style={styles.amountBox}>
+                    <View style={styles.amountInputRow}>
+                      <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
+                        − Rp
+                      </Text>
+                      <TextInput
+                        style={[textStyles.bodyMd, styles.amountInput]}
+                        value={displayRupiah(rawDiscount)}
+                        onChangeText={(t) => setRawDiscount(t.replace(/\D/g, ""))}
+                        keyboardType="numeric"
+                        returnKeyType="done"
+                        textAlign="right"
+                        placeholder="0"
+                        placeholderTextColor={colors.outlineVariant}
+                      />
+                    </View>
+                  </FieldBox>
                   <TouchableOpacity
                     onPress={() => {
                       setShowDiscount(false)
@@ -784,7 +803,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                   {formatRupiah(totalTagihan)}
                 </Text>
               </View>
-            </FieldCard>
+            </View>
           </View>
 
           {/* ── 4. Pembayaran ──────────────────────────────────────── */}
@@ -963,9 +982,14 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
           </View>
 
           {/* ── 6. Catatan ─────────────────────────────────────────── */}
+          {/* NOT migrated onto FieldBox: AC-1's flagship field list and this dispatch's brief
+              both enumerate Kembali/Tujuan/Harga bensin/KM Kembali/Subtotal Sewa/extra-fee
+              description+amount and stop there — Catatan is absent from both. Left as-is
+              (unchanged pre-existing bare rendering) rather than widened on my own judgment;
+              flagged for Lead in the delivery report. */}
           <View>
             <SectionLabel>Catatan</SectionLabel>
-            <FieldCard>
+            <View style={styles.card}>
               <TextInput
                 style={[textStyles.bodyMd, styles.notesInput]}
                 value={notes}
@@ -976,7 +1000,7 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                 placeholderTextColor={colors.outlineVariant}
                 textAlignVertical="top"
               />
-            </FieldCard>
+            </View>
           </View>
 
           <View style={{ height: spacing.xxxl + 64 + bottomSpace }} />
@@ -1049,18 +1073,51 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
+// PRD-8 BR-6/AC-6: the field-box style set (border colour + fill + radius + `minHeight`) lives
+// ONLY in `FieldBox` now. `inputRow` / `amountInputRow` / `inlineInput` / `amountInput` /
+// `extraFeeDesc` below are the INNER content rows/fields that sit *inside* a `<FieldBox>` — same
+// split RupiahInput uses (its `row`/`field`). `amountBox` / `extraFeeDescBox` compose extra sizing
+// (`minWidth`/`flex`) onto FieldBox's own box via its `style` prop, per ④'s handoff note (RN array
+// style semantics — these do not redeclare border/fill/radius/minHeight).
+//
+// Alphabetised (react-native/sort-styles) — this block groups by section no longer, so read the
+// per-key comments, not headers, for context.
 const styles = StyleSheet.create({
-  safeArea: {
-    backgroundColor: colors.background,
-    flex: 1,
-  },
-  centered: {
+  addLineBtn: {
     alignItems: "center",
-    flex: 1,
+    backgroundColor: colors.surface,
+    borderColor: colors.outlineVariant,
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.xs,
+    height: 44,
     justifyContent: "center",
   },
-
-  // AppBar
+  addPaymentBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.xs,
+    justifyContent: "center",
+    paddingVertical: spacing.md,
+  },
+  // Composes onto FieldBox (Subtotal Sewa / extra-fee amount / Diskon) — preserves the pill's old
+  // `minWidth: 140` now that border/fill/radius/minHeight live on FieldBox itself.
+  amountBox: {
+    minWidth: 140,
+  },
+  amountInput: {
+    color: colors.onSurface,
+    flex: 1,
+    padding: 0,
+    textAlign: "right",
+  },
+  // The "Rp" + amount TextInput row, now rendered INSIDE a FieldBox rather than being the box.
+  amountInputRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+  },
   appBar: {
     alignItems: "center",
     backgroundColor: colors.surfaceContainerLowest,
@@ -1070,6 +1127,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
   },
+  appBarTitle: {
+    flex: 1,
+  },
   backBtn: {
     alignItems: "center",
     height: 40,
@@ -1077,17 +1137,34 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     width: 40,
   },
-  appBarTitle: {
-    flex: 1,
+  bottomBar: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderTopColor: colors.outlineVariant,
+    borderTopWidth: 1,
+    elevation: 4,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.sm,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
   },
-
-  // Scroll content
-  scrollContent: {
-    gap: spacing.md,
-    padding: spacing.base,
+  // PRD-5 BR-1 (v1.0.4): lets a button label wrap instead of overflowing — hoisted out of
+  // the JSX so it doesn't trip `no-inline-styles`.
+  btnDisabled: {
+    opacity: 0.6,
   },
-
-  // Card
+  btnLabel: { flexShrink: 1 },
+  btnSelesai: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    justifyContent: "center",
+    minHeight: 56,
+    paddingVertical: spacing.sm,
+  },
+  // Section container (formerly the local `FieldCard` sub-component — PRD-8 D-5 removes the
+  // duplicate; usages now read `<View style={styles.card}>` directly).
   card: {
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
@@ -1095,67 +1172,31 @@ const styles = StyleSheet.create({
     padding: spacing.base,
     ...cardShadow,
   },
-  inlineEditBtn: {
+  centered: {
     alignItems: "center",
-    flexDirection: "row",
-    gap: 4,
+    flex: 1,
+    justifyContent: "center",
   },
-  terlambatWarning: {
+  editPayBtn: { alignItems: "center", flexDirection: "row", gap: 2, marginLeft: spacing.xs },
+  emptyPayment: {
     alignItems: "center",
-    backgroundColor: colors.warningContainer,
-    borderRadius: 12,
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-    padding: spacing.md,
-  },
-
-  // Divider
-  rowDivider: {
-    backgroundColor: colors.outlineVariant,
-    height: 1,
-    marginVertical: 0,
-  },
-
-  // Time row (Waktu Sewa section)
-  timeRow: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-
-  // Generic row
-  infoRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    minHeight: 40,
-  },
-
-  // Late caption
-  lateCaption: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.xs,
-    paddingTop: spacing.sm,
-  },
-
-  // iOS picker
-  iosPickerContainer: {
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
-    marginTop: spacing.sm,
-    padding: spacing.base,
-  },
-  iosPickerDone: {
-    alignSelf: "flex-end",
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    marginTop: spacing.sm,
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
   },
-
-  // Fuel gauge
+  // PRD-8 D-3: boxed, not underlined — border-bottom dropped, `flex: 1` moved to
+  // `extraFeeDescBox` (composed onto the wrapping FieldBox instead).
+  extraFeeDesc: {
+    color: colors.onSurface,
+    padding: 0,
+  },
+  extraFeeDescBox: {
+    flex: 1,
+  },
+  extraFeeRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
   fuelGaugeRow: {
     flexDirection: "row",
     marginTop: spacing.sm,
@@ -1173,71 +1214,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
     borderTopRightRadius: 6,
   },
-
-  // Stepper
-  stepperRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  stepperBtn: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
-    borderRadius: 20,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
-  },
-
-  // Inline inputs
-  inputRow: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: spacing.xs,
-    height: 48,
-    paddingHorizontal: spacing.sm,
-  },
-  inlineInput: {
-    color: colors.onSurface,
-    flex: 1,
-    minHeight: 48,
-  },
-
-  // Amount input
-  amountInputRow: {
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 4,
-    height: 40,
-    minWidth: 140,
-    paddingHorizontal: spacing.sm,
-  },
-  amountInput: {
-    color: colors.onSurface,
-    flex: 1,
-    paddingVertical: 0,
-    textAlign: "right",
-  },
-
-  // Fuel suggestion row
-  fuelSuggestionRow: {
-    alignItems: "center",
-    backgroundColor: colors.warningContainer,
-    borderRadius: 12,
-    flexDirection: "row",
-    gap: spacing.sm,
-    padding: spacing.sm,
-  },
   fuelSuggestionIcon: {
     alignItems: "center",
     backgroundColor: colors.warningContainer,
@@ -1249,60 +1225,80 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     width: 36,
   },
-  terapkanBtn: {
+  // Guard 3 / debt #12: renders amber unconditionally, regardless of add/subtract direction —
+  // pinned as-is by the characterisation suite. NOT touched by this migration.
+  fuelSuggestionRow: {
     alignItems: "center",
-    backgroundColor: colors.tertiaryContainer,
-    borderRadius: 8,
-    justifyContent: "center",
-    minHeight: 36,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-
-  // Extra fee row
-  extraFeeRow: {
-    alignItems: "center",
+    backgroundColor: colors.warningContainer,
+    borderRadius: 12,
     flexDirection: "row",
     gap: spacing.sm,
+    padding: spacing.sm,
   },
-  extraFeeDesc: {
-    borderBottomColor: colors.outlineVariant,
-    borderBottomWidth: 1,
+  // Generic label/value row (Subtotal Sewa, Diskon, Total Tagihan). Untouched — its own
+  // `minHeight: 40` is a DIFFERENT signature from the field-box set and is pinned by the
+  // characterisation suite's row locators.
+  infoRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    minHeight: 40,
+  },
+  inlineEditBtn: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+  },
+  inlineInput: {
     color: colors.onSurface,
     flex: 1,
-    paddingVertical: spacing.xs,
+    padding: 0,
   },
-
-  // Add biaya / diskon buttons
-  addLineBtn: {
+  // The Rp-prefixed / km-suffixed content row for Harga bensin/kotak and KM Kembali, now rendered
+  // INSIDE a FieldBox rather than being the box (was treatment #3 in PRD-8's inventory).
+  inputRow: {
     alignItems: "center",
-    backgroundColor: colors.surface,
-    borderColor: colors.outlineVariant,
-    borderRadius: 10,
-    borderWidth: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 44,
-    justifyContent: "center",
   },
-
-  // Payment rows
-  paymentRow: {
-    alignItems: "center",
-    borderBottomColor: colors.outlineVariant,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    gap: spacing.sm,
+  iosPickerContainer: {
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
+    marginTop: spacing.sm,
+    padding: spacing.base,
+  },
+  iosPickerDone: {
+    alignSelf: "flex-end",
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    marginTop: spacing.sm,
     paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  paymentIcon: {
+  jaminanBanner: {
+    borderRadius: 12,
+    gap: spacing.sm,
+    padding: spacing.base,
+  },
+  jaminanChip: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderColor: colors.outlineVariant,
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  jaminanChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xs,
+  },
+  // Pre-existing dead style (`react-native/no-unused-styles`, baseline) — not part of this
+  // migration's scope, left as found.
+  lateCaption: {
     alignItems: "center",
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 18,
-    height: 36,
-    justifyContent: "center",
-    width: 36,
+    flexDirection: "row",
+    gap: spacing.xs,
+    paddingTop: spacing.sm,
   },
   methodBadge: {
     backgroundColor: colors.surfaceContainer,
@@ -1310,21 +1306,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  editPayBtn: { alignItems: "center", flexDirection: "row", gap: 2, marginLeft: spacing.xs },
-  addPaymentBtn: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.xs,
-    justifyContent: "center",
-    paddingVertical: spacing.md,
+  // Catatan — NOT migrated onto FieldBox this dispatch (see the JSX comment at its call site).
+  notesInput: {
+    color: colors.onSurface,
+    minHeight: 96,
   },
-  emptyPayment: {
-    alignItems: "center",
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
-  },
-
-  // Sisa summary
   paySummary: {
     backgroundColor: colors.surfaceContainerLow,
     borderRadius: 12,
@@ -1343,58 +1329,78 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     justifyContent: "space-between",
   },
-
-  // Jaminan banner
-  jaminanBanner: {
-    borderRadius: 12,
+  paymentIcon: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceContainer,
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  paymentRow: {
+    alignItems: "center",
+    borderBottomColor: colors.outlineVariant,
+    borderBottomWidth: 1,
+    flexDirection: "row",
     gap: spacing.sm,
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
+  },
+  rowDivider: {
+    backgroundColor: colors.outlineVariant,
+    height: 1,
+    marginVertical: 0,
+  },
+  safeArea: {
+    backgroundColor: colors.background,
+    flex: 1,
+  },
+  scrollContent: {
+    gap: spacing.md,
     padding: spacing.base,
   },
-  jaminanChips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.xs,
-  },
-  jaminanChip: {
+  stepperBtn: {
+    alignItems: "center",
     backgroundColor: colors.surfaceContainerLowest,
     borderColor: colors.outlineVariant,
     borderRadius: 20,
     borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-
-  // Notes
-  notesInput: {
-    color: colors.onSurface,
-    minHeight: 96,
-  },
-
-  // Bottom bar
-  bottomBar: {
-    backgroundColor: colors.surfaceContainerLowest,
-    borderTopColor: colors.outlineVariant,
-    borderTopWidth: 1,
-    elevation: 4,
-    paddingHorizontal: spacing.base,
-    paddingTop: spacing.sm,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-  },
-  btnSelesai: {
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: 12,
+    height: 40,
     justifyContent: "center",
-    minHeight: 56,
-    paddingVertical: spacing.sm,
+    width: 40,
   },
-  // PRD-5 BR-1 (v1.0.4): lets a button label wrap instead of overflowing — hoisted out of
-  // the JSX so it doesn't trip `no-inline-styles`.
-  btnLabel: { flexShrink: 1 },
-  btnDisabled: {
-    opacity: 0.6,
+  stepperRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  terapkanBtn: {
+    alignItems: "center",
+    backgroundColor: colors.tertiaryContainer,
+    borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 36,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  terlambatWarning: {
+    alignItems: "center",
+    backgroundColor: colors.warningContainer,
+    borderRadius: 12,
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+  },
+  timeRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  // Tujuan's TextInput, now rendered inside a FieldBox — mirrors RupiahInput's `field` split
+  // (`padding: 0` so the TextInput's own default padding doesn't stack on FieldBox's).
+  tujuanInput: {
+    color: colors.onSurface,
+    padding: 0,
   },
 })
