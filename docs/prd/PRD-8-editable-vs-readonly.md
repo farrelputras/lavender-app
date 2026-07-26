@@ -1,16 +1,25 @@
 # PRD-8 — You can tell which fields you can change
 
 - **PRD:** 8 — refer to this as **PRD-8**.
-- **Status:** 🟢 **DESIGNED — ready for PM.** Scaffolded 2026-07-25; designed the same day. Behavioural
+- **Status:** 🟢 **DESIGNED — in delivery.** Scaffolded 2026-07-25; designed the same day. Behavioural
   requirements (BR-1…BR-12) and acceptance criteria (AC-1…AC-12) below. Eight decisions taken with
   Farrel in the design session (**D-1…D-8**); six questions remain open and are marked as *design-session*
-  or *PM* calls, none of them blocking.
-- **Target release:** unassigned — PM's call. **Ships (or is at least decided) before PRD-6** — see §Dependency.
+  or *PM* calls, none of them blocking. **OQ-1…OQ-4 were subsequently closed during delivery** as Lead's
+  D-1…D-4, approved by Farrel 2026-07-25 (`docs/reports/v1-0-5.md`); they are left in place below as the
+  record of what was asked.
+- **⚠️ AMENDED 2026-07-26 — two amendments, both decided during v1.0.5 delivery.**
+  **§Amendment A-1** splits **AC-4** into **AC-4a / AC-4b / AC-4c**; AC-4b is **deferred to the release
+  carrying PRD-6**, and it is deferred, *not* weakened. **§Amendment A-2** adds
+  **`app/components/PembayaranSheet.tsx`** — three editable Fields, one of them a rupiah amount — to the
+  inventory and the rollout. **Read both before treating AC-4 or the inventory as complete.**
+- **Target release:** **v1.0.5** (`docs/releases/v1-0-5.md`) — assigned 2026-07-25, in delivery.
+  **Ships before PRD-6** — see §Dependency.
   ⚠️ **This is no longer a presentation-only release.** D-5 opens the debt **#4** fence on
   `PengembalianScreen`. Size it accordingly; see §What this costs.
 - **Author:** Product · 2026-07-25 (pain point reported by Farrel from Mom's use of v1.0.4).
   **Designed 2026-07-25** — evidence re-verified against code, inventory corrected from 7 treatments to
-  **10**, contrast measured rather than estimated.
+  **10**, contrast measured rather than estimated. **Amended 2026-07-26** (A-1, A-2 — see their
+  provenance tables; A-2 corrects the inventory again, **10 → 12 treatments**).
 - **Priority:** **medium — but it gates PRD-6.** No data is wrong *from this cause*; the cost is
   hesitation and mis-taps, and one of those mis-taps became PRD-6.
   > Narrowed 2026-07-25. The blanket claim "no data is wrong today" was true when written and is not
@@ -21,11 +30,238 @@
   shares PRD-5's BR-8 principle (rules live in the shared primitives, so new screens inherit them) ·
   partially closes debt **#4**, and forces new coverage against debt **#15**.
 
+## Amendment A-1 — AC-4 splits into 4a / 4b / 4c (2026-07-26)
+
+> **This amendment splits a criterion. It withdraws nothing and it weakens nothing.** Everything AC-4
+> asked for is still owed. What changes is **which release owes which half** — because AC-4 as written
+> describes a screen that does not exist until PRD-6 ships, and **D-1 sequences PRD-8 to ship first**.
+
+| | |
+|---|---|
+| Found | 2026-07-25 at v1.0.5 scoping, by **PM** — `docs/releases/v1-0-5.md` §"The one criterion this release must amend" |
+| Escalated | 2026-07-25 by **Lead** as **D-5** (`docs/reports/v1-0-5.md`), with the operational reason: *"a tester reading AC-4 as currently written will see `kmEditInput` and `notesInput` wearing boxes and **correctly report a failure**"* |
+| Decided | 2026-07-25 `[by-Farrel]` — D-5 approved: *"Product writes PRD-8 A-1 (the AC-4 split) before ⑦ dispatches"* |
+| Recorded here | 2026-07-26 by **Product**, discharging D-5. The release plan's split table is the source of truth and is reproduced below |
+| Line numbers | re-verified against the code 2026-07-26 before writing this amendment |
+
+### The root cause: AC-4 was written against a world PRD-8 does not ship into
+
+**D-4** settled PRD-6's OQ-1 jointly with this PRD and concluded that `RentalDetailScreen` *"becomes
+100 % read-only"*. That conclusion is correct — **but it describes the state after PRD-6's dedicated
+edit screen exists.** Building that screen is PRD-6's work, not PRD-8's. AC-4 then recorded the
+post-PRD-6 end state as though it were PRD-8's own deliverable, while **D-1 deliberately sequences
+PRD-8 first** so that PRD-6 inherits a settled convention.
+
+**Those two decisions are in tension, and AC-4 is the single place the tension surfaced.** Neither
+decision is wrong; the criterion that assumed both were simultaneously true is.
+
+### What is actually on `RentalDetailScreen` today
+
+Two **live, editable, recorded** Fields — both listed as ✅ editable in this PRD's own inventory
+(treatments #8 and #6), both under PRD-1's permission matrix, both still present:
+
+| Field | JSX site | Style | Renders when |
+|---|---|---|---|
+| `kmEditInput` — *KM* | `:520`, `testID="kondisi-km-input"` | treatment #8, bare text | `canEditKondisiKeluar` |
+| `notesInput` — *Catatan* | `:827`, `testID="notes-input"` | treatment #6, `#ecf5fe` r12 | `notesEditing` is true |
+
+> Style-block line numbers `:1100` / `:1112` are cited in the inventory below; those point at the
+> `StyleSheet` declarations, **not** the JSX. Corrected by Lead as **C-3**; recorded here so nobody
+> navigates by them.
+
+**Under AC-4 as written, both would ship unmarked** — two working editable fields with no box, on the
+screen whose confusion opened this PRD. That is **the exact defect PRD-8 exists to fix**, delivered by
+PRD-8 itself.
+
+### The split
+
+Taking `docs/releases/v1-0-5.md` as the source of truth:
+
+- **AC-4a — ✅ IN v1.0.5.** On `RentalDetailScreen`, no `surfaceContainerLow` single-value block
+  remains: *Tujuan* (`:795`) and the read-only *Catatan* (`:846`). Their values keep rendering — as
+  **plain read-only rows** per BR-2. It is the **tint** that goes, not the information. Subtractive,
+  cheap, and it resolves the `insetBlock` ↔ `notesInput` collision **by deleting one side of it**
+  rather than arbitrating it. Unchanged from AC-4's first half.
+
+- **AC-4b — ❌ OUT of v1.0.5. Deferred to the release that carries PRD-6.** *"Nothing on this screen
+  renders in the field box."* It presumes the dedicated edit screen exists and has taken the editable
+  Fields with it. Until then the criterion is **unsatisfiable without shipping the defect**.
+
+- **AC-4c — ✅ IN v1.0.5** *(new; replaces AC-4b for this release only)*. `kmEditInput` (`:520`) and
+  `notesInput` (`:827`) **do** render in the field box. They are Fields under **BR-4** today, so
+  **BR-1** already requires it. Two inputs.
+
+### AC-4b is deferred, not weakened — and here is the difference
+
+**Stating this plainly, because a split is exactly how a criterion gets quietly dropped:**
+
+1. **AC-4b's requirement is unchanged in every word.** It is not narrowed, softened, or made
+   conditional on judgment. It is **assigned to a different release**, named: the one carrying PRD-6.
+2. **Nothing about it becomes optional.** When PRD-6 moves `RentalDetailScreen`'s edit controls to the
+   dedicated edit screen, **AC-4c's two boxes must disappear with them** and AC-4b becomes both
+   satisfiable and binding. **AC-4c is a bridge with a defined end, not a permanent exception** — it
+   expires by construction the moment the fields it marks are no longer on that screen.
+3. **The deferral costs nothing in convention terms.** During v1.0.5 the screen still teaches the rule
+   correctly: boxed = changeable, plain = not. AC-4b is about the screen eventually having *no*
+   changeable fields — a **consequence of PRD-6**, not a property of the convention.
+4. **PRD-6's release inherits an explicit obligation.** AC-4b is that release's to close, and this
+   amendment is where it is written down.
+
+> **The clearest illustration of the whole convention is on this screen, and the split is what
+> produces it.** *Catatan* is one field rendered two ways by one ternary: the tinted `insetBlock` at
+> `:846` when read-only, the `notesInput` at `:827` when editing. After AC-4a + AC-4c it becomes a
+> **plain row that grows a box at the moment it becomes editable** — BR-1 demonstrated in a single
+> control, on the screen Mom reported. AC-4 as written would have flattened both states to plain.
+
+### Superseded text, preserved so a future reader can trace the change
+
+> ~~**AC-4.** On `RentalDetailScreen`, no `surfaceContainerLow` single-value block remains (*Tujuan*,
+> read-only *Catatan*), and **nothing on the screen renders in the field box** — it is read-only under
+> D-4.~~ — split 2026-07-26 into **AC-4a / AC-4b / AC-4c**. The first clause survives intact as AC-4a.
+> The second clause was true only of the post-PRD-6 screen and is now **AC-4b**, deferred.
+
+### Consequences, stated so nothing is quietly worked around
+
+1. **The tester derives "correct" from this PRD.** That instruction is in every tester brief this
+   project writes, and it is why this amendment exists rather than living only in a release report:
+   **a true test reading the unamended AC-4 would produce a false verdict.**
+2. **AC-7's allow-list is unaffected.** `RentalDetailScreen` is a **boxed** file, not an allow-listed
+   one — its two `TextInput`s must have a `FieldBox` ancestor. The allow-list stays at exactly two.
+3. **AC-11 is untouched.** `canEditKondisiKeluar` / `canEditNotes` are consumed unmodified. **AC-4c
+   marks existing editability; it grants none.** BR-9 holds — no grant, no revoke.
+4. **The release carrying PRD-6 owes AC-4b**, and owes the *removal* of AC-4c's two boxes as part of
+   moving those fields off the screen.
+
+## Amendment A-2 — `PembayaranSheet` joins the inventory and the rollout (2026-07-26)
+
+> **This amendment adds a file the requirements missed.** `app/components/PembayaranSheet.tsx` carries
+> three editable Fields — one of them the rupiah amount Mom types when recording a payment — and it
+> appeared in **none** of: this PRD's inventory, the release plan's D-7 rollout table, AC-7's
+> allow-list, or Lead's Phase-1 audit surface. **Four documents missed the same file simultaneously.**
+> **Its absence from the inventory is the actual defect here.** Folding it into delivery is the
+> consequence; the omission is the finding.
+
+| | |
+|---|---|
+| Found | 2026-07-25 by the **①  discovery dispatch** as **F-1** (`docs/reports/v1-0-5.md`), while enumerating every `<TextInput` under `app/` — it surfaced only because the enumeration was exhaustive rather than sampled |
+| Escalated | 2026-07-25 by **Lead** as **RG-1** at the re-gate, as a scope question with three options |
+| Decided | 2026-07-25 `[by-Farrel]` — **Option A, fold it into v1.0.5**: *"Agree for option a to fold it in."* |
+| Recorded here | 2026-07-26 by **Product**, discharging RG-1 consequence 5 |
+| Fields re-verified | 2026-07-26 against the code — **and the record needed correcting; see §What these fields actually look like** |
+
+### The three Fields
+
+| Field | Site | What it is |
+|---|---|---|
+| ***Jumlah*** | `PembayaranSheet.tsx:203` | **The payment amount.** A rupiah entry point |
+| Method description (*"Lainnya"*) | `:248` | Free text, shown when `method === "LAINNYA"` |
+| *Notes* | `:294` | Optional free text |
+
+All three are **Fields** under **BR-4** — values Mom enters that get **recorded**. None is a Control.
+
+### It is a shared component consumed by four screens
+
+| Consumer | Import / use | v1.0.5 scope |
+|---|---|---|
+| `RentalDetailScreen` | `:21` / `:907` | ✅ **in scope** |
+| `PengembalianScreen` | `:17` / `:1009` | ✅ **in scope** |
+| `HutangDetailScreen` | `:16` / `:257` | ❌ **out of scope** (D-7) |
+| `DetailSewaScreen` | `:18` / `:1034` | ❌ **out of scope** (D-6) |
+
+### Why it is not a minor omission: BR-7
+
+**BR-7** elevates the money field to *"the proof case, not the cleanup item… **every** rupiah entry
+point is a field box."* BR-7 enumerates `RupiahInput` and `PengembalianScreen`'s two amounts — but
+***Jumlah* is where Mom types a payment amount**, reachable from **both** the return screen and the
+rental detail screen. **It is plausibly her second-most-frequent money entry in the app.**
+
+**BR-7 is unsatisfiable while this file is unmarked.** If the one surface she types money into were
+the one unmarked surface, **AC-12 would fail on an omission rather than on the design.**
+
+### What these fields actually look like — correcting the record
+
+> ⚠️ **`docs/reports/v1-0-5.md` (F-1, RG-1) describes all three as "bare treatment-#8 inputs." That is
+> wrong on all three, and Product verified it against the source before writing this amendment.** The
+> decision RG-1 reached is **unaffected and is if anything better supported** — but the *characterisation*
+> was inherited unverified through four documents, which is the same failure mode as PRD-4 **A-1**.
+
+| Field | Actual treatment today | Verdict against BR-1 / BR-3 / BR-8 |
+|---|---|---|
+| ***Jumlah*** (`:203`) | The `TextInput` itself is bare (`rupiahField`, `padding: 0`), but it sits inside a **`rupiahInput` wrapper** (`:194`): `surfaceContainerLow` **tint** fill + `outlineVariant` border + **r8** + **fixed `height: 64`** | ❌ **border fails BR-3** (`outlineVariant`) · ❌ **fill is the demoted tint** (BR-5) · ❌ **fixed `height` violates BR-8** · radius is 8, not `borderRadius.default` |
+| Method description (`:248`) and *Notes* (`:294`) | `textInput` style: **white** `surfaceContainerLowest` fill + `outlineVariant` border + **r8** + `borderWidth: 1` | ❌ **border fails BR-3** · **this combination appears nowhere in the 10-treatment census** |
+
+**Two things fall out of this, and both strengthen the amendment rather than soften it:**
+
+1. **The census was 10 treatments; it is 12.** *Both* of the sheet's combinations are new — the tinted
+   `rupiahInput` wrapper (**#11**) and the white-filled `textInput` (**#12**), added to the inventory
+   below. The census is already fine-grained enough to separate rows 2/3/4 on **border radius alone**,
+   so a different **fill token** plainly earns its own row. The file was not merely *missed* — it was
+   **concealing two treatments the census never counted**, which is precisely what a missing inventory
+   row does.
+2. **There is a third live fixed-height violation, and it is on the money field.** **BR-8** names
+   `PengembalianScreen:1203` / `:1221`. `rupiahInput`'s **`height: 64`** is a third instance, in a
+   **shared component**, on the control Mom uses to enter payment amounts. It is not a tap-target
+   problem (64 > `tapTargetMin` 48) — it is the **`fontScale` 1.5 growth** problem **BR-8** and PRD-5
+   **BR-1** exist to forbid, and **AC-10** binds on it once the sheet carries field boxes.
+   **BR-8 is not being reworded — it is app-wide as written, and it already covers this.**
+
+> **The practical consequence for delivery:** the work here is **not** "box three bare inputs." It is
+> **correct one wrapper and one style** onto the shared primitive — border token `outlineVariant` →
+> `outline` (BR-3), fill → the D-1 token, radius 8 → `borderRadius.default`, and **`height: 64` →
+> `minHeight`** (BR-8). Smaller than briefed in some respects, and different in kind.
+
+### The distinction the whole decision rests on
+
+**`HutangDetailScreen` and `DetailSewaScreen` change appearance inside the sheet while their source
+changes by ZERO lines.**
+
+**That is not a fence breach, and a future reader must not be able to mistake it for one:**
+
+- **Debt #4's fence and D-6 guard `DetailSewaScreen`'s *own source*** — its local primitives, its
+  tariff-composition math. Neither is touched. Not one line of either out-of-scope screen is edited.
+- **`PembayaranSheet` is a *shared* component.** Boxing its inputs touches **no math** on any consumer.
+- **It is structurally identical to `RupiahInput`'s border correction**, which this PRD already
+  accepted with its blast radius named (scope item 5).
+- **Applying the rule to screens while skipping the component they share is the exact mechanism that
+  produced ten treatments** in the first place. **BR-6** wants the convention living in shared
+  components; this *is* that.
+
+> ⚠️ **The fence is NOT reopened. D-6 stands in full.** `DetailSewaScreen`'s own `TextInput`s remain
+> **allow-listed** (8 of them), its primitives stay unmigrated, and its tariff math is untouched. What
+> changes on that screen is **pixels inside a component it imports**, and nothing else.
+
+### AC-7's allow-list therefore stays at exactly two
+
+**`PembayaranSheet` moves from *unaccounted-for* to *in scope*, which is the only resolution that does
+not grow the allow-list.** Its three `TextInput`s join the **boxed** manifest, so:
+
+- The release gate's *"any third entry is a scope breach, not a test detail"* **stands untouched and
+  unweakened**.
+- **AC-7's allow-list remains exactly `LoginScreen` (D-7) + `DetailSewaScreen` (D-6)**, each with its
+  written reason, per §Known exceptions.
+- The two alternatives both failed on this point: **allow-listing** it would have added a third entry
+  *and* left a money field unmarked; **scoping the audit to the five screens** would have produced a
+  false pass and destroyed AC-7's durability.
+
+### Consequences, stated so nothing is quietly worked around
+
+1. **The release touches six files, not five.** `PembayaranSheet.tsx` is the sixth.
+2. **BR-7 becomes satisfiable** — every rupiah entry point in the app wears the convention.
+3. **Zero fenced-screen source changes**, and this is the basis of the decision (above).
+4. **The visual checklist must cover the sheet as opened from all four consumers** — including
+   `HutangDetailScreen` and `DetailSewaScreen`, which are **out of scope yet change appearance**. An
+   out-of-scope screen whose look changes is exactly the row a checklist author skips.
+   > **The honest residual:** `DetailSewaScreen` has **zero** automated coverage (debt **#15**, which
+   > this release only *partially* closes), so **the visual walk is the only verification** its sheet
+   > appearance gets. Named here rather than discovered at sign-off.
+5. **The inventory below is amended** — three Fields added, and treatment **#11** added.
+
 ## Summary
 
 Mom cannot tell, by looking, which fields on a screen she can change and which are just showing her
-information. The app has no visual convention for this. It has **ten** different ways of drawing an
-editable field, two of which are pixel-identical to how it draws a read-only value.
+information. The app has no visual convention for this. It has ~~**ten**~~ **twelve** different ways of
+drawing an editable field (**amended 2026-07-26 — see §Amendment A-2**), two of which are
+pixel-identical to how it draws a read-only value.
 
 ## Problem statement
 
@@ -61,7 +297,11 @@ UserFormScreen  (EDITABLE)                UserDetailScreen  (READ-ONLY)
 They differ **only in divider colour**. An editable *Nama Lengkap* and a read-only *Alamat* render
 identically. That is not a weak convention — it is a collision, and it is the whole PRD.
 
-### The full inventory — 10 treatments, verified 2026-07-25
+### The full inventory — ~~10~~ **12** treatments, verified 2026-07-25, **amended 2026-07-26 (A-2)**
+
+> **Rows #11 and #12 were added by §Amendment A-2**, together with `PembayaranSheet`'s three Fields.
+> They are not new *code* — they were always there; this census missed the file. Rows #1–#10 are
+> unchanged.
 
 | # | Treatment | Where | Editable? |
 |---|---|---|---|
@@ -75,11 +315,21 @@ identically. That is not a weak convention — it is a collision, and it is the 
 | 8 | **bare text — no box, no border, no fill** | `UserFormScreen.tsx:340`, `HutangFormScreen.tsx:229`, Pengembalian *Tujuan* (`:506`), `kmEditInput` (`RentalDetailScreen.tsx:1100`) | ✅ |
 | 9 | **bare text — no box, no border, no fill** | every `infoLabel` / `infoValue` row, app-wide | ❌ read-only |
 | 10 | bottom-border underline only | `extraFeeDesc` (`PengembalianScreen.tsx:1268`) | ✅ |
+| **11** | **`#ecf5fe` tint fill + `outlineVariant` 1px + r8, `height: 64`** — wrapper around a bare `TextInput` (`rupiahField`, `padding: 0`) | **`PembayaranSheet.tsx:194`** wrapping ***Jumlah*** (`:203`) | ✅ **— A-2** |
+| **12** | **`#ffffff` fill + `outlineVariant` 1px + r8** | **`PembayaranSheet.tsx`** — `textInput`: *"Lainnya"* method description (`:248`), *Notes* (`:294`) | ✅ **— A-2** |
 
 **Rows 6/7 collide** (the tint problem the report noticed). **Rows 8/9 collide** (the problem it
 didn't) — and 8/9 is the one that hurts, because it covers the three screens with the most typing on
 them. Rows 2, 3 and 4 are the *same* treatment differing only in border radius (12 / 8 / 10) and
 height handling: three independent attempts at the answer, none of them shared.
+
+> **A-2's two rows sharpen both findings rather than adding a footnote.** **#11 is a fourth divergent
+> attempt at rows 2/3/4's box** — same border token, same r8 as row 3, but a *tint* fill and a fixed
+> `height: 64`; and because its inner `TextInput` is bare, ***Jumlah* is simultaneously row 8 and row
+> 11**. **#12 is a fifth.** So the app has **five** independent attempts at the outlined field box, not
+> three — and **all five pick `outlineVariant`**, the token BR-3 retires. That is no longer a scatter of
+> mistakes; it is the *same* mistake made five times, which is exactly what BR-6's one-definition-site
+> requirement exists to end.
 
 ### The sharpest single fact
 
@@ -222,6 +472,12 @@ measurement, not by taste.**
   | `HutangDetailScreen`, list & search screens | **out** — read-only + `SearchField`, which is a *control* |
   | `DetailSewaScreen` | **out** — D-6 |
 
+  > ⚠️ **AMENDED 2026-07-26 — this table is screens only, and it is incomplete.** A **shared component**,
+  > `PembayaranSheet.tsx` (three Fields, one of them a rupiah amount), belongs in the rollout and is
+  > **in scope**. The table above is preserved as the decision taken on 2026-07-25; **§Amendment A-2 is
+  > the operative rollout.** Note the *shape* of the miss for future rollout tables: enumerating
+  > **screens** is what let a component consumed by four of them fall through.
+
 - **D-8 — two states only; no "locked" third state.** *Answers OQ-4.* Boxed = you can change this;
   plain = you can't. A field Mom cannot edit because of status or role renders plain for her.
   > **Accepted cost, stated plainly:** admin-only *Catatan* will look identical to permanently
@@ -315,9 +571,20 @@ measurement, not by taste.**
   bare-text input remains** (treatment #8 is gone from both files), and no read-only-looking row is
   editable.
 
-- **AC-4.** On `RentalDetailScreen`, no `surfaceContainerLow` single-value block remains (*Tujuan*,
-  read-only *Catatan*), and **nothing on the screen renders in the field box** — it is read-only under
-  D-4.
+- **AC-4.** ⚠️ **SPLIT 2026-07-26 into AC-4a / AC-4b / AC-4c — see §Amendment A-1. Do not implement
+  AC-4 as originally written.** Original text, preserved:
+  > ~~On `RentalDetailScreen`, no `surfaceContainerLow` single-value block remains (*Tujuan*, read-only
+  > *Catatan*), and **nothing on the screen renders in the field box** — it is read-only under D-4.~~
+
+  - **AC-4a.** On `RentalDetailScreen`, no `surfaceContainerLow` single-value block remains — *Tujuan*
+    (`:795`) and the read-only *Catatan* (`:846`). Their values keep rendering, as **plain read-only
+    rows** per BR-2; the tint goes, the information stays.
+  - **AC-4b.** *Nothing on the screen renders in the field box.* **DEFERRED to the release carrying
+    PRD-6** — it presumes PRD-6's dedicated edit screen exists. **Deferred, not weakened**: unchanged in
+    every word, owed in full, and binding on that release. See A-1 §"AC-4b is deferred, not weakened".
+  - **AC-4c.** `kmEditInput` (`:520`) and `notesInput` (`:827`) **do** render in the field box — they are
+    live editable Fields under BR-4 today, so BR-1 already requires it. **Transitional by construction:**
+    when PRD-6 moves these fields to the edit screen, these two boxes go with them and AC-4b takes over.
 
 - **AC-5.** On `UserDetailScreen`, nothing renders in the field box, and every value row is the plain
   read-only rendering.
