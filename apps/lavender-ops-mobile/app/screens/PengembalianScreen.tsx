@@ -420,19 +420,13 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                   inlineEditBtn — the box says "changeable", the Edit control says "how" (a
                   picker, not typing). FieldBox only wraps the SAME TouchableOpacity that already
                   covered this whole row, so the tap target and interaction are unchanged. */}
+              <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kembali</Text>
               <FieldBox>
                 <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
                   <View style={{ flex: 1 }}>
-                    <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>
-                      Kembali
-                    </Text>
                     <Text style={[textStyles.bodyMd, { color: colors.onSurface, marginTop: 2 }]}>
                       {formatHeaderDate(returnedAt)} · {formatTime(returnedAt)}
                     </Text>
-                  </View>
-                  <View style={styles.inlineEditBtn}>
-                    <MaterialIcons name="edit" size={16} color={colors.primary} />
-                    <Text style={[textStyles.labelLg, { color: colors.primary }]}>Edit</Text>
                   </View>
                 </TouchableOpacity>
               </FieldBox>
@@ -717,7 +711,9 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
                   </FieldBox>
                   <FieldBox style={styles.amountBox}>
                     <View style={styles.amountInputRow}>
-                      <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>Rp</Text>
+                      <Text style={[textStyles.bodyMd, { color: colors.onSurfaceVariant }]}>
+                        Rp
+                      </Text>
                       <TextInput
                         style={[textStyles.bodyMd, styles.amountInput]}
                         value={displayRupiah(fee.rawAmount)}

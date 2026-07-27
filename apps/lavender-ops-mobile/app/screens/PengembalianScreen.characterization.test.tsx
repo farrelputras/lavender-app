@@ -460,9 +460,10 @@ function removeExtraFeeRowByDescription(utils: RenderResult, description: string
  * STRUCTURAL FALLBACK: walks up from the discount amount TextInput to the nearest ancestor
  * matching `styles.infoRow`'s signature (`flexDirection: "row"`, `alignItems: "center"`,
  * `minHeight: 40`) — the Diskon row itself; Subtotal Sewa's own `infoRow` is a SIBLING, not an
- * ancestor, of this specific input, so it is never encountered. The amount field's own wrapper
- * (`amountInputRow`) uses `height: 40`, a distinct key from `minHeight`, so it does not
- * false-match on the way up.
+ * ancestor, of this specific input, so it is never encountered. Two intermediate ancestors don't
+ * false-match on the way up either: `amountInputRow` (the "Rp" + amount row) declares no
+ * `height`/`minHeight` at all, and the `FieldBox` wrapping it supplies `minHeight: 52` — present,
+ * but ≠ 40 — so the walk keeps climbing until it reaches `infoRow`'s own `minHeight: 40`.
  */
 function removeDiscountRow(utils: RenderResult, discountInput: any) {
   const row = findAncestorWhere(
@@ -483,7 +484,13 @@ function removeDiscountRow(utils: RenderResult, discountInput: any) {
  * looking for the nearest ancestor matching `styles.paymentRow`'s signature (`flexDirection:
  * "row"`, `borderBottomWidth: 1`) — none of Total Tagihan/Sisa/"Sudah dibayar:"'s own containers
  * carry `borderBottomWidth`, so only the genuine payment row matches. `within(row).getByText`
- * then disambiguates from the Kembali row's OWN "Edit" control, which uses the identical string.
+ * then scopes to THAT row's own "Edit" — needed because a rental can carry several persisted
+ * payment rows, each rendering the identical "Edit" string; unscoped `getByText("Edit")` would
+ * be ambiguous the moment a second payment row exists, `within(row)` is what picks this row's
+ * copy and no other's. (This scoping used to also be load-bearing against the Kembali row's own
+ * inline "Edit" control, which rendered the identical string — that control was removed
+ * 2026-07-26, so it no longer contributes to the tree at all; the multi-payment-row case above is
+ * what still makes `within(row)` necessary here.)
  */
 function openExistingPaymentEdit(utils: RenderResult, amountLabel: string) {
   const { within } = require("@testing-library/react-native")
@@ -1024,14 +1031,53 @@ describe("extra-fee and discount row removal", () => {
 
 // ─── (2b·3) returnedAt — the Kembali picker interaction (D-2) ─────────────
 
-describe("returnedAt — the Kembali picker interaction (D-2: gets the box, keeps its inlineEditBtn, no interaction change)", () => {
-  it("pressing the inline Edit control opens the Android picker, and a chosen value reaches the payload", async () => {
+/**
+ * Locates the Kembali row's own `TouchableOpacity` (PengembalianScreen.tsx, `onPress={openPicker}`).
+ * STRUCTURAL FALLBACK, not text: the inline "Edit" icon+label this used to be located by was
+ * removed 2026-07-26 (Farrel: "removing the inline 'Edit' button is intended since clicking the
+ * fieldbox already give interaction on editing") — the row itself is still the identical
+ * `TouchableOpacity`, so this scans `UNSAFE_getAllByType(TouchableOpacity)` for the ONE match
+ * whose flattened style matches `styles.timeRow`'s signature (`alignItems: "flex-start"`,
+ * `flexDirection: "row"`, a defined `gap`). `alignItems: "flex-start"` alone is enough to
+ * disambiguate: every OTHER `TouchableOpacity` on this screen (back button, both Stepper
+ * buttons, "Tambah Biaya"/"Diskon", the extra-fee/Diskon trash icons, a payment row's own Edit,
+ * "Tambah Pembayaran", "Selesaikan") uses `alignItems: "center"`. Mulai and Durasi share the
+ * exact same `timeRow` style but are plain `View`s, not `TouchableOpacity` — scoping the type is
+ * what keeps this Kembali-specific among the three visually-identical time rows.
+ */
+function getKembaliRow(utils: RenderResult) {
+  const { TouchableOpacity, StyleSheet } = require("react-native")
+  const matches = utils.UNSAFE_getAllByType(TouchableOpacity).filter((node: any) => {
+    const flat = StyleSheet.flatten(node.props.style) ?? {}
+    return flat.alignItems === "flex-start" && flat.flexDirection === "row" && flat.gap !== undefined
+  })
+  if (matches.length !== 1) {
+    throw new Error(
+      `Kembali row (styles.timeRow TouchableOpacity) — expected exactly 1 match, found ${matches.length}`,
+    )
+  }
+  return matches[0]
+}
+
+// D-2's first clause stands (Kembali gets the FieldBox). D-2's second clause — "keeps its
+// inlineEditBtn, no interaction change" — is SUPERSEDED as of 2026-07-26 by Farrel, who removed
+// the inline Edit control by hand and ruled it intentional, verbatim: "removing the inline
+// 'Edit' button is intended since clicking the fieldbox already give interaction on editing".
+// The interaction itself — the same TouchableOpacity, onPress={openPicker} — is unchanged; only
+// the decorative Edit icon/label is gone.
+const KEMBALI_PICKER_DESCRIBE_TITLE =
+  "returnedAt — the Kembali picker interaction (D-2's first clause stands: gets the box. D-2's " +
+  "second clause — \"keeps its inlineEditBtn, no interaction change\" — SUPERSEDED 2026-07-26 " +
+  "by Farrel: inline Edit control removed by hand, ruled intentional since the FieldBox itself " +
+  "already gives the interaction)"
+
+describe(KEMBALI_PICKER_DESCRIBE_TITLE, () => {
+  it("pressing the Kembali row opens the Android picker, and a chosen value reaches the payload", async () => {
     const utils = await renderScreen(makeRental({ tarif: 40000, payments: [] }))
 
-    // Kembali's own "Edit" is first in JSX order (Waktu Sewa is the screen's first section) —
-    // getAllByText, not getByText, so this stays correct even when a payment row (which also
-    // renders an "Edit" button, same string) exists elsewhere on screen.
-    fireEvent.press(utils.getAllByText("Edit")[0])
+    // See `getKembaliRow` — the inline "Edit" text/icon this used to press is gone (superseded
+    // D-2 clause, 2026-07-26); the row's own TouchableOpacity is untouched and is now the handle.
+    fireEvent.press(getKembaliRow(utils))
 
     // SURPRISING FINDING (flagged separately in the report): under this jest config,
     // `@react-native-community/datetimepicker`'s default export resolves to its **iOS**
