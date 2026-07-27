@@ -416,10 +416,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 
               <View style={styles.rowDivider} />
 
-              {/* Kembali (editable — tap to open picker). PRD-8 D-2: gets the box AND keeps its
-                  inlineEditBtn — the box says "changeable", the Edit control says "how" (a
-                  picker, not typing). FieldBox only wraps the SAME TouchableOpacity that already
-                  covered this whole row, so the tap target and interaction are unchanged. */}
+              {/* Kembali (editable — tap to open picker). PRD-8 D-2: the box itself now carries
+                  the affordance (the inline "Edit" control was removed 2026-07-26 — tapping the
+                  box already opens the picker). FieldBox only wraps the SAME TouchableOpacity
+                  that already covered this whole row, so the tap target and interaction are
+                  unchanged. */}
               <Text style={[textStyles.labelMd, { color: colors.onSurfaceVariant }]}>Kembali</Text>
               <FieldBox>
                 <TouchableOpacity style={styles.timeRow} onPress={openPicker} activeOpacity={0.7}>
@@ -978,24 +979,25 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
           </View>
 
           {/* ── 6. Catatan ─────────────────────────────────────────── */}
-          {/* NOT migrated onto FieldBox: AC-1's flagship field list and this dispatch's brief
-              both enumerate Kembali/Tujuan/Harga bensin/KM Kembali/Subtotal Sewa/extra-fee
-              description+amount and stop there — Catatan is absent from both. Left as-is
-              (unchanged pre-existing bare rendering) rather than widened on my own judgment;
-              flagged for Lead in the delivery report. */}
+          {/* PRD-8 dispatch ⑨: `notes.trim()` flows into the close-rental payload, so this is a
+              Field under BR-4 (AC-7 forbids a bare TextInput under app/ outside the two
+              allow-listed screens). FieldBox's `minHeight: 52` is a minimum, not a fixed height,
+              so the box grows with multiline content instead of clipping it. */}
           <View>
             <SectionLabel>Catatan</SectionLabel>
             <View style={styles.card}>
-              <TextInput
-                style={[textStyles.bodyMd, styles.notesInput]}
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={4}
-                placeholder="Tambahkan catatan opsional..."
-                placeholderTextColor={colors.outlineVariant}
-                textAlignVertical="top"
-              />
+              <FieldBox>
+                <TextInput
+                  style={[textStyles.bodyMd, styles.notesInput]}
+                  value={notes}
+                  onChangeText={setNotes}
+                  multiline
+                  numberOfLines={4}
+                  placeholder="Tambahkan catatan opsional..."
+                  placeholderTextColor={colors.outlineVariant}
+                  textAlignVertical="top"
+                />
+              </FieldBox>
             </View>
           </View>
 
@@ -1079,6 +1081,11 @@ export function PengembalianScreen({ navigation, route }: AppStackScreenProps<"P
 // Alphabetised (react-native/sort-styles) — this block groups by section no longer, so read the
 // per-key comments, not headers, for context.
 const styles = StyleSheet.create({
+  // PRD-8 dispatch ⑨ (v1.0.5): `height: 44` → `minHeight: 48` + `paddingVertical` — the
+  // established minHeight-not-height pattern, so the box grows rather than clips at larger text
+  // scale. This is a Control, NOT a Field (BR-4): it deliberately keeps `outlineVariant` +
+  // radius 10, NOT FieldBox's `outline` + radius 12 + `surface`-only fill — those tokens are the
+  // signal that this is not a value Mom can edit in place (BR-1/BR-3).
   addLineBtn: {
     alignItems: "center",
     backgroundColor: colors.surface,
@@ -1087,14 +1094,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.xs,
-    height: 44,
     justifyContent: "center",
+    minHeight: 48,
+    paddingVertical: spacing.sm,
   },
+  // PRD-8 dispatch ⑨ (v1.0.5): explicit `minHeight: 48` added to align with `addLineBtn`
+  // (Farrel: "Tambah Pembayaran" should match "Tambah Biaya"/"Diskon" sizing). `paddingVertical`
+  // unchanged — it already met the minHeight+padding pattern.
   addPaymentBtn: {
     alignItems: "center",
     flexDirection: "row",
     gap: spacing.xs,
     justifyContent: "center",
+    minHeight: 48,
     paddingVertical: spacing.md,
   },
   // Composes onto FieldBox (Subtotal Sewa / extra-fee amount / Diskon) — preserves the pill's old
@@ -1239,11 +1251,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     minHeight: 40,
   },
-  inlineEditBtn: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 4,
-  },
   inlineInput: {
     color: colors.onSurface,
     flex: 1,
@@ -1302,10 +1309,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
-  // Catatan — NOT migrated onto FieldBox this dispatch (see the JSX comment at its call site).
+  // Catatan's TextInput, now rendered inside a FieldBox — mirrors Tujuan/RupiahInput's `field`
+  // split (`padding: 0` so the TextInput's own default padding doesn't stack on FieldBox's).
+  // `minHeight: 96` sets the multiline TextInput's own minimum (~4 lines); it composes with
+  // FieldBox's own `minHeight: 52` rather than replacing it — both are minimums, so the box
+  // grows with content, never clips it.
   notesInput: {
     color: colors.onSurface,
     minHeight: 96,
+    padding: 0,
   },
   paySummary: {
     backgroundColor: colors.surfaceContainerLow,

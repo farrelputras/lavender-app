@@ -260,17 +260,22 @@ export default function PembayaranSheet({
               )}
             </View>
 
-            {/* Tanggal */}
+            {/* Tanggal — a Field under BR-4 (a recorded value the user picks), even though it
+                opens a picker rather than accepting typed text, so it gets FieldBox too (PRD-8
+                dispatch ⑨). `dateRow` used to BE the box (its own border/fill/radius/height);
+                it's now just the row's internal layout, composed inside FieldBox. */}
             <View style={styles.field}>
               <Text style={styles.fieldLabel}>Tanggal</Text>
-              <TouchableOpacity
-                style={styles.dateRow}
-                onPress={() => setShowDatePicker(true)}
-                activeOpacity={0.8}
-              >
-                <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{dateLabel}</Text>
-                <MaterialIcons name="calendar-month" size={20} color={colors.onSurfaceVariant} />
-              </TouchableOpacity>
+              <FieldBox>
+                <TouchableOpacity
+                  style={styles.dateRow}
+                  onPress={() => setShowDatePicker(true)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[textStyles.bodyLg, { color: colors.onSurface }]}>{dateLabel}</Text>
+                  <MaterialIcons name="calendar-month" size={20} color={colors.onSurfaceVariant} />
+                </TouchableOpacity>
+              </FieldBox>
               {showDatePicker && (
                 <DateTimePicker
                   value={paidAt}
@@ -370,16 +375,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 32,
   },
+  // PRD-8 (v1.0.5): border/fill/radius/height moved to FieldBox (BR-6, AC-6 — one declaration
+  // site; also BR-8's `minHeight`-not-`height`). This is now pure inner-row layout — label left,
+  // calendar icon right — with no `paddingHorizontal` of its own since FieldBox already supplies
+  // that (same convention as `rupiahField`/`textInput` below).
   dateRow: {
     alignItems: "center",
-    backgroundColor: colors.surfaceContainerLowest,
-    borderColor: colors.outlineVariant,
-    borderRadius: 8,
-    borderWidth: 1,
     flexDirection: "row",
-    height: 56,
     justifyContent: "space-between",
-    paddingHorizontal: 16,
   },
   field: {
     gap: spacing.xs,
